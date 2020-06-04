@@ -1,52 +1,67 @@
 title: Overview
-Algorand provides supported SDKs for JavaScript, Python, Java and Go. These SDKs offer both standalone and node connected functionality. The node connected functionallity is  designed to use the REST endpoints, described below, for the primary Algorand node processes. The stand alone functions offer capabilities for offline or limited connected operation. These offline functions include the ability to work with accounts that are not managed by by Algorand key management daemon(`kmd`) and to work with transctions. This includes creation, signing and appending signatures to transactions. Support is also provided for multisignatures and logic signatures.
+Algorand maintains SDK support in [JavaScript](https://github.com/algorand/java-algorand-sdk), [Python](https://github.com/algorand/py-algorand-sdk), [Java](https://github.com/algorand/java-algorand-sdk) and [Go](https://github.com/algorand/go-algorand-sdk). Additionally, [Community Provided SDKs](../../community/#sdks) expand the development reach. These SDKs offer both standalone and network connected development functionality. The standalone functionality includes the ability to work with accounts managed within your application and to construct offline transactions. This includes the creation, signing and appending of signatures to transactions prior to broadcast. Supported signatures types include single account, multisignatures and logic signatures. Each SDK implements a client which connects to various [REST endpoints](TODO:$REST_LANDING_PAGE) for interfacing with blockchain state, transactions and applications. This provides the ability to broadcast a signed transaction, compile a TEAL program and query the blockchain for historical data.
 
-Examples of using the SDKs are provided throughout the developer website. Additional examples are also provided within the individual repository locations. Additional developer reference documentation is described below.
+Examples using the supported SDKs are provided throughout the developer portal. Additional developer reference documentation is described below.
 
-# Rest Endpoints
-Integration with either the Algorand protocol daemon (`algod`) or the Algorand key management daemon (`kmd`) is provided using a set of REST APIs. These APIs are described using the [Open API Specification version 2 (OAS 2)](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md). Each of these processes serves their respective API on a separate port and url which is stored in the algod.net and kmd.net files within the `data` and `data/kmd-version` directories. Each process provides the specification in a swagger json format that is available using the following REST API calls: 
+!!! info
+    All examples on this page assume the data directory is ~/node/data
 
-Algorand Protocol Daemon
+# REST Endpoints
+Integration with the Algorand protocol daemon (`algod`), Algorand key management daemon (`kmd`) or Algorand Indexer daemon (`algorand-indexer`) is provided using a set of [REST APIs](TODO:$REST_LANDING_PAGE). These APIs are described using the [Open API Specification version 2 (OAS 2)](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md). The `algod` and `kmd` daemons serve their respective API from the _address:port_ defined within the _algod.net_ and _kmd.net_ files found in the _~/node/data_ and _~/node/data/kmd-{version}_ directories. The `algorand-indexer` daemon provides its API from the _host:port_ defined by the _--server_ flag specified at start up. Each daemon provides its API specification in a swagger json format available from this endpoint: 
+
+Algorand Protocol Daemon (`algod`)
+
 ```
 curl http://$(cat ~/node/data/algod.net)/swagger.json
 ```
 
-Algorand Key Management Daemon
-Assuming data directory is ~/node/data
+Algorand Key Management Daemon (`kmd`)
+
 ```
 curl http://$(cat ~/node/data/kmd-v0.5/kmd.net)/swagger.json
 ```
 
 !!! info
-    The kmd process is only automatically started when using `goal` commands that access the kmd. This process will also timeout after 60 seconds of being idle. If you require SDK access to the `kmd` you will need to manually start the process with `goal` using the command: `goal kmd start -d <data-dir>`.
+    The `kmd` daemon is only automatically started when using the `goal` command line tool with specific commands requiring key management access. Also, this daemon timeout after 60 seconds being idle. If you require API access to `kmd` you will need to manually start the process with `goal` using the command: `goal kmd start -d <data-dir>`.
 
-All `algod` REST methods and models are decribed in the `algod` [reference documentation](./rest-apis/algod.md). 
-All `kmd` REST methods and models are decribed in the `kmd` [reference documentation](./rest-apis/kmd.md). 
+Algorand Indexer (`algorand-indexer`)
+
+```
+curl http://{host:port}/swagger.json # TODO: This endpoint is not implemented
+```
+
+!!! info
+    All REST methods and models are fully described within [reference documentation](TODO:$REST_LANDING_PAGE). 
 
 
 # Security Token
-Most REST calls will also require an API token header to make calls against the REST server. This token is generated by the process and is stored in a file. For the `algod` process, the file (`algod.token`) is located in the `data` directory. For the `kmd` process, the file (`kmd.token`) is stored in the `data/kmd-version` kmd. Security tokens can be regenerated using the `goal node generatetoken` command.
+Most REST calls will also require an API token header to authenticate with the API server. For both `algod` and `kmd` the token is automatically generated by the daemon at startup and stored in a file. `algod` places _algod.token_ in the _~/node/data_ directory. `kmd` places _kmd.token_ the _~/node/data/kmd-{version}_ directory. Security tokens can be regenerated for both using the `goal node generatetoken` command. The `algorand-indexer` daemon allows configuration of the security token at startup using the _--token_ flag and specifying a value. 
 
-The API Token for the `algod` process is named `X-Algo-API-Token` and the `kmd's` is named `X-KMD-API-Token`.
+| Daemon             | Header Identifier   | Header Value Defined Via                      |
+| ------------------ | ------------------- | --------------------------------------------- |
+| `algod`            | X-Algo-API-Token    | file: ~/node/data/algod.token                 |
+| `kmd`              | X-KMD-API-Token     | file: ~/node/data/kmd-{version}/kmd.token     |
+| `algorand-indexer` | X-Indexer-API-Token | flag: --token {your_value_here}               |
 
-Each of the SDKs provides a method for setting these headers. Most REST tools provide a method for setting additional headers. To set the header with a `curl` command use the the `-H` parameter. For example to make a call to retrieve a specific block, use the following curl command from a terminal in the data directory.
+Each SDKs provides a method for setting these headers. Most REST tools provide a method for setting additional headers. To set the header with a `curl` command use the `-H` parameter. For example, to make a call to retrieve a specific block, use the following curl command:
 
 ```
-curl http://$(cat algod.net)/v1/block/31538 -H "X-Algo-API-Token: $(cat algod.token)"
+curl http://$(cat ~/node/algod.net)/v2/blocks/31538 -H "X-Algo-API-Token: $(cat ~/node/data/algod.token)"
 ```
 
 In the above example, the block information will be displayed if the block exists on the local node. If the node is a non-Archival node, older blocks will not be available.
+TODO: Consider replacing above example with /v2/status as will always return relevant data
 
 # JavaScript
 ## Installation
-The JavaScript SDK is available as [NPM package](https://www.npmjs.com/package/algosdk) or as [minified JavaScript library](https://github.com/algorand/js-algorand-sdk/blob/master/dist/algosdk.min.js). The SDK is installed for usage with a Node project using npm. 
+The JavaScript SDK is available as an [NPM package](https://www.npmjs.com/package/algosdk) or as a [minified JavaScript library](https://github.com/algorand/js-algorand-sdk/blob/master/dist/algosdk.min.js). 
 
-Node.js
+Requirements: [Node.js](https://nodejs.org/en/download/) versions TODO: supported version range
 ```
 $npm install algosdk
 ```
 
-To install the minified library, download the library and add it to the project's library location. Use the src tag to specify the location of the library.
+To install the minified library, download the [latest distribution](https://github.com/algorand/js-algorand-sdk/tree/develop/dist) and add it to the project's library location. Use the src tag to specify the location of the library.
 
 ```javascript tab="JavaScript"
 <script src="algosdk.min.js"/> 
@@ -57,12 +72,15 @@ The [GitHub repository](https://github.com/algorand/js-algorand-sdk) contains ad
 
 # Python
 ## Installation
-The Python SDK is available with the Python Package Installer (pip). The SDK requires Python3 be installed. To install the SDK, open a terminal and run the following command:
+The Python SDK is available as a [pip package](https://pypi.org/project/py-algorand-sdk/). To install the Python SDK, open a terminal and run the following command:
+
+Requirements: [Python3](https://www.python.org/download/releases/3.0/)
 
 ```
 $pip3 install py-algorand-sdk
 ```
-Alternatively, choose a [distribution file](https://pypi.org/project/py-algorand-sdk/#files), and run 
+
+Alternatively, choose and download a [distribution file](https://pypi.org/project/py-algorand-sdk/#files), and run 
 
 ```
 $ pip3 install [file name].
@@ -74,7 +92,9 @@ See the Python SDK [reference documentation](https://py-algorand-sdk.readthedocs
 
 # Java
 ## Installation
-The Java SDK is available in Maven’s central repository and can be used in your Maven project by using the following dependency. 
+The Java SDK is available in the [MVN repository](https://mvnrepository.com/artifact/com.algorand/algosdk) and can be used in your Maven project by including the following dependency. 
+
+Requirements: Java SDK requires Java 7+ and Android minSdkVersion 16+.
 
 ```
 <dependency>
@@ -84,8 +104,6 @@ The Java SDK is available in Maven’s central repository and can be used in you
 </dependency>
 ```
 
-The Java SDK requires Java 7+ and Android minSdkVersion 16+.
-
 The [GitHub repository](https://github.com/algorand/java-algorand-sdk) contains additional documentation and examples.
 
 See the Java SDK [reference documentation](https://algorand.github.io/java-algorand-sdk/) for more information on packages and methods.
@@ -93,7 +111,9 @@ See the Java SDK [reference documentation](https://algorand.github.io/java-algor
 
 # Go
 ## Installation
-The Go SDK is provided as a standard go package and can be downloaded and installed using the `go get` command as shown below:
+The Go SDK is available as a standard package and can be downloaded and installed using the `go get` command as shown below.
+
+Requirements: [Go Programming Language](https://golang.org/dl/) version 1.12.x TODO: based on requirements for `go-algorand` the SDK may be different?
 
 ```
 go get -u github.com/algorand/go-algorand-sdk/..
