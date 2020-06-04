@@ -16,13 +16,13 @@ async function connectToNetwork() {
 	const port = <port-number>;
 	const token = <algod-token>;
 
-	let algodClient = new algosdk.Algod(token, server, port);
+	let algodClient = new algosdk.Algodv2(token, server, port);
 	...
 }
 ```
 
 ```Python tab=
-from algosdk import algod
+from algosdk.v2client import algod
 
 algod_address = <algod-address>
 algod_token = <algod-token>
@@ -31,9 +31,8 @@ algod_client = algod.AlgodClient(algod_token, algod_address)
 ```
 
 ```Java tab=
-import com.algorand.algosdk.algod.client.AlgodClient;
-import com.algorand.algosdk.algod.client.api.AlgodApi;
-import com.algorand.algosdk.algod.client.auth.ApiKeyAuth;
+import com.algorand.algosdk.v2.client.common.AlgodClient;
+import com.algorand.algosdk.v2.client.common.Client;
 
 public class ConnectToNetwork {
     public static void main(String args[]) throws Exception {
@@ -56,7 +55,7 @@ public class ConnectToNetwork {
 package main
 
 import (
-	"github.com/algorand/go-algorand-sdk/client/algod"
+	"github.com/algorand/go-algorand-sdk/client/v2/algod" 
 )
 
 const algodAddress = <algod-address>
@@ -83,14 +82,14 @@ async function connectToNetwork() {
 		'X-API-Key': <service-api-key>
 	};
 
-	let algodClient = new algosdk.Algod(token, server, port);
+	let algodClient = new algosdk.Algodv2(token, server, port);
 	...
 }
 
 ```
 
 ```Python tab=
-from algosdk import algod
+from algosdk.v2client import algod
 
 algod_address = <algod-address>
 algod_token = ""
@@ -102,9 +101,8 @@ algod_client = algod.AlgodClient(algod_token, algod_address, headers)
 ```
 
 ```Java tab=
-import com.algorand.algosdk.algod.client.AlgodClient;
-import com.algorand.algosdk.algod.client.api.AlgodApi;
-import com.algorand.algosdk.algod.client.auth.ApiKeyAuth;
+	import com.algorand.algosdk.v2.client.common.AlgodClient;
+	import com.algorand.algosdk.v2.client.common.Client;
 
 public class ConnectToNetwork {
 	public static void main(String[] args) {
@@ -123,7 +121,7 @@ public class ConnectToNetwork {
 
 ```Go tab=
 import (
-	"github.com/algorand/go-algorand-sdk/client/algod"
+	"github.com/algorand/go-algorand-sdk/client/v2/algod" 
 )
 const algodAddress = <algod-address>
 const apiKey = <your-api-key>
@@ -138,9 +136,9 @@ func main() {
 
 
 
-# Check node status and network version
+# Check node status
 
-Call the _status_ and _version_ methods from the algod client to check the details of your connection. This information is also available through equivalent REST API calls and `goal` commands.
+Call the _status_ method from the algod client to check the details of your connection. This information is also available through equivalent REST API calls and `goal` commands.
 
 ```javascript tab="JavaScript"
 ...
@@ -190,7 +188,7 @@ Call the _status_ and _version_ methods from the algod client to check the detai
 ```bash tab="cURL"
 curl -i -X GET \
    -H "X-Algo-API-Token:<algod-token>" \
- 'http://<algod-address>:<algod-port>/v1/status'
+ 'http://<algod-address>:<algod-port>/v2/status'
 ```
 
 ```bash tab="goal" hl_lines="2 3 4 5 6 7 8 9"
@@ -203,36 +201,46 @@ Next consensus protocol: [LINK_TO_FUTURE_PROTOCOL_SPEC]
 Round for next consensus protocol: [ROUND_FOR_FUTURE_PROTOCOL]
 Next consensus protocol supported: [true|false]
 Has Synced Since Startup: [true|false]
+Last Catchpoint: []
 Genesis ID: [GENESIS_ID]
-Genesis hash: [BASE64_GENESIS_HASH]
+Genesis hash: [GENESIS_HASH]
 ```
 
-The _status_ methods return information about the status of the node, such as the latest round<LINK TO GLOSSARY>, referred to as `lastRound`, from the perspective of the node you are connected to. Each of the SDKs may differ slightly in which information they return for each call. Shown below is the response from the REST API call.
+The _status_ methods returns information about the status of the node, such as the latest round<LINK TO GLOSSARY>, referred to as `lastRound`, from the perspective of the node you are connected to. Each of the SDKs may differ slightly in which information they return for each call. Shown below is the response from the REST API call.
 
 ```json tab="Response"
 {
-    "lastRound": 4243027,
-    "lastConsensusVersion": "https://github.com/algorandfoundation/specs/tree/4a9db6a25595c6fd097cf9cc137cc83027787eaa",
-    "nextConsensusVersion": "https://github.com/algorandfoundation/specs/tree/4a9db6a25595c6fd097cf9cc137cc83027787eaa",
-    "nextConsensusVersionRound": 4243028,
-    "nextConsensusVersionSupported": true,
-    "timeSinceLastRound": 4261519666,
-    "catchupTime": 0,
-    "hasSyncedSinceStartup": false
+	"catchpoint": "",
+    "catchpoint-acquired-blocks": 0,
+    "catchpoint-processed-accounts": 0,
+    "catchpoint-total-accounts": 0,
+    "catchpoint-total-blocks": 0,
+    "catchup-time": 0,
+    "last-catchpoint": "",
+    "last-round": 4243027,
+    "last-version": "https://github.com/algorandfoundation/specs/tree/4a9db6a25595c6fd097cf9cc137cc83027787eaa",
+    "next-version": "https://github.com/algorandfoundation/specs/tree/4a9db6a25595c6fd097cf9cc137cc83027787eaa",
+    "next-version-round": 4243028,
+    "next-version-supported": true,
+    "stopped-at-unsupported-round": false,
+    "time-since-last-round": 4261519666,
 }
 
 ```
 
-Check if the node is caught up by validating against others running nodes, like a [public block explorer](../community.md#block-explorers). As a secondary check, see if your `catchupTime` is 0 and your rounds are progressing at a rate of less than 5 seconds on average. This is the time it takes to confirm a block on Algorand. Note that the `timeSinceLastRound` is represented in nanoseconds.
+Check if the node is caught up by validating against others running nodes, like a [public block explorer](../community.md#block-explorers). As a secondary check, see if your `catchup-time` is 0 and your rounds are progressing at a rate of less than 5 seconds on average. This is the time it takes to confirm a block on Algorand. Note that the `time-since-last-round` is represented in nanoseconds.
 
 !!! warning
 	If your node is out-of-sync with the rest of the network you cannot send transactions and account balances will be out-of-date. 
 
-The _version_ methods return information about the identity of the network and the current software build. 
+# TODO: Check suggested transaction parameters
+
+The _/v2/transactions/params_ endpoint returns information about the identity of the network and parameters for constructing a new transaction. 
 
 
 ```javascript tab="JavaScript"
 ...
+	TODO:
 	let version = await algodClient.versions();
 	console.log("Algorand protocol version: %o", version)
 ...
@@ -240,6 +248,7 @@ The _version_ methods return information about the identity of the network and t
 
 ```python tab="Python"
 ...
+	TODO:
 	try:
 		versions = algod_client.versions()
 		print(json.dumps(versions, indent=4))
@@ -250,6 +259,7 @@ The _version_ methods return information about the identity of the network and t
 
 ```java tab="Java"
 	...
+	TODO:
         try {
             Version version = algodApiInstance.getVersion();
             System.out.println("Algorand network version: " + version);
@@ -262,6 +272,7 @@ The _version_ methods return information about the identity of the network and t
 
 ```go tab="Go"
 ...
+	TODO:
 	version, err := algodClient.Versions()
 	if err != nil {
 		fmt.Printf("Error getting versions: %s\n", err)
@@ -278,7 +289,7 @@ The _version_ methods return information about the identity of the network and t
 ```bash tab="cURL"
 curl -i -X GET \
    -H "X-Algo-API-Token:<algod-token>" \
- 'http://<algod-address>:<algod-port>/versions'
+ 'http://<algod-address>:<algod-port>/v2/transactions/params'
 ```
 
 ```bash tab="goal" hl_lines="10 11"
@@ -291,27 +302,21 @@ Next consensus protocol: [LINK_TO_FUTURE_PROTOCOL_SPEC]
 Round for next consensus protocol: [ROUND_FOR_FUTURE_PROTOCOL]
 Next consensus protocol supported: [true|false]
 Has Synced Since Startup: [true|false]
+Last Catchpoint: []
 Genesis ID: [GENESIS_ID]
-Genesis hash: [BASE64_GENESIS_HASH]
+Genesis hash: [GENESIS_HASH]
 ```
 
-Check that the `genesis_id` and the `genesis_hash_b64`, as shown in the REST response below, match your chosen network before proceeding.
+Check that the `genesis-id` and the `genesis-hash`, as shown in the REST response below. Ensure both match your chosen network before proceeding.
 
 ```json hl_lines="5 6" tab="Response"
 {
-    "versions": [
-        "v1"
-    ],
-    "genesis_id": "testnet-v1.0",
-    "genesis_hash_b64": "SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=",
-    "build": {
-        "major": 2,
-        "minor": 0,
-        "build_number": 2,
-        "commit_hash": "1bc1d4c9",
-        "branch": "rel/stable",
-        "channel": "stable"
-    }
+    "consensus-version": "https://github.com/algorandfoundation/specs/tree/4a9db6a25595c6fd097cf9cc137cc83027787eaa",
+    "fee": 1,
+    "genesis-hash": "TODO:betanet?",
+    "genesis-id": "TODO:betanet?",
+    "last-round": 3311,
+    "min-fee": 1000
 }
 
 ```
@@ -327,7 +332,7 @@ Check that the `genesis_id` and the `genesis_hash_b64`, as shown in the REST res
 		const server = <algod-address>;
 		const port = <port>;
 
-		let algodClient = new algosdk.Algod(token, server, port);
+		let algodClient = new algosdk.Algodv2(algod_token, algod_server, algod_port);
 
 		let status = await algodClient.status();
 		console.log("Algorand network status: %o", status);
@@ -339,7 +344,7 @@ Check that the `genesis_id` and the `genesis_hash_b64`, as shown in the REST res
 
 	```python tab="Python"
 	import json
-	from algosdk import algod
+	from algosdk.v2client import algod
 
 	def main():
 		algod_address = <algod-address>
@@ -357,10 +362,8 @@ Check that the `genesis_id` and the `genesis_hash_b64`, as shown in the REST res
 	```
 
 	```java tab="Java"
-	import com.algorand.algosdk.algod.client.AlgodClient;
-	import com.algorand.algosdk.algod.client.api.AlgodApi;
-	import com.algorand.algosdk.algod.client.auth.ApiKeyAuth;
-	import com.algorand.algosdk.algod.client.model.*;
+	import com.algorand.algosdk.v2.client.common.AlgodClient;
+	import com.algorand.algosdk.v2.client.common.Client;
 
 	public class ConnectToNetwork { 
 		public static void main(String args[]) throws Exception {
@@ -394,7 +397,7 @@ Check that the `genesis_id` and the `genesis_hash_b64`, as shown in the REST res
 		"encoding/json"
 		"fmt"
 
-		"github.com/algorand/go-algorand-sdk/client/algod"
+		"github.com/algorand/go-algorand-sdk/client/v2/algod"
 	)
 
 	const algodAddress = <algod-address>
@@ -444,7 +447,7 @@ Check that the `genesis_id` and the `genesis_hash_b64`, as shown in the REST res
 			'X-API-Key': <service-api-key>
 		};
 
-		let algodClient = new algosdk.Algod(token, server, port);
+		let algodClient = new algosdk.Algodv2(token, server, port);
 
 		let status = await algodClient.status();
 		console.log("Algorand network status: %o", status);
@@ -456,7 +459,7 @@ Check that the `genesis_id` and the `genesis_hash_b64`, as shown in the REST res
 
 	```python tab="Python"
 	import json
-	from algosdk import algod
+	from algosdk.v2client import algod
 
 	def main():
 		algod_address = <algod-address>
@@ -484,11 +487,8 @@ Check that the `genesis_id` and the `genesis_hash_b64`, as shown in the REST res
 	import java.util.concurrent.TimeUnit;
 
 	import com.algorand.algosdk.account.Account;
-	import com.algorand.algosdk.algod.client.AlgodClient;
-	import com.algorand.algosdk.algod.client.ApiException;
-	import com.algorand.algosdk.algod.client.api.AlgodApi;
-	import com.algorand.algosdk.algod.client.auth.ApiKeyAuth;
-	import com.algorand.algosdk.algod.client.model.*;
+	import com.algorand.algosdk.v2.client.common.AlgodClient;
+	import com.algorand.algosdk.v2.client.common.Client;
 
 	public class ConnectToNetwork {
 
@@ -521,7 +521,7 @@ Check that the `genesis_id` and the `genesis_hash_b64`, as shown in the REST res
 		"encoding/json"
 		"fmt"
 
-		"github.com/algorand/go-algorand-sdk/client/algod"
+		"github.com/algorand/go-algorand-sdk/client/v2/algod"
 	)
 
 	const algodAddress = <algod-address>
