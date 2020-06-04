@@ -82,11 +82,81 @@ Private key mnemonic: [PASSPHRASE]
 Public key: [ADDRESS]
 ```
 
+_Learn more about [Creating Accounts on Algorand](../features/accounts/create.md)._
+
 ## Add funds
 For [TestNet](../../reference/algorand-networks/testnet/#faucet) and [BetaNet](../../reference/algorand-networks/betanet/#faucet), copy and paste the public portion of your key pair in the corresponding faucet prompt and click "Submit". A `200` response means the transaction went through and your balance increased by 100,000,000 microAlgos (i.e. 100 Algos).
 
 !!! info
 	Amounts are returned in microAlgos - the base unit for Algos. Micro denotes a unit x 10^-6. Therefore, 1 Algo equals 1,000,000 microAlgos.
+
+## Connect your client
+
+Each SDK provides a client which must instantiate prior to making calls to the API endopoints. You must provide values for `<algod-taddress>`, `<port>` and `<algod-token>`. The CLI Tools implement the client natively. 
+
+_Learn more about [Connecting to a Node](connect.md)._
+
+```JavaScript tab=
+const algosdk = require('algosdk');
+
+async function connectToNetwork() {
+
+	const server = <algod-address>;
+	const port = <port-number>;
+	const token = <algod-token>;
+
+	let algodClient = new algosdk.Algodv2(token, server, port);
+	...
+}
+```
+
+```Python tab=
+from algosdk.v2client import algod
+
+algod_address = <algod-address>
+algod_token = <algod-token>
+
+algod_client = algod.AlgodClient(algod_token, algod_address)
+```
+
+```Java tab=
+import com.algorand.algosdk.v2.client.common.AlgodClient;
+import com.algorand.algosdk.v2.client.common.Client;
+
+public class ConnectToNetwork {
+    public static void main(String args[]) throws Exception {
+        
+        final String ALGOD_API_ADDR = <algod-address>;
+        final String ALGOD_API_TOKEN = <algod-token>;
+
+        //Create an instance of the algod API client
+        AlgodClient client = (AlgodClient) new AlgodClient()
+		client.setBasePath(ALGOD_API_ADDR);
+        ApiKeyAuth api_key = (ApiKeyAuth) client.getAuthentication("api_key");
+        api_key.setApiKey(ALGOD_API_TOKEN);
+        AlgodApi algodApiInstance = new AlgodApi(client); 
+		...
+	}
+}
+```
+
+```Go tab=
+package main
+
+import (
+	"github.com/algorand/go-algorand-sdk/client/v2/algod" 
+)
+
+const algodAddress = <algod-address>
+const algodToken = <algod-token>
+
+func main() {
+	algodClient, err := algod.MakeClient(algodAddress, algodToken)
+	if err != nil {
+		return
+	}
+}
+```
 
 ## Check your balance
 
@@ -94,7 +164,7 @@ Check your balance to confirm the added funds.
 
 ```javascript tab="JavaScript"
 ...
-	const passphrase = <25-word-mnemonic>;
+	const passphrase = "<25-word-mnemonic>";
 	let myAccount = algosdk.mnemonicToSecretKey(passphrase)
 	console.log("My address: %s", myAccount.addr)
 
@@ -159,8 +229,6 @@ curl -i -X GET \
 $ goal account balance -a <my-address>
 [AMOUNT] microAlgos
 ```
-
-_Learn more about [Creating Accounts on Algorand](../features/accounts/create.md)._
 
 # Construct the transaction
 
@@ -607,7 +675,7 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
             const server = <algod-address>;
             const port = <port>;        
 
-            let algodClient = new algosdk.Algod(token, server, port);
+            let algodClient = new algosdk.Algodv2(algod_token, algod_server, algod_port);
 
             const receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A";    
             const passphrase = <your-25-word-mnemonic>;
@@ -655,7 +723,7 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
     import json
     import time
     import base64
-    from algosdk import algod
+    from algosdk.v2client import algod
     from algosdk import mnemonic
     from algosdk import transaction
 
