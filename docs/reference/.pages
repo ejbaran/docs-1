@@ -2,6 +2,7 @@ title: Reference Docs
 arrange:
   - algorand-networks
   - cli
+  - indexer.md
   - sdks
   - rest-apis
   - teal
