@@ -3,6 +3,7 @@ arrange:
   - index.md
   - algorand-networks
   - cli
+  - indexer.md
   - sdks
   - rest-apis
   - teal

@@ -5,18 +5,35 @@ This section is a getting started guide for developers looking to build applicat
 # What does it mean to build on Algorand?
 Building an application on Algorand means that your application, directly or indirectly, reads from or writes to the Algorand blockchain. Writing to the Algorand blockchain is synonymous with issuing a transaction that will later be confirmed within a block. Reading from the blockchain means reading back transactions that have been confirmed within prior blocks.
 
-A program connects to the Algorand blockchain through an **algod** client. The algod client requires a valid **algod REST endpoint IP address** and **algod token** from an Algorand node that is connected to the network you plan to interact with. 
+A brief primer on some terms and relationships of the bits that comprise the Algorand development environmnet. Figure 1. below illustrates the components covered within the Developer Portal. 
+
+![Figure 1. Algorand Developer Environemnt](/imgs/algo_dev_env.png "Algorand Development Environment")
+
+The Algorand blockchain is a distributed system of "nodes" each maintaing their local "state" based on validating the history of blocks and the transactions therein. "State data" is maintained by the consensus protocol which is implemented within the `algod` daemon, often refered to as "the node" software. Algorand also provides an indexed database that 
+
+That's the base layer we as application developers are going to build on. 
+As an application developer you may need to access current state or historical data. Algorand maintain a set of 
+
+An application connects to the Algorand blockchain through an **algod** client. The algod client requires a valid **algod REST endpoint IP address** and **algod token** from an Algorand node that is connected to the network you plan to interact with. 
 
 # Available tools
-Algorand officially supports four SDKs for developing applications on Algorand: [Javascript](../reference/sdks.md#javascript), [Java](../reference/sdks.md#java), [Python](../reference/sdks.md#python), and [Go](../reference/sdks.md#go). 
+## Software Development Kits (SDK)
 
-There are also three command-line utilities packaged with Algorand node software: [`goal`](../reference/cli/goal/goal.md), [`kmd`](../reference/cli/kmd.md), and [`algokey`](../reference/cli/algokey/algokey.md).
+Algorand officially supports four SDKs for developing applications: [Javascript](./reference/sdks.md#javascript), [Java](./reference/sdks.md#java), [Python](./reference/sdks.md#python), and [Go](./reference/sdks.md#go). Additionally, [Community Provided SDKs](./community/#sdks) expand the development reach. 
+
+## Command Line Interface (CLI) Tools 
+
+Algorand provides three command-line utilities packaged with Algorand node software: [`goal`](./reference/cli/goal/goal.md), [`kmd`](./reference/cli/kmd.md), and [`algokey`](./reference/cli/algokey/algokey.md).
 
 `goal` is the primary tool for operating a node and it also contains functionality to manage keys, sign and send transactions, create assets, and perform many of the same or similar functions that are available in the SDKs. Although not required to build an application, developers who run nodes may find it useful to achieve some level of fluency in `goal` as a complementary tool during testing and validation. `goal` _is_ required to setup more advanced testing environments using private networks.
 
 `kmd` is the CLI for the Algorand Key Management daemon and `algokey` is a standalone utility for generating Algorand accounts and for signing transactions. It is often used as a lightweight offline client for secure key signing. These two tools are not essential for getting started, so details of their use are described elsewhere.
 
 There are also REST APIs available for both **algod** and **kmd** processes.
+
+## Indexer Daemon
+
+Algorand provides a standalone daemon [algorand-indexer](./reference/indexer.md) with reads committed blocks from the Algorand blockchain and maintains a local database of transactions and accounts that are searchable and indexed. A [REST API](./reference/rest-apis/indexer.md) is avilable which enables applications developers to perform rich queries.
 
 # Choosing a network
 There are three **public** Algorand Networks paired with the functionality to create **private** networks using any protocol version. 
