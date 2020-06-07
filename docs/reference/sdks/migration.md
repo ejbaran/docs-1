@@ -46,7 +46,7 @@ npm list algosdk
         </td>
         <td>
             ```javascript
-            const algosdk = require('algosdk');
+            const algosdk = require('algosdk'); // fully supported
             ```
         </td>
     </tr>
@@ -56,12 +56,12 @@ npm list algosdk
         </td>
         <td>
             ```javascript
-            from algosdk import kmd
+            const algosdk = require('algosdk'); // unchanged
             ```
         </td>
         <td>
             ```javascript
-            // Not implemented, use V1
+            // not implemented, continue using V1
             ```
         </td>
     </tr>
@@ -71,12 +71,12 @@ npm list algosdk
         </td>
         <td>
             ```javascript
-            // Not implemented, use V2
+            // not implemented, use V2
             ```
         </td>
         <td>
             ```javascript
-            const algosdk = require('algosdk');
+            const algosdk = require('algosdk'); // new
             ```
         </td>
     </tr>
@@ -94,7 +94,7 @@ npm list algosdk
         </td>
         <td>
             ```javascript
-            let algodClient = new algosdk.Algodv2(algod_token, algod_server, algod_port);
+            let algodClient = new algosdk.Algodv2(algod_token, algod_server, algod_port); // fully supported
             ```
         </td>
     </tr>
@@ -104,7 +104,7 @@ npm list algosdk
         </td>
         <td>
             ```javascript
-            let kmdClient = new algosdk.Kmd(kmd_token, kmd_server, kmd_port);
+            let kmdClient = new algosdk.Kmd(kmd_token, kmd_server, kmd_port); // unchanged
             ```
         </td>
     </tr>
@@ -114,7 +114,7 @@ npm list algosdk
         </td>
         <td>
             ```javascript
-            let indexerClient = new algosdk.Indexer(indexer_token, indexer_server, indexer_port);
+            let indexerClient = new algosdk.Indexer(indexer_token, indexer_server, indexer_port); // new
             ```
         </td>
     </tr>
@@ -157,7 +157,7 @@ pip3 list | grep "py-algorand-sdk"
         </td>
         <td>
             ```python
-            from algosdk.v2client import algod
+            from algosdk.v2client import algod # fully supported
             ```
         </td>
     </tr>
@@ -167,12 +167,12 @@ pip3 list | grep "py-algorand-sdk"
         </td>
         <td>
             ```python
-            from algosdk import kmd
+            from algosdk import kmd # unchanged
             ```
         </td>
         <td>
             ```python
-            # Not implemented, use V1
+            # not implemented, use V1
             ```
         </td>
     </tr>
@@ -182,12 +182,12 @@ pip3 list | grep "py-algorand-sdk"
         </td>
         <td>
             ```python
-            # Not implemented, use V2
+            # not implemented, use V2
             ```
         </td>
         <td>
             ```python
-            from algosdk.v2client import indexer
+            from algosdk.v2client import indexer # new
             ```
         </td>
     </tr>
@@ -205,7 +205,7 @@ pip3 list | grep "py-algorand-sdk"
         </td>
         <td>
             ```python
-            algod_client = algod.AlgodClient(algod_token, algod_address)
+            algod_client = algod.AlgodClient(algod_token, algod_address) // fully supported
             ```
         </td>
     </tr>
@@ -215,7 +215,7 @@ pip3 list | grep "py-algorand-sdk"
         </td>
         <td>
             ```python
-            algod_client = algod.AlgodClient(algod_token, algod_address)
+            algod_client = algod.AlgodClient(algod_token, algod_address) // unchanged
             ```
         </td>
     </tr>
@@ -225,7 +225,7 @@ pip3 list | grep "py-algorand-sdk"
         </td>
         <td>
             ```python
-            indexer_client = indexer.IndexerClient(indexer_token, indexer_address)
+            indexer_client = indexer.IndexerClient(indexer_token, indexer_address) //new
             ```
         </td>
     </tr>
@@ -263,6 +263,7 @@ Maven:
         </td>
         <td>
             ```java
+            // deprecated:
             import com.algorand.algosdk.algod.client.AlgodClient;
             import com.algorand.algosdk.algod.client.ApiException;
             import com.algorand.algosdk.algod.client.api.AlgodApi;
@@ -270,6 +271,7 @@ Maven:
         </td>
         <td>
             ```java
+            // fully supported:
             import com.algorand.algosdk.v2.client.common.AlgodClient;
             ```
         </td>
@@ -280,6 +282,7 @@ Maven:
         </td>
         <td>
             ```java
+            // unchanged:
             import com.algorand.algosdk.kmd.client.KmdClient;
             import com.algorand.algosdk.kmd.client.ApiException;
             import com.algorand.algosdk.kmd.client.api.KmdApi;
@@ -287,7 +290,7 @@ Maven:
         </td>
         <td>
             ```java
-            // Not implemented, use V1
+            // not implemented, use V1
             ```
         </td>
     </tr>
@@ -297,11 +300,12 @@ Maven:
         </td>
         <td>
             ```java
-            // Not implemented, use V2
+            // not implemented, use V2
             ```
         </td>
         <td>
             ```java
+            // new:
             import com.algorand.algosdk.v2.client.common.IndexerClient;
             ```
         </td>
@@ -320,7 +324,7 @@ Maven:
         </td>
         <td>
             ```java
-            let algodClient = new algosdk.Algodv2(algod_token, algod_server, algod_port);
+            let algodClient = new algosdk.Algodv2(algod_token, algod_server, algod_port); // fully supported
             ```
         </td>
     </tr>
@@ -330,7 +334,7 @@ Maven:
         </td>
         <td>
             ```java
-            let kmdClient = new algosdk.Kmd(kmd_token, kmd_server, kmd_port);
+            let kmdClient = new algosdk.Kmd(kmd_token, kmd_server, kmd_port); // unchanged
             ```
         </td>
     </tr>
@@ -340,7 +344,7 @@ Maven:
         </td>
         <td>
             ```java
-            let indexerClient = new algosdk.Indexer(indexer_token, indexer_server, indexer_port);
+            let indexerClient = new algosdk.Indexer(indexer_token, indexer_server, indexer_port); // new
             ```
         </td>
     </tr>
@@ -384,7 +388,7 @@ make build
             ```go
             import ( 
                 "github.com/algorand/go-algorand-sdk/client/v2/algod" 
-            )
+            ) // fully supported
             ```
         </td>
     </tr>
@@ -396,12 +400,12 @@ make build
             ```go
             import ( 
                 "github.com/algorand/go-algorand-sdk/client/kmd" 
-            )
+            ) // unchanged
             ```
         </td>
         <td>
             ```go
-            // Not implemented, use V1
+            // not implemented, use V1
             ```
         </td>
     </tr>
@@ -411,14 +415,14 @@ make build
         </td>
         <td>
             ```go
-            // Not implemented, use V2
+            // not implemented, use V2
             ```
         </td>
         <td>
             ```go
             import ( 
                 "github.com/algorand/go-algorand-sdk/client/v2/indexer" 
-            )
+            ) // new
             ```
         </td>
     </tr>
@@ -436,7 +440,7 @@ make build
         </td>
         <td>
             ```go
-            algodClient, err := algod.MakeClient(algodAddress, algodToken)
+            algodClient, err := algod.MakeClient(algodAddress, algodToken) // fully supported
             ```
         </td>
     </tr>
@@ -446,7 +450,7 @@ make build
         </td>
         <td>
             ```go
-            kmdClient, err := kmd.MakeClient(kmdAddress, kmdToken)
+            kmdClient, err := kmd.MakeClient(kmdAddress, kmdToken) // unchanged
             ```
         </td>
     </tr>
@@ -456,7 +460,7 @@ make build
         </td>
         <td>
             ```go
-            indexerClient, err := indexer.MakeClient(indexerAddress, indexerToken)
+            indexerClient, err := indexer.MakeClient(indexerAddress, indexerToken) // new
             ```
         </td>
     </tr>
