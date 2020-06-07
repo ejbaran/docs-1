@@ -12,14 +12,14 @@ The two Additional REST calls are:
 /v1/transaction/{txid}
 ```
 This call allows quickly locating a transaction using the txid
-See [REST API Reference](../../reference/rest-apis/algod.md#get-v1transactiontxid) for more details.
+See [REST API Reference](../../reference/rest-apis/algod/v1.md#get-v1transactiontxid) for more details.
 
 ```
 /v1/account/{account}/transactions?fromDate=YYYY-MM-DD&toDate=YYYY-MM-DD) 
 ```
 
 This call allows locating all transactions within a date range. Date parameters support RFC3339 (ie 2006-01-02T15:04:05Z07:00).
-See [REST API Reference](../../reference/rest-apis/algod.md#get-v1accountaddresstransactions) for more details.
+See [REST API Reference](../../reference/rest-apis/algod/v1.md#get-v1accountaddresstransactions) for more details.
 
 To turn on indexing for a node, the `isIndexerActive` configuration parameter must be set to `true`. The [Node Configuration](../../reference/node/config.md) guide describes setting node configuration properties.
 
