@@ -307,7 +307,7 @@ Genesis ID: [GENESIS_ID]
 Genesis hash: [GENESIS_HASH]
 ```
 
-Check that the `genesis-id` and the `genesis-hash`, as shown in the REST response below. Ensure both match your chosen network before proceeding.
+Check the `genesis-id` and the `genesis-hash`, as shown in the REST response below. Ensure both match your chosen network before proceeding.
 
 ```json hl_lines="5 6" tab="Response"
 {
