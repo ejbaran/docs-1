@@ -261,18 +261,18 @@ fields.
 	note = "Hello World".encode()
 	receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A"
 
-	data = {
-		"sender": my_address,
-		"receiver": receiver,
-		"fee": params.get('minFee'),
-		"flat_fee": True,
-		"amt": 1000000,
-		"first": params.get('lastRound'),
-		"last": params.get('lastRound') + 1000,
-		"note": note,
-		"gen": params.get('genesisID'),
-		"gh": params.get('genesishashb64')
-	}
+    data = {
+        "sender": my_address,
+        "receiver": receiver,
+        "fee": params.fee,
+        "flat_fee": True,
+        "amt": 1000000,
+        "first": params.first,
+        "last": params.last,
+        "note": note,
+        "gen": params.gen,
+        "gh": params.gh
+    }
 	
 	txn = transaction.PaymentTxn(**data)
 ...
@@ -510,12 +510,12 @@ var waitForConfirmation = async function(algodclient, txId) {
 def wait_for_confirmation( algod_client, txid ):
     while True:
         txinfo = algod_client.pending_transaction_info(txid)
-        if txinfo.get('round') and txinfo.get('round') > 0:
-            print("Transaction {} confirmed in round {}.".format(txid, txinfo.get('round')))
+        if txinfo.get('confirmed-round'):
+            print("Transaction {} confirmed in round {}.".format(txid, txinfo.get('confirmed-round')))
             break
         else:
             print("Waiting for confirmation...")
-            algod_client.status_after_block(algod_client.status().get('lastRound') +1)
+            algod_client.status_after_block(algod_client.status().get('last-round') +1)
 ```
 
 ```java tab="Java"
@@ -606,9 +606,9 @@ try {
 
 ```python tab="Python"
 ...
-	confirmed_txn = algod_client.transaction_info(my_address, txid)
-	print("Transaction information: {}".format(json.dumps(confirmed_txn, indent=4)))
-	print("Decoded note: {}".format(base64.b64decode(confirmed_txn.get('noteb64')).decode()))
+    confirmed_txn = algod_client.pending_transaction_info(txid)
+    print("Transaction information: {}".format(json.dumps(confirmed_txn, indent=4)))
+    print("Decoded note: {}".format(base64.b64decode(confirmed_txn["txn"]["txn"]["note"]).decode()))
 ...
 ```
 
@@ -731,12 +731,12 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
     def wait_for_confirmation( algod_client, txid ):
         while True:
             txinfo = algod_client.pending_transaction_info(txid)
-            if txinfo.get('round') and txinfo.get('round') > 0:
-                print("Transaction {} confirmed in round {}.".format(txid, txinfo.get('round')))
+            if txinfo.get('confirmed-round'):
+                print("Transaction {} confirmed in round {}.".format(txid, txinfo.get('confirmed-round')))
                 break
             else:
                 print("Waiting for confirmation...")
-                algod_client.status_after_block(algod_client.status().get('lastRound') +1)
+                algod_client.status_after_block(algod_client.status().get('last-round') +1)
 
     def gettingStartedExample():
         algod_address = <algod-address>
@@ -759,14 +759,14 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
         data = {
             "sender": my_address,
             "receiver": receiver,
-            "fee": params.get('minFee'),
+            "fee": params.fee,
             "flat_fee": True,
             "amt": 1000000,
-            "first": params.get('lastRound'),
-            "last": params.get('lastRound') + 1000,
+            "first": params.first,
+            "last": params.last,
             "note": note,
-            "gen": params.get('genesisID'),
-            "gh": params.get('genesishashb64')
+            "gen": params.gen,
+            "gh": params.gh
         }
 
         txn = transaction.PaymentTxn(**data)
@@ -781,12 +781,11 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
 
         # Read the transction
         try:
-            confirmed_txn = algod_client.transaction_info(my_address, txid)
+            confirmed_txn = algod_client.pending_transaction_info(txid)
         except Exception as err:
             print(err)
         print("Transaction information: {}".format(json.dumps(confirmed_txn, indent=4)))
-        print("Decoded note: {}".format(base64.b64decode(confirmed_txn.get('noteb64')).decode()))
-        
+        print("Decoded note: {}".format(base64.b64decode(confirmed_txn["txn"]["txn"]["note"]).decode()))
 
     gettingStartedExample()
     ```
