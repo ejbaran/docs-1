@@ -2,11 +2,11 @@ title: API V2 Migration Guide
 
 In June 2020, Algorand introduced the V2 API for `algod` and deprecated the V1 API. Both APIs remain functional to allow developers time to transition their application code to the fully supported V2 endpoints. Simultaneously, Algorand introduced `algorand-indexer` with only a V2 API. Use this guide to update your preferred SDK for V2 client support and then transition your application to use V2 clients for `algod` and `algorand-indexer` where applicable.
 
-!!! information 
-    The `kmd` API remains unchanged at V1. There are no changes required for application code using the V1 `kmd` client. 
-
 !!! warning
     The deprecation of the V1 API for `algod` will become a breaking change in a future release of the `algod` software. Please ensure your application code is migrated to the new V2 endpoints at this time.
+
+!!! information 
+    The `kmd` API remains unchanged at V1. There are no changes required for application code using the V1 `kmd` client. Reference [kmd client instantiations](#kmd-instantiations) below.
 
 # Update your SDK
 
@@ -97,7 +97,7 @@ npm list algosdk
             ```
         </td>
     </tr>
-    <tr>
+    <!--tr>
         <td>
             kmd
         </td>
@@ -106,7 +106,7 @@ npm list algosdk
             let kmdClient = new algosdk.Kmd(kmd_token, kmd_server, kmd_port);
             ```
         </td>
-    </tr>
+    </tr-->
     <tr>
         <td>
             indexer
@@ -200,16 +200,6 @@ pip3 list | grep "py-algorand-sdk"
     <tr>
         <td>
             algod
-        </td>
-        <td>
-            ```python
-            algod_client = algod.AlgodClient(algod_token, algod_address)
-            ```
-        </td>
-    </tr>
-    <tr>
-        <td>
-            kmd
         </td>
         <td>
             ```python
@@ -328,16 +318,6 @@ Maven:
     </tr>
     <tr>
         <td>
-            kmd
-        </td>
-        <td>
-            ```java
-            let kmdClient = new algosdk.Kmd(kmd_token, kmd_server, kmd_port);
-            ```
-        </td>
-    </tr>
-    <tr>
-        <td>
             indexer
         </td>
         <td>
@@ -444,16 +424,6 @@ make build
     </tr>
     <tr>
         <td>
-            kmd
-        </td>
-        <td>
-            ```go
-            kmdClient, err := kmd.MakeClient(kmdAddress, kmdToken)
-            ```
-        </td>
-    </tr>
-    <tr>
-        <td>
             indexer
         </td>
         <td>
@@ -464,6 +434,53 @@ make build
     </tr>
 </table>
 
-# Update your Application Code
+# kmd Client Instantiations<a name="kmd-instantiations"></a>
+<table>
+    <tr>
+        <th>SDK</td>
+        <th>Client Instantiation</td>
+    </tr>
+    <tr>
+        <td>
+            JavaScript
+        </td>
+        <td>
+            ```javascript
+            let kmdClient = new algosdk.Kmd(kmd_token, kmd_server, kmd_port);
+            ```
+        </td>
+    </tr>
+   <tr>
+        <td>
+            Python
+        </td>
+        <td>
+            ```python
+            kmd_client = algod.kmd(kmd_token, kmd_address)
+            ```
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Java
+        </td>
+        <td>
+            ```java
+            let kmdClient = new algosdk.Kmd(kmd_token, kmd_server, kmd_port);
+            ```
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Go
+        </td>
+        <td>
+            ```go
+            kmdClient, err := kmd.MakeClient(kmdAddress, kmdToken)
+            ```
+        </td>
+    </tr>
+</table>
+
 
 
