@@ -11,7 +11,6 @@ In June 2020, Algorand introduced the V2 API for `algod` and deprecated the V1 A
 # Update your SDK
 
 ## JavaScript
-### Update
 
 ```bash
 # update using npm
@@ -20,9 +19,9 @@ npm install algosdk
 # verify installed version
 npm list algosdk
 ```
-### Supported Clients by Version
+### REST APIs by SDK Release
 
-| SDK Version | Supported V1 Clients | Supported V2 Clients |
+| SDK Release | Supported V1 APIs | Supported V2 APIs |
 | ----------- | -------------------- | -------------------- |
 | thru algod@1.5.0 | `algod`, `kmd`       | n/a                  |
 | from algod@1.6.1 | `kmd`                | `algod`, `algorand-indexer` |
@@ -32,8 +31,8 @@ npm list algosdk
 <table>
     <tr>
         <th>API</td>
-        <th>V1 Import</td>
-        <th>V2 Import</td>
+        <th>V1 API (deprecated)</td>
+        <th>V2 API (fully supported)</td>
     </tr>
     <tr>
         <td>
@@ -41,22 +40,22 @@ npm list algosdk
         </td>
         <td>
             ```javascript
-            const algosdk = require('algosdk'); // deprecated
+            const algosdk = require('algosdk');
             ```
         </td>
         <td>
             ```javascript
-            const algosdk = require('algosdk'); // fully supported
+            const algosdk = require('algosdk');
             ```
         </td>
     </tr>
-    <tr>
+    <!--tr>
         <td>
             kmd
         </td>
         <td>
             ```javascript
-            const algosdk = require('algosdk'); // unchanged
+            const algosdk = require('algosdk');
             ```
         </td>
         <td>
@@ -64,7 +63,7 @@ npm list algosdk
             // not implemented, continue using V1
             ```
         </td>
-    </tr>
+    </tr-->
     <tr>
         <td>
             indexer
@@ -82,7 +81,7 @@ npm list algosdk
     </tr>
 </table>
 
-### Recommended Client Instantiations
+### Client Instantiations
 <table>
     <tr>
         <th>API</td>
@@ -94,7 +93,7 @@ npm list algosdk
         </td>
         <td>
             ```javascript
-            let algodClient = new algosdk.Algodv2(algod_token, algod_server, algod_port); // fully supported
+            let algodClient = new algosdk.Algodv2(algod_token, algod_server, algod_port);
             ```
         </td>
     </tr>
@@ -104,7 +103,7 @@ npm list algosdk
         </td>
         <td>
             ```javascript
-            let kmdClient = new algosdk.Kmd(kmd_token, kmd_server, kmd_port); // unchanged
+            let kmdClient = new algosdk.Kmd(kmd_token, kmd_server, kmd_port);
             ```
         </td>
     </tr>
@@ -121,7 +120,6 @@ npm list algosdk
 </table>
 
 ## Python
-### Update
 
 ```bash
 # update using pip
@@ -133,7 +131,7 @@ pip3 list | grep "py-algorand-sdk"
 
 ### Supported Clients by Version
 
-| SDK Version | Supported V1 Clients | Supported V2 Clients |
+| SDK Version | Supported V1 APIs | Supported V2 APIs |
 | ----------- | -------------------- | -------------------- |
 | thru py-algorand-sdk 1.2.1 | `algod`, `kmd`       | n/a                  |
 | from py-algorand-sdk 1.3.0 | `kmd`                | `algod`, `algorand-indexer` |
@@ -143,8 +141,8 @@ pip3 list | grep "py-algorand-sdk"
 <table>
     <tr>
         <th>API</td>
-        <th>V1 Import</td>
-        <th>V2 Import</td>
+        <th>V1 API (deprecated)</td>
+        <th>V2 API (fully supported)</td>
     </tr>
     <tr>
         <td>
@@ -161,7 +159,7 @@ pip3 list | grep "py-algorand-sdk"
             ```
         </td>
     </tr>
-    <tr>
+    <!--tr>
         <td>
             kmd
         </td>
@@ -175,7 +173,7 @@ pip3 list | grep "py-algorand-sdk"
             # not implemented, use V1
             ```
         </td>
-    </tr>
+    </tr-->
     <tr>
         <td>
             indexer
@@ -193,7 +191,7 @@ pip3 list | grep "py-algorand-sdk"
     </tr>
 </table>
 
-### Recommended Client Instantiations
+### Client Instantiations
 <table>
     <tr>
         <th>API</td>
@@ -205,7 +203,7 @@ pip3 list | grep "py-algorand-sdk"
         </td>
         <td>
             ```python
-            algod_client = algod.AlgodClient(algod_token, algod_address) // fully supported
+            algod_client = algod.AlgodClient(algod_token, algod_address)
             ```
         </td>
     </tr>
@@ -215,7 +213,7 @@ pip3 list | grep "py-algorand-sdk"
         </td>
         <td>
             ```python
-            algod_client = algod.AlgodClient(algod_token, algod_address) // unchanged
+            algod_client = algod.AlgodClient(algod_token, algod_address)
             ```
         </td>
     </tr>
@@ -232,7 +230,7 @@ pip3 list | grep "py-algorand-sdk"
 </table>
 
 ## Java
-### Update
+
 
 ```
 Maven:
@@ -244,7 +242,7 @@ Maven:
 ```
 ### Supported Clients by Version
 
-| SDK Version | Supported V1 Clients | Supported V2 Clients |
+| SDK Version | Supported V1 APIs | Supported V2 APIs |
 | ----------- | -------------------- | -------------------- |
 | thru java-algorand-sdk 1.3.1 | `algod`, `kmd`       | n/a                  |
 | from java-algorand-sdk 1.4.0 | `kmd`                | `algod`, `algorand-indexer` |
@@ -254,8 +252,8 @@ Maven:
 <table>
     <tr>
         <th>API</td>
-        <th>V1 Import</td>
-        <th>V2 Import</td>
+        <th>V1 API (deprecated)</td>
+        <th>V2 API (fully supported)</td>
     </tr>
     <tr>
         <td>
@@ -263,7 +261,7 @@ Maven:
         </td>
         <td>
             ```java
-            // deprecated:
+           :
             import com.algorand.algosdk.algod.client.AlgodClient;
             import com.algorand.algosdk.algod.client.ApiException;
             import com.algorand.algosdk.algod.client.api.AlgodApi;
@@ -271,18 +269,18 @@ Maven:
         </td>
         <td>
             ```java
-            // fully supported:
+           :
             import com.algorand.algosdk.v2.client.common.AlgodClient;
             ```
         </td>
     </tr>
-    <tr>
+    <!--tr>
         <td>
             kmd
         </td>
         <td>
             ```java
-            // unchanged:
+           :
             import com.algorand.algosdk.kmd.client.KmdClient;
             import com.algorand.algosdk.kmd.client.ApiException;
             import com.algorand.algosdk.kmd.client.api.KmdApi;
@@ -293,7 +291,7 @@ Maven:
             // not implemented, use V1
             ```
         </td>
-    </tr>
+    </tr-->
     <tr>
         <td>
             indexer
@@ -312,7 +310,7 @@ Maven:
     </tr>
 </table>
 
-### Recommended Client Instantiations
+### Client Instantiations
 <table>
     <tr>
         <th>API</td>
@@ -324,7 +322,7 @@ Maven:
         </td>
         <td>
             ```java
-            let algodClient = new algosdk.Algodv2(algod_token, algod_server, algod_port); // fully supported
+            let algodClient = new algosdk.Algodv2(algod_token, algod_server, algod_port);
             ```
         </td>
     </tr>
@@ -334,7 +332,7 @@ Maven:
         </td>
         <td>
             ```java
-            let kmdClient = new algosdk.Kmd(kmd_token, kmd_server, kmd_port); // unchanged
+            let kmdClient = new algosdk.Kmd(kmd_token, kmd_server, kmd_port);
             ```
         </td>
     </tr>
@@ -351,7 +349,7 @@ Maven:
 </table>
 
 ## Go
-### Update
+
 
 ```bash
 go get -u github.com/algorand/go-algorand-sdk/...
@@ -360,7 +358,7 @@ make build
 
 ### Supported Clients by Version
 
-| SDK Version | Supported V1 Clients | Supported V2 Clients |
+| SDK Version | Supported V1 APIs | Supported V2 APIs |
 | ----------- | -------------------- | -------------------- |
 | thru go-algorand-sdk 1.3.0 | `algod`, `kmd`       | n/a                  |
 | from go-algorand-sdk 1.4.0 | `kmd`                | `algod`, `algorand-indexer` |
@@ -370,8 +368,8 @@ make build
 <table>
     <tr>
         <th>API</td>
-        <th>V1 Import</td>
-        <th>V2 Import</td>
+        <th>V1 API (deprecated)</td>
+        <th>V2 API (fully supported)</td>
     </tr>
     <tr>
         <td>
@@ -381,18 +379,18 @@ make build
             ```go
             import ( 
                 "github.com/algorand/go-algorand-sdk/client/algod" 
-            ) // deprecated
+            )
             ```
         </td>
         <td>
             ```go
             import ( 
                 "github.com/algorand/go-algorand-sdk/client/v2/algod" 
-            ) // fully supported
+            )
             ```
         </td>
     </tr>
-    <tr>
+    <!--tr>
         <td>
             kmd
         </td>
@@ -400,7 +398,7 @@ make build
             ```go
             import ( 
                 "github.com/algorand/go-algorand-sdk/client/kmd" 
-            ) // unchanged
+            )
             ```
         </td>
         <td>
@@ -408,7 +406,7 @@ make build
             // not implemented, use V1
             ```
         </td>
-    </tr>
+    </tr-->
     <tr>
         <td>
             indexer
@@ -428,7 +426,7 @@ make build
     </tr>
 </table>
 
-### Recommended Client Instantiations
+### Client Instantiations
 <table>
     <tr>
         <th>API</td>
@@ -440,7 +438,7 @@ make build
         </td>
         <td>
             ```go
-            algodClient, err := algod.MakeClient(algodAddress, algodToken) // fully supported
+            algodClient, err := algod.MakeClient(algodAddress, algodToken)
             ```
         </td>
     </tr>
@@ -450,7 +448,7 @@ make build
         </td>
         <td>
             ```go
-            kmdClient, err := kmd.MakeClient(kmdAddress, kmdToken) // unchanged
+            kmdClient, err := kmd.MakeClient(kmdAddress, kmdToken)
             ```
         </td>
     </tr>
