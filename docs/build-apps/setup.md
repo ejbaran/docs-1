@@ -7,7 +7,7 @@ Building an application on Algorand means that your application, directly or ind
 
 The following is a brief primer on some terms and relationships of the components that comprise the Algorand development environment. Figure 1. below illustrates these components and how they fit together. 
 
-![Figure 1. Algorand Developer Environment](/imgs/algo_dev_stack.png "Algorand Development Environment")
+![Figure 1. Algorand Developer Environment](../../../imgs/algo_dev_stack.png "Algorand Development Environment")
 
 The Algorand blockchain is a distributed system of **nodes** each maintaining their **local state** based on validating the history of blocks and the transactions therein. State data is maintained by the consensus protocol which is implemented within the `algod` daemon, often referred to as the node software. As a developer, this is most likely the base layer for your applications.
 
