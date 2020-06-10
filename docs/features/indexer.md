@@ -7,15 +7,63 @@ This guide explains how to search the Algorand Blockchain using the V2 Indexer. 
 
 The primary purpose of this Indexer is to provide a REST API interface of API calls to support searching the Algorand Blockchain. The Indexer REST APIs retrieve the blockchain data from a [PostgreSQL](https://www.postgresql.org/) compatible database that must be populated. This database is populated using the same indexer instance or a separate instance of the indexer which must connect to the algod process of a running Algorand node to read block data. This node must also be an Archival node to make searching the entire blockchain possible. 
 
-The Indexer provides a set of REST API calls for searching blockchain Transactions, Accounts, Assets and Blocks. Each of these calls also provides several filter parameters to support refining searches. The latest Algorand native SDKs (Python, JavaScript, Go, and Java) provide similar functionality. Thes REST calls are based on the Open API specification and are described in the REST SDK reference documentation. 
-
 !!! info
     The Indexer DB takes up a fraction of disk space compared to the actual blockchain data with archival mode on. For example, 100 GB of blockchain data takes about 1 GB of data in the Indexer DB.
 
-Before describing each of the available REST APIs, a few specific functions are described that are supported across many of the calls. This includes [Paginated Results](#paginated-results), [Historical Data searches](#historical-data-searches), and [Note Field Seaching](#note-field-searching).
+The Indexer provides a set of REST API calls for searching blockchain Transactions, Accounts, Assets and Blocks. Each of these calls also provides several filter parameters to support refining searches. The latest Algorand native SDKs (Python, JavaScript, Go, and Java) provide similar functionality. Thes REST calls are based on the Open API specification and are described in the REST SDK reference documentation. 
+
+# SDK Client Instantiations
+
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+# requires Python SDK version 1.3 or higher
+
+import json
+
+from algosdk.v2client import indexer
+data = {
+   "indexer_token": "",
+   "indexer_address": "http://localhost:8980"
+}
+# instantiate indexer client
+myindexer = indexer.IndexerClient(**data)
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+// requires Go SDK version 1.4 or higher
+
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+
+	"github.com/algorand/go-algorand-sdk/client/v2/indexer"
+)
+
+const indexerAddress = "http://localhost:8980"
+const indexerToken = ""
+
+func main() {
+
+	// instantiate indexer client
+   indexerClient, err := indexer.MakeClient(indexerAddress, indexerToken)
+}
+```
 
 !!! info 
     When using cURL be aware that the parameters may need to be URL encoded. The SDKs handle the encoding of parameter data. 
+
+Before describing each of the available REST APIs, a few specific functions are described that are supported across many of the calls. This includes [Paginated Results](#paginated-results), [Historical Data searches](#historical-data-searches), and [Note Field Seaching](#note-field-searching).
 
 # Paginated Results
 When searching large amounts of blockchain data often the results may be too large to process in one given operation. In fact, the indexer imposes hard limits on the number of results returned for specific searches.  The default limits for these searches are summarized in the table below.
@@ -77,6 +125,82 @@ The following REST calls support paginated results.
 * `/assets/{asset-id}/transactions` - Search for Transactions with a specific Asset.
 * `/transactions` - Search all transactions
 
+??? example "Complete Example - Paginated Results"
+
+   ```python tab="Python"
+   # SearchTransactionsPaging.py
+   # loop thru all transactions in the search result
+   # using next_page to paginate
+   nexttoken = ""
+   numtx = 1
+   responseall = ""
+   # loop until there are no more tranactions in the response
+   # for the limit (max is 1000  per request)
+   while (numtx > 0):
+      data = {
+         "min_amount": 100000000000000,
+         "limit": 5,
+         "next_page": nexttoken
+      }
+      response = myindexer.search_transactions(**data)
+      transactions = response['transactions']
+      numtx = len(transactions)
+      if (numtx > 0):
+         nexttoken = response['next-token']
+         # concatinate response
+         responseall = responseall + json.dumps(response)
+   #json.load method converts JSON string to Python Object
+   parsed = json.loads(responseall)
+   # Pretty Printing JSON string
+   print(json.dumps(parsed, indent=2, sort_keys=True))
+   ```
+
+   ```python tab="Python"
+   # SearchTransactionsPaging.py
+   # loop thru all transactions in the search result
+   # using next_page to paginate
+   nexttoken = ""
+   numtx = 1
+   responseall = ""
+   # loop until there are no more tranactions in the response
+   # for the limit (max is 1000  per request)
+   while (numtx > 0):
+      data = {
+         "min_amount": 100000000000000,
+         "limit": 5,
+         "next_page": nexttoken
+      }
+      response = myindexer.search_transactions(**data)
+      transactions = response['transactions']
+      numtx = len(transactions)
+      if (numtx > 0):
+         nexttoken = response['next-token']
+         # concatinate response
+         responseall = responseall + json.dumps(response)
+   #json.load method converts JSON string to Python Object
+   parsed = json.loads(responseall)
+   # Pretty Printing JSON string
+   print(json.dumps(parsed, indent=2, sort_keys=True))
+   ```
+
+   ```java tab="Java"
+
+   ```
+
+   ```go tab="Go"
+
+   ```
+
+   ```bash tab="Curl"
+   # loop thru all transactions in the search result
+   # using next_page to paginate
+   # get most recent transactions where balance greater than 10, limit results to 5 per page
+   curl localhost:8980/v2/transactions?currency-greater-than=10\&limit=5
+   # note the "next-token" field in the results and supply the value in future queries
+   curl localhost:8980/v2/transactions?currency-greater-than=10\&limit=5\&next=
+   ```
+   
+
 # Historical Data Searches 
 Many of the REST calls support getting values at specific rounds. This means that the Indexer will do calculations that determine what specific values were at a specific round. For example, if account A starts at round 50 with 200 ARCC tokens and spends 50 of those tokens in round 75, the following command would return a balance of 150
 
@@ -91,6 +215,43 @@ curl localhost:8980/v2/accounts/A?round=50
 ```
 
 The round parameter results are inclusive of all transactions within the given round. This parameter is available in many of the REST calls. This can be very computationally expensive so for performance reasons, it is by default disabled on the `/accounts` REST call but can be enabled by using the `--dev-mode` flag when starting the Indexer.
+
+??? example "Complete Example - Historical Data Searchest"
+
+   ```javascript tab="JavaScript"
+
+   ```
+
+   ```python tab="Python"
+   data = {
+      "address": "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI",
+      "block": 50
+   }
+   response = myindexer.account_info(**data)
+   print(json.dumps(response, indent=2, sort_keys=True))
+   ```
+
+   ```java tab="Java"
+
+   };
+   ```
+
+   ```go tab="Go"
+      // Parameters 
+      var round uint64 = 6127822
+      var account = "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI"
+
+      // Lookup block
+      _, result, err := indexerClient.LookupAccountByID(account).Round(round).Do(context.Background())
+
+      // Print results
+      JSON, err := json.MarshalIndent(result, "", "\t")
+      fmt.Printf(string(JSON) + "\n")
+   ```
+
+   ```bash tab="Curl"
+   curl localhost:8980/v2/accounts/7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI?round=50
+   ```
 
 # Note Field Searching
 Every transaction has the ability to add up to a 1kb note in the note field. Several of the REST APIs provide the ability to search for a prefix that is present in the note field, meaning that the note starts with a specific string. This can be a very powerful way to quickly locate transactions that are specific to an application. The REST calls that support prefix searching are the following.
@@ -107,8 +268,52 @@ $ python3 -c "import base64;print(base64.b64encode('showing prefix'.encode()))"
 
 This will return an encoded value of `c2hvd2luZyBwcmVmaXg=`.  This value can then be passed to the search. To search all transactions use the following commmand.
 
-``` bash tab="cURL"
-$ curl "localhost:8980/v2/transactions?note-prefix=c2hvd2luZyBwcmVmaXg=" | json_pp
+??? example "Complete Example - Note Field Searcing"
+
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+# SearchTransactionsNote.py
+import base64
+encodednote = base64.b64encode('showing prefix'.encode())
+data = {
+   "note_prefix": base64.b64decode(encodednote)
+}
+response = myindexer.search_transactions(**data)
+print("note_prefix = " +
+     json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+// Parameters
+var minAmount uint64 = 10
+var data = "showing prefix"
+var encodedNote = base64.StdEncoding.EncodeToString([]byte(data))
+
+// Query
+result, err := indexerClient.SearchForTransactions().NotePrefix([]byte(data)).Do(context.Background())
+
+// Print results
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
+}
+
+```
+
+```bash tab="Curl"
+python3 -c "import base64;print(base64.b64encode('showing prefix'.encode()))"
+curl "localhost:8980/v2/transactions?note-prefix=c2hvd2luZyBwcmVmaXg=" | json_pp
+```
+
+Results
+``` bash
 {
    "current-round" : 7087347,
    "next-token" : "qCFsAAAAAAAAAAAA",
