@@ -34,8 +34,8 @@ myindexer = indexer.IndexerClient(indexer_token="", indexer_address="http://loca
 ```
 
 ```java tab="Java"
-// InstantiateIndexer.java
-// requires java-algorand-sdk 1.4.0 or higher (see pom.xml)
+// /indexer/java/InstantiateIndexer.java
+// requires java-algorand-sdk 1.4.1 or higher (see pom.xml)
 package com.algorand.javatest.indexer;
 
 import com.algorand.algosdk.v2.client.common.IndexerClient;
@@ -99,7 +99,7 @@ When searching large amounts of blockchain data often the results may be too lar
 These values represent the maximum number of results that will be returned when searching for specific results. For example, the following will return the last 1000 transactions that exceeded 10 microAlgos. 
 
 ```javascript tab="JavaScript"
-// SearchTransactionsMinAmount.js
+// /indexer/javascript/SearchTransactionsMinAmount.js
 (async () => {
     let currencyGreater = 10;
     let transactionInfo = await indexerClient.searchForTransactions()
@@ -112,16 +112,16 @@ These values represent the maximum number of results that will be returned when 
 ```
 
 ```python tab="Python"
-data = {
-   "min_amount": 10
-}
-response = myindexer.search_transactions(**data)
+# /indexer/python/SearchTransactionsPaging.py
+
+response = myindexer.search_transactions(min_amount=10) 
+
 # Pretty Printing JSON string
 print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// SearchTransactionsMinAmount.java
+// /indexer/java/SearchTransactionsMinAmount.java
     public static void main(String args[]) throws Exception {
         SearchTransactionsMinAmount ex = new SearchTransactionsMinAmount();
         IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
@@ -153,10 +153,10 @@ fmt.Printf(string(JSON) + "\n")
 
 When trying to find specific transactions, the Indexer supplies a pagination method that allows separating the results into several REST calls to return larger result sets. When used with the limit parameter the results for large data sets can be returned in expected result counts.
 
-For example, adding a limit parameter of 5 to previous call
+For example, adding a limit parameter of 5 to the previous call
 
 ```javascript tab="JavaScript"
-// SearchTransactionsLimit.js
+// /indexer/javascript/SearchTransactionsLimit.js
 (async () => {
     let currencyGreater = 10;
     let limit = 5;
@@ -171,17 +171,17 @@ For example, adding a limit parameter of 5 to previous call
 ```
 
 ```python tab="Python"
-data = {
-   "min_amount": 10,
-   "limit": 5,
-}
-response = myindexer.search_transactions(**data)
+# /indexer/python/SearchTransactionsPaging.py
+
+response = myindexer.search_transactions(
+   min_amount=10, limit=5) 
+
 # Pretty Printing JSON string
 print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// SearchTransactionsLimit.js
+// /indexer/java/SearchTransactionsLimit.js
     public static void main(String args[]) throws Exception {
         SearchTransactionsLimit ex = new SearchTransactionsLimit();
         IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
@@ -228,7 +228,7 @@ Results showing "next-token"
 To get the next 5 transactions simply add the next-token as a parameter to the next REST call. The parameter is named `next` and this token is only good for the next 5 results.
 
 ```javascript tab="JavaScript"
-// SearchTransactionsPaging.js
+// /indexer/javascript/SearchTransactionsPaging.js
 let nexttoken = "";
 let numtx = 1;
 // loop until there are no more transactions in the response
@@ -258,31 +258,28 @@ let numtx = 1;
 ```
 
 ```python tab="Python"
-# loop thru all transactions in the search result
-# using next_page to paginate
+# /indexer/python/SearchTransactionsPaging.py
+
 nexttoken = ""
 numtx = 1
-# loop until there are no more tranactions in the response
-# for the limit (max is 1000  per request)
-while (numtx > 0):
-   data = {
-      "min_amount": 100000000000000,
-      "limit": 5,
-      "next_page": nexttoken
-   }
-   response = myindexer.search_transactions(**data)
-   transactions = response['transactions']
-   numtx = len(transactions)
-   if (numtx > 0):
-      nexttoken = response['next-token']
-      parsed = json.loads(response)
-      # Pretty Printing JSON string
-      print(json.dumps(parsed, indent=2, sort_keys=True))
 
+# loop using next_page to paginate until there are no more transactions in the response
+# for the limit (max is 1000  per request)
+
+while (numtx > 0):
+
+    response = myindexer.search_transactions(
+        min_amount=100000000000000, limit=2, next_page=nexttoken) 
+    transactions = response['transactions']
+    numtx = len(transactions)
+    if (numtx > 0):
+        nexttoken = response['next-token']
+        # Pretty Printing JSON string 
+        print("Tranastion Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// SearchTransactionsPaging.java
+// /indexer/java/SearchTransactionsPaging.java
     public static void main(String args[]) throws Exception {
         SearchTransactionsPaging ex = new SearchTransactionsPaging();
         IndexerClient indexerClientInstance = (IndexerClient) ex.connectToNetwork();
@@ -370,7 +367,7 @@ The following REST calls support paginated results.
 Many of the REST calls support getting values at specific rounds. This means that the Indexer will do calculations that determine what specific values were at a specific round. For example, if account A starts at round 50 with 200 ARCC tokens and spends 50 of those tokens in round 75, the following command would return a balance of 150
 
 ```javascript tab="JavaScript"
-// AccountInfo.js
+// /indexer/javascript/AccountInfo.js
 (async () => {
     let acct = "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI";
     let accountInfo = await indexerClient.lookupAccountByID(acct).do();
@@ -382,11 +379,15 @@ Many of the REST calls support getting values at specific rounds. This means tha
 ```
 
 ```python tab="Python"
+# /indexer/python/AccountInfo.py
 
+response = myindexer.account_info(
+    address="7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI")
+print("Account Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// AccountInfo.java
+// /indexer/java/AccountInfo.java
     public static void main(String args[]) throws Exception {
         AccountInfo ex = new AccountInfo();
         IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
@@ -408,6 +409,7 @@ curl localhost:8980/v2/accounts/7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5A
 If the round parameter is used and set to 50 a balance of 200 would be returned.
 
 ```javascript tab="JavaScript"
+// indexer/javascript/AccountInfoBlock.js
 (async () => {
     let acct = "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI";
     let round = 50;
@@ -421,16 +423,15 @@ If the round parameter is used and set to 50 a balance of 200 would be returned.
 ```
 
 ```python tab="Python"
-data = {
-   "address": "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI",
-   "block": 50
-}
-response = myindexer.account_info(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/AccountInfoBlock.py
+
+response = myindexer.account_info(
+    address="7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI", block=50)
+print("Account Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// AccountInfoBlock.java
+// /indexer/java/AccountInfoBlock.java
     public static void main(String args[]) throws Exception {
         AccountInfoBlock ex = new AccountInfoBlock();
         IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
@@ -444,7 +445,7 @@ print(json.dumps(response, indent=2, sort_keys=True))
 
 ```go tab="Go"
 // Parameters 
-var round uint64 = 6127822
+var round uint64 = 50
 var account = "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI"
 
 // Lookup block
@@ -474,10 +475,10 @@ To search for a specific prefix use the `note-prefix` parameter. The value needs
 $ python3 -c "import base64;print(base64.b64encode('showing prefix'.encode()))"
 ```
 
-This will return an encoded value of `c2hvd2luZyBwcmVmaXg=`.  This value can then be passed to the search. To search all transactions use the following commmand.
+This will return an encoded value of `c2hvd2luZyBwcmVmaXg=`.  This value can then be passed to the search. To search all transactions use the following command.
 
 ```javascript tab="JavaScript"
-// SearchTransactionsNote.js
+// /indexer/python/SearchTransactionsNote.js
 (async () => {
     //let s = buffer.toString('base64');   
     let s = "c2hvd2luZyBwcmVmaXg=";
@@ -491,18 +492,21 @@ This will return an encoded value of `c2hvd2luZyBwcmVmaXg=`.  This value can the
 ```
 
 ```python tab="Python"
+# /indexer/python/SearchTransactionsNote.py
+
 import base64
 encodednote = base64.b64encode('showing prefix'.encode())
-data = {
-   "note_prefix": base64.b64decode(encodednote)
-}
-response = myindexer.search_transactions(**data)
+decodednote = base64.b64decode(encodednote)
+
+response = myindexer.search_transactions(
+    note_prefix=decodednote)
+
 print("note_prefix = " +
-     json.dumps(response, indent=2, sort_keys=True))
+      json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// SearchTransactionsNote.java
+// /indexer/java/SearchTransactionsNote.java
     public static void main(String args[]) throws Exception {
         SearchTransactionsNote ex = new SearchTransactionsNote();
         IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
@@ -574,7 +578,7 @@ Results
 The ‘/accounts’ call can be used to search for accounts on the Algorand blockchain. This query provides two main parameters for returning accounts with specific balances. These two calls are `currency-greater-than` and `currency-less-than` which returns all accounts with balances that match the criteria. By default, the currency these parameters look for is the Algo and the values are specified in microAlgos. This behavior can be changed by supplying the `asset-id` parameter which specifies the asset to search accounts for in the ledger. For example to search accounts that have the Tether UDSt token the following command would be used.
 
 ```javascript tab="JavaScript"
-// AccountsAssetID.js
+// /indexer/javascript/AccountsAssetID.js
 (async () => {
     let assetIndex = 312769;
     let accountInfo = await indexerClient.searchAccounts()
@@ -587,16 +591,15 @@ The ‘/accounts’ call can be used to search for accounts on the Algorand bloc
 ```
 
 ```python tab="Python"
-# gets accounts with a particular AssetID
-data = {
-   "asset_id": 312769
-}
-response = myindexer.accounts(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/AccountsAssetID.py
+
+response = myindexer.accounts(
+    asset_id=312769)
+print("Account Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// AccountsAssetID.java
+// /indexer/java/AccountsAssetID.java
     public static void main(String args[]) throws Exception {
         AccountsAssetID ex = new AccountsAssetID();
         IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
@@ -627,7 +630,7 @@ curl localhost:8980/v2/accounts?asset-id=312769
 This search can be further refined to search for accounts that have a balance greater than 100 USDt by using the following query.
 
 ```javascript tab="JavaScript"
-// AccountsAssetIDMinBalance.js
+// /indexer/javascript/AccountsAssetIDMinBalance.js
 (async () => {
     let assetIndex = 312769;
     let currencyGreater = 100;
@@ -642,17 +645,16 @@ This search can be further refined to search for accounts that have a balance gr
 ```
 
 ```python tab="Python"
+# /indexer/python/AccountsAssetIDMinBalance.py
+
 # gets accounts with a min balance of 100 that have a particular AssetID
-data = {
-   "min_balance": 100,
-   "asset_id": 312769
-}
-response = myindexer.accounts(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+response = myindexer.accounts(
+    asset_id=312769, min_balance=100)
+print("Account Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// AccountsAssetIDMinBalance.java
+// /indexer/java/AccountsAssetIDMinBalance.java
     public static void main(String args[]) throws Exception {
         AccountsAssetIDMinBalance ex = new AccountsAssetIDMinBalance();
         IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
@@ -714,7 +716,7 @@ The `/accounts/{account-id}` can be used to look up ledger data for a specific a
 For example:
 
 ```javascript tab="JavaScript"
-// AccountInfo.js
+// /indexer/javascript/AccountInfo.js
 (async () => {
     let acct = "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI";
     let accountInfo = await indexerClient.lookupAccountByID(acct).do();
@@ -726,16 +728,16 @@ For example:
 ```
 
 ```python tab="Python"
+# /indexer/python/AccountInfo.py
+
 # gets account
-data = {
-   "address": "TDO7JWA77FH3T2HP5ZOZWFKUQDQEAPD25HDKDVEAAWQKBWTMNMYRXOOYGA"
-}
-response = myindexer.account_info(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+response = myindexer.account_info(
+    address="TDO7JWA77FH3T2HP5ZOZWFKUQDQEAPD25HDKDVEAAWQKBWTMNMYRXOOYGA")
+print("Account Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// AccountInfo.java
+// /indexer/java/AccountInfo.java
     public static void main(String args[]) throws Exception {
         AccountInfo ex = new AccountInfo();
         IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
@@ -748,7 +750,7 @@ print(json.dumps(response, indent=2, sort_keys=True))
 
 ```go tab="Go"
 // query parameters
-var accountID = "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI"
+var accountID = "TDO7JWA77FH3T2HP5ZOZWFKUQDQEAPD25HDKDVEAAWQKBWTMNMYRXOOYGA"
 
 // Lookup account
 _, result, err := indexerClient.LookupAccountByID(accountID).Do(context.Background())
@@ -797,7 +799,7 @@ The `/accounts/{account-id}/transactions` REST call provides a powerful mechanis
 The range of transactions to be searched can be restricted based on the time by using the `before-time` and `after-time` parameters. These parameters must be [rfc3339](http://www.faqs.org/rfcs/rfc3339.html) formatted date-time strings. For example, the following query searches for all transactions that occurred after 10 am (Zulu/UTC) minus 5 hours (EST).
 
 ```javascript tab="JavaScript"
-// SearchTxAddressTime.js
+// /indexer/javascript/SearchTxAddressTime.js
 (async () => {
     let address = "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4";
     let start_time = "2020-06-03T10:00:00-05:00"; 
@@ -813,18 +815,19 @@ The range of transactions to be searched can be restricted based on the time by 
 ```
 
 ```python tab="Python"
+# /indexer/python/SearchTxAddressTime.py
+
 # get transaction at specific time
-data = {
-   "address": "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
-   "start_time": "2020-06-03T10:00:00-05:00"
-}
-response = myindexer.search_transactions_by_address(**data)
-print("start_time: 06/03/2020 11:00:00 = " + json.dumps(response, indent=2, sort_keys=True))
+response = myindexer.search_transactions_by_address(
+    address="XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4", start_time="2020-06-03T10:00:00-05:00")
+
+print("Transaction Start Time 2020-06-03T10:00:00-05:00 = " +
+      json.dumps(response, indent=2, sort_keys=True))
 
 ```
 
 ```java tab="Java"
-// SearchTxAddressTime.java
+// /indexer/java/SearchTxAddressTime.java
     public static void main(String args[]) throws Exception {
         SearchTxAddressTime ex = new SearchTxAddressTime();
         IndexerClient indexerClientInstance = (IndexerClient) ex.connectToNetwork();
@@ -895,7 +898,7 @@ Results
 Transaction searches can also be restricted to round ranges using the `min-round` and `max-round` parameters. 
 
 ```javascript tab="JavaScript"
-// SearchTxAddressBlockRange.js
+// /indexer/javascript/SearchTxAddressBlockRange.js
 (async () => {
     let address = "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4";
     let min_round = 7048876;
@@ -912,11 +915,17 @@ Transaction searches can also be restricted to round ranges using the `min-round
 ```
 
 ```python tab="Python"
+# /indexer/python/SearchTxAddressBlockRange.py
 
+response = myindexer.search_transactions_by_address(
+    address="XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4", min_round=7048876, max_round=7048878)
+
+print("min-max rounds: 7048876-7048878 = " +
+      json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// SearchTxAddressBlockRange.java
+// /indexer/java/SearchTxAddressBlockRange.java
     public static void main(String args[]) throws Exception {
         SearchTxAddressBlockRange ex = new SearchTxAddressBlockRange();
         IndexerClient indexerClientInstance = (IndexerClient) ex.connectToNetwork();
@@ -951,7 +960,7 @@ $ curl "localhost:8980/v2/accounts/XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4
 In addition, you can specify a specific round by using the round parameter.
 
 ```javascript tab="JavaScript"
-// SearchTxAddressBlock.js
+// /indexer/javascript/SearchTxAddressBlock.js
 (async () => {
     let address = "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4";
     let round = 7048877;
@@ -967,17 +976,17 @@ In addition, you can specify a specific round by using the round parameter.
 ```
 
 ```python tab="Python"
-data = {
-   "address": "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
-   "block": "7048877"
-   }
-response = myindexer.search_transactions_by_address(**data)
+# /indexer/python/SearchTxAddressBlock.py
+
+response = myindexer.search_transactions_by_address(
+    address="XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4", block=7048877)
+
 print("block: 7048877 = " +
-     json.dumps(response, indent=2, sort_keys=True))
+      json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// SearchTxAddressBlock.java
+// /indexer/java/SearchTxAddressBlock.java
     public static void main(String args[]) throws Exception {
         SearchTxAddressBlock ex = new SearchTxAddressBlock();
         IndexerClient indexerClientInstance = (IndexerClient) ex.connectToNetwork();
@@ -1012,7 +1021,7 @@ $ curl "localhost:8980/v2/accounts/XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4
 Searching for a specific transaction can be achieved by supplying the transaction id using the `txid` parameter.
 
 ```javascript tab="JavaScript"
-// SearchTxAddressTxId.js
+// /indexer/javascript/SearchTxAddressTxId.js
 (async () => {
     let address = "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4";
     let txid = "QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA"; 
@@ -1028,17 +1037,18 @@ Searching for a specific transaction can be achieved by supplying the transactio
 ```
 
 ```python tab="Python"
-data = {
-   "address": "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
-   "txid": "QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA"
-   }
-response = myindexer.search_transactions_by_address(**data)
+# /indexer/python/SearchTxAddressTxId.py
+
+response = myindexer.search_transactions_by_address(
+    address="XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
+    txid="QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA")
+
 print("txid: QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA = " +
-     json.dumps(response, indent=2, sort_keys=True))
+      json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// SearchTxAddressTxId.java
+// /indexer/java/SearchTxAddressTxId.java
     public static void main(String args[]) throws Exception {
         SearchTxAddressTxId ex = new SearchTxAddressTxId();
         IndexerClient indexerClientInstance = (IndexerClient) ex.connectToNetwork();
@@ -1071,7 +1081,7 @@ $ curl "localhost:8980/v2/accounts/XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4
 You can also search for specific transaction types that are described in the [transaction structure](https://developer.algorand.org/docs/features/transactions/#transaction-types) documentation. The Indexer supports looking for `pay`, `keyreg`, `acfg`, `axfer` and `afrz` transaction types. To search for a specific type of transaction use the `tx-type` parameter. The following example searches for the asset creation transaction for the DevDocsCoin.
 
 ```javascript tab="JavaScript"
-// SearchTxAddresstxntype.js
+// /indexer/javascript/SearchTxAddresstxntype.js
 (async () => {
     let address = "SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU";
     let txn_type = "acfg"; 
@@ -1087,17 +1097,18 @@ You can also search for specific transaction types that are described in the [tr
 ```
 
 ```python tab="Python"
-data = {
-   "address": "SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU",
-   "txn_type": "acfg"
-   }
-response = myindexer.search_transactions_by_address(**data)
+# /indexer/python/SearchTxAddresstxntype.py
+
+response = myindexer.search_transactions_by_address(
+    address="SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU",
+    txn_type="acfg")
+
 print("txn_type: acfg = " +
-     json.dumps(response, indent=2, sort_keys=True))
+      json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// SearchTxAddresstxntype.java
+// /indexer/java/SearchTxAddresstxntype.java
     public static void main(String args[]) throws Exception {
         SearchTxAddresstxntype ex = new SearchTxAddresstxntype();
         IndexerClient indexerClientInstance = (IndexerClient) ex.connectToNetwork();
@@ -1175,7 +1186,7 @@ Results
 Searching Transactions that are of certain values can be created by using the `currency-greater-than` and `currency-less-than` parameters. By default, these values are in microAlgos, but if this is used in conjunction with the `asset-id` parameter the currencies will refer to the specific asset. Searching for transactions greater than 50 DevDocsCoin (asset id=2044572) can be done with the following:
 
 ```javascript tab="JavaScript"
-// SearchTxAddressAsset.js
+// /indexer/javascript/SearchTxAddressAsset.js
 (async () => {
     let address = "SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU";
     let asset_id = 2044572;
@@ -1194,17 +1205,17 @@ Searching Transactions that are of certain values can be created by using the `c
 ```
 
 ```python tab="Python"
-data = {
-   "address": "SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU",
-   "asset_id": "2044572",
-   "min_amount": 50
-   }
-response = myindexer.search_transactions_by_address(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/AccountsAssetIDMinBalance.py
+
+# gets assets with a min balance of 50 for AssetID
+response = myindexer.asset_balances(
+        address="SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU",asset_id=2044572, min_balance=50)
+
+print("Asset Balances :" + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// SearchTxAddressAsset.java
+// /indexer/java/SearchTxAddressAsset.java
     public static void main(String args[]) throws Exception {
         SearchTxAddressAsset ex = new SearchTxAddressAsset();
         IndexerClient indexerClientInstance = (IndexerClient) ex.connectToNetwork();
@@ -1220,7 +1231,7 @@ print(json.dumps(response, indent=2, sort_keys=True))
 
 ```go tab="Go"
 // query parameters
-var assetId uint64 = 312769
+var assetId uint64 = 2044572
 var minBalance uint64 = 50
 address, _ := types.DecodeAddress("SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU")
 
@@ -1274,7 +1285,7 @@ Results
 Transaction searches can also look for specific [signature types](https://developer.algorand.org/docs/reference/transactions/#signed-transaction), which can be standard signatures, multi-signatures, or logic signatures. To search for transactions with a specific signature type use the `sig-type` parameter and specify either `sig`, `msig`, or `lsig` and the parameter values. These are signatures that specifically sign Algorand transactions. The following query will return all transactions that signed with a multi-signature for the specific account.
 
 ```javascript tab="JavaScript"
-// SearchTxAddresssigtype.js
+// /indexer/javascript/SearchTxAddresssigtype.js
 (async () => {
     let address = "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4";
     let sig_type = "msig"; 
@@ -1291,18 +1302,17 @@ Transaction searches can also look for specific [signature types](https://develo
 ```
 
 ```python tab="Python"
-data = {
-   "address": "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
-   "sig_type": "msig"
-   }
-response = myindexer.search_transactions_by_address(**data)
-print("sig_type: msig = " +
-     json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/SearchTxAddresssigtype.py
 
+response = myindexer.search_transactions_by_address(
+    address="XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4", sig_type="msig")
+
+print("sig_type: msig = " +
+      json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// SearchTxAddresssigtype.java
+// /indexer/java/SearchTxAddresssigtype.java
     public static void main(String args[]) throws Exception {
         SearchTxAddresssigtype ex = new SearchTxAddresssigtype();
         IndexerClient indexerClientInstance = (IndexerClient) ex.connectToNetwork();
@@ -1339,7 +1349,7 @@ This call returns a list of transactions, the round the results were calculated 
 The Indexer provides the `/assets` REST call to search the blockchain for specific assets. The call supports searching based on the asset id, the name of the asset, the unit name of the asset, and by the creator of the asset. For example, to search for DevDocsCoin the `name` parameter should be used. Note that this is a non-case sensitive search.
 
 ```javascript tab="JavaScript"
-// SearchAssetName.js
+// /indexer/javascript/SearchAssetName.js
 (async () => {
     let name = "DevDocsCoin";
     let assetInfo = await indexerClient.searchForAssets()
@@ -1352,15 +1362,15 @@ The Indexer provides the `/assets` REST call to search the blockchain for specif
 ```
 
 ```python tab="Python"
-data = {
-   "name": "DevDocsCoin"
-}
-response = myindexer.search_assets(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/SearchAssetsName.py
+
+response = myindexer.search_assets(
+    name="DevDocsCoin")
+print("Asset Name Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// SearchAssetsName.java
+// /indexer/java/SearchAssetsName.java
     public static void main(String args[]) throws Exception {
         SearchAssetsName ex = new SearchAssetsName();
         IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
@@ -1419,7 +1429,7 @@ This call returns a list of assets and the round the results were calculated in.
 To get the details of a specific asset the indexer provides the `/assets/{asset-id}` REST call.  This call takes no parameters as the asset id is passed in the URL. This call returns the details of the asset and the round the results were calculated in. 
 
 ```javascript tab="JavaScript"
-// SearchAssets.js
+// /indexer/javascript/SearchAssets.js
 (async () => {
     let assetIndex = 2044572;
     let assetInfo = await indexerClient.searchForAssets()
@@ -1432,15 +1442,16 @@ To get the details of a specific asset the indexer provides the `/assets/{asset-
 ```
 
 ```python tab="Python"
-data = {
-   "asset_id": "2044572"
-}
-response = myindexer.search_assets(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/SearchAssets.py
+
+response = myindexer.search_assets(
+    asset_id=2044572)
+
+print("Asset Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// SearchAssets.java
+// /indexer/java/SearchAssets.java
     public static void main(String args[]) throws Exception {
         SearchAssets ex = new SearchAssets();
         IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
@@ -1495,7 +1506,7 @@ Results
 The Indexer provides the `/assets/{asset-id}/balances` REST API call to search for accounts that transact in a specific Asset. The call returns a list of balances, with their specific amount, the address holding the asset, and whether the account is frozen. Additionally, the round the results were calculated is returned.
 
 ```javascript tab="JavaScript"
-// AssetsBalances.js
+// /indexer/javascript/AssetsBalances.js
 (async () => {
     let assetIndex = 2044572;
     let assetInfo = await indexerClient.lookupAssetBalances(assetIndex).do();
@@ -1507,11 +1518,15 @@ The Indexer provides the `/assets/{asset-id}/balances` REST API call to search f
 ```
 
 ```python tab="Python"
+# /indexer/python/AssetsBalances.py
 
+response = myindexer.asset_balances(
+    asset_id=2044572)
+print("Asset Balance: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// AssetsBalances.java
+// /indexer/java/AssetsBalances.java
     public static void main(String args[]) throws Exception {
         AssetsBalances ex = new AssetsBalances();
         IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
@@ -1561,7 +1576,7 @@ Results
 This call can be refined by looking for addresses based on the current amount using the `currency-greater-than` and `currency-less-than` parameters.
 
 ```javascript tab="JavaScript"
-// AssetsBalancesMinBalance.js
+// /indexer/javascript/AssetsBalancesMinBalance.js
 (async () => {
     let assetIndex = 2044572;
     let currencyGreater = 200;
@@ -1575,16 +1590,16 @@ This call can be refined by looking for addresses based on the current amount us
 ```
 
 ```python tab="Python"
-data = {
-   "asset_id": "2044572",
-   "min_balance": 200
-}
-response = myindexer.asset_balances(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/AssetsBalancesMinBalance.py
+
+response = myindexer.asset_balances(
+    asset_id=2044572, min_balance=200)
+
+print("Asset Balances :" + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// AccountsAssetIDMinBalance.java
+// /indexer/java/AccountsAssetIDMinBalance.java
     public static void main(String args[]) throws Exception {
         AccountsAssetIDMinBalance ex = new AccountsAssetIDMinBalance();
         IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
@@ -1655,7 +1670,7 @@ This call also supports [Paginated Results](#paginated-results) and [Note Field 
 When searching for transactions that involve a specific Asset you can search for specific accounts as well as the address role. The roles that can be searched for are `sender`, `receiver`, and `freeze-target`. For example, a specific receiver with a given address for an Asset can be searched using the following:
 
 ```javascript tab="JavaScript"
-// SearchAssetTransactionsRole.js
+// /indexer/javascript/SearchAssetTransactionsRole.js
 (async () => {
     let asset_id = 2044572;
     let address_role = "receiver";
@@ -1671,17 +1686,16 @@ When searching for transactions that involve a specific Asset you can search for
 ```
 
 ```python tab="Python"
-data = {
-   "asset_id": "2044572",
-   "address_role": "receiver",
-   "address": "UF7ATOM6PBLWMQMPUQ5QLA5DZ5E35PXQ2IENWGZQLEJJAAPAPGEGC3ZYNI"
-}
-response = myindexer.search_asset_transactions(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/SearchAssetTransactionsRole.py
+
+response = myindexer.search_asset_transactions(
+    asset_id=2044572, address_role="receiver", address="UF7ATOM6PBLWMQMPUQ5QLA5DZ5E35PXQ2IENWGZQLEJJAAPAPGEGC3ZYNI")
+
+print("Asset Transaction Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// SearchAssetsTransactionsRole.java
+// /indexer/java/SearchAssetsTransactionsRole.java
     public static void main(String args[]) throws Exception {
         SearchAssetsTransactionsRole ex = new SearchAssetsTransactionsRole();
         IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
@@ -1717,7 +1731,7 @@ When searching for the receiver like in the above example, a `closeto` transacti
 The Indexer provides the `/blocks/{round-number}` API call to retrieve specific blocks from the blockchain. This call does not take any parameters and returns data associated with the block.
 
 ```javascript tab="JavaScript"
-// BlockInfo.js
+// /indexer/javascript/BlockInfo.js
 (async () => {
     let block = 50;
     let blockInfo = await indexerClient.lookupBlock(block).do();
@@ -1729,15 +1743,15 @@ The Indexer provides the `/blocks/{round-number}` API call to retrieve specific 
 ```
 
 ```python tab="Python"
-data = {
-   "block": "555"
-}
-response = myindexer.block_info(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/BlockInfo.py
+
+response = myindexer.block_info(
+    block=555)
+print("Block Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-// BlockInfo.java
+// /indexer/java/BlockInfo.java
     public static void main(String args[]) throws Exception {
         BlockInfo ex = new BlockInfo();
         IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
