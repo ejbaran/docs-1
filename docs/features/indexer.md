@@ -15,26 +15,47 @@ The Indexer provides a set of REST API calls for searching blockchain Transactio
 # SDK Client Instantiations
 
 ```javascript tab="JavaScript"
-
+// requires algosdk@1.6.1 or higher 
+// verify installed version
+// npm list algosdk
+const algosdk = require('algosdk');
+const indexer_token = "";
+const indexer_server = "http://localhost";
+const indexer_port = 8980;
 ```
 
 ```python tab="Python"
-# requires Python SDK version 1.3 or higher
-
 import json
-
+# requires Python SDK version 1.3 or higher
 from algosdk.v2client import indexer
-data = {
-   "indexer_token": "",
-   "indexer_address": "http://localhost:8980"
-}
+
 # instantiate indexer client
-myindexer = indexer.IndexerClient(**data)
+myindexer = indexer.IndexerClient(indexer_token="", indexer_address="http://localhost:8980")
 ```
 
 ```java tab="Java"
+// InstantiateIndexer.java
+// requires java-algorand-sdk 1.4.0 or higher (see pom.xml)
+package com.algorand.javatest.indexer;
 
-};
+import com.algorand.algosdk.v2.client.common.IndexerClient;
+import com.algorand.algosdk.v2.client.common.Client;
+
+public class InstantiateIndexer {
+    public Client indexerInstance = null;
+    // utility function to connect to a node
+    private Client connectToNetwork(){
+        final String INDEXER_API_ADDR = "localhost";
+        final int INDEXER_API_PORT = 8980;       
+        IndexerClient indexerClient = new IndexerClient(INDEXER_API_ADDR, INDEXER_API_PORT); 
+        return indexerClient;
+    }
+    public static void main(String args[]) throws Exception {
+        InstantiateIndexer ex = new InstantiateIndexer();
+        IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
+        System.out.println("IndexerClient Instantiated : " + indexerClientInstance); // pretty print json
+    }
+ }
 ```
 
 ```go tab="Go"
