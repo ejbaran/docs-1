@@ -212,16 +212,16 @@ The round parameter results are inclusive of all transactions within the given r
    ```
 
    ```go tab="Go"
-      // Parameters 
-      var round uint64 = 6127822
-      var account = "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI"
+   // Parameters 
+   var round uint64 = 6127822
+   var account = "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI"
 
-      // Lookup block
-      _, result, err := indexerClient.LookupAccountByID(account).Round(round).Do(context.Background())
+   // Lookup block
+   _, result, err := indexerClient.LookupAccountByID(account).Round(round).Do(context.Background())
 
-      // Print results
-      JSON, err := json.MarshalIndent(result, "", "\t")
-      fmt.Printf(string(JSON) + "\n")
+   // Print results
+   JSON, err := json.MarshalIndent(result, "", "\t")
+   fmt.Printf(string(JSON) + "\n")
    ```
 
    ```bash tab="Curl"
@@ -404,9 +404,9 @@ For example:
 ```
 
 ```python tab="Python"
-# gets accounts with a min balance of 100 that have a particular AssetID
+# gets account
 data = {
-   "address": "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI"
+   "address": "TDO7JWA77FH3T2HP5ZOZWFKUQDQEAPD25HDKDVEAAWQKBWTMNMYRXOOYGA"
 }
 response = myindexer.account_info(**data)
 print(json.dumps(response, indent=2, sort_keys=True))
@@ -418,11 +418,15 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```go tab="Go"
+// query parameters
+var accountID = "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI"
 
-```
+// Lookup account
+_, result, err := indexerClient.LookupAccountByID(accountID).Do(context.Background())
 
-```bash tab="Curl"
-curl localhost:8980/v2/accounts/TDO7JWA77FH3T2HP5ZOZWFKUQDQEAPD25HDKDVEAAWQKBWTMNMYRXOOYGA | json_pp
+// Print the results
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
 ```
 
 ``` bash tab="cURL"
@@ -468,7 +472,7 @@ The range of transactions to be searched can be restricted based on the time by 
 ```
 
 ```python tab="Python"
-# gets accounts with a min balance of 100 that have a particular AssetID
+# get transaction at specific time
 data = {
    "address": "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
    "start_time": "2020-06-03T10:00:00-05:00"
@@ -484,7 +488,15 @@ print("start_time: 06/03/2020 11:00:00 = " + json.dumps(response, indent=2, sort
 ```
 
 ```go tab="Go"
+// query parameters
+var startTime = "2020-06-03T10:00:00-05:00"
 
+// Query
+result, err := indexerClient.SearchForTransactions().Address(address).AfterTimeString(startTime).Do(context.Background())
+
+// Print the results
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
 ```
 
 ``` bash tab="cURL"
@@ -549,7 +561,17 @@ print("min-max rounds: 7048876-7048878 = " +
 ```
 
 ```go tab="Go"
+// query parameters
+var minRound uint64 = 7048876
+var maxRound uint64 = 7048878
+address, _ := types.DecodeAddress("XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4")
 
+// query
+result, err := indexerClient.SearchForTransactions().Address(address).MinRound(minRound).MaxRound(maxRound).Do(context.Background())
+
+// Print the results
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
 ```
 
 ``` bash tab="cURL"
@@ -578,6 +600,16 @@ print("block: 7048877 = " +
 ```
 
 ```go tab="Go"
+// query parameters
+var round uint64 = 7048877
+address, _ := types.DecodeAddress("XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4")
+
+// query
+result, err := indexerClient.SearchForTransactions().Address(address).Round(Round).Do(context.Background())
+
+// Print the results
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
 
 ```
 
@@ -608,7 +640,16 @@ print("txid: QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA = " +
 ```
 
 ```go tab="Go"
+// query parameters
+var txID = "QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA"
+address, _ := types.DecodeAddress("XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4")
 
+// Query
+result, err := indexerClient.SearchForTransactions().Address(address).TXID(txID).Do(context.Background())
+
+// Print the results
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
 ```
 
 ``` bash tab="cURL"
@@ -638,7 +679,16 @@ print("txn_type: acfg = " +
 ```
 
 ```go tab="Go"
+// query parameters
+var txType = "acfg"
+address, _ := types.DecodeAddress("SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU")
 
+// Query
+result, err := indexerClient.SearchForTransactions().Address(address).TxType(txType).Do(context.Background())
+
+// Print the results
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
 ```
 
 ``` bash tab="cURL"
@@ -713,7 +763,17 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```go tab="Go"
+// query parameters
+var assetId uint64 = 312769
+var minBalance uint64 = 50
+address, _ := types.DecodeAddress("SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU")
 
+// Lookup accounts with minimum balance of asset
+result, err := indexerClient.LookupAssetBalances(assetId).CurrencyGreaterThan(minBalance).Do(context.Background())
+
+// Print the results
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
 ```
 
 ``` bash tab="cURL"
@@ -778,7 +838,16 @@ print("sig_type: msig = " +
 ```
 
 ```go tab="Go"
+// query parameters
+var sigType = "msig"
+address, _ := types.DecodeAddress("XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4")
 
+// Query
+result, err := indexerClient.SearchForTransactions().Address(address).SigType(sigType).Do(context.Background())
+
+// Print the results
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
 ```
 
 ``` bash tab="cURL"
@@ -810,7 +879,15 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```go tab="Go"
+// query parameters
+var assetName = "DevDocsCoin"
 
+// Lookup asset
+_, result, err := indexerClient.SearchForAssets().Name(assetName).Do(context.Background())
+
+// Search asset by name
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
 ```
 
 ``` bash tab="cURL"
@@ -865,14 +942,21 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```go tab="Go"
+// query parameters
+var assetID uint64 = 2044572
 
+// Query
+_, result, err := indexerClient.LookupAssetByID(assetID).Do(context.Background())
+
+// Print the results
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
 ```
 
-Results
 ``` bash tab="cURL"
 $ curl "localhost:8980/v2/assets/2044572" | json_pp
 ```
-
+Results
 ``` bash
 {
    "asset" : {
@@ -916,7 +1000,15 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```go tab="Go"
+// query parameters
+const assetId = 2044572
 
+// Lookup balance of asset
+result, err := indexerClient.LookupAssetBalances(assetId).Do(context.Background())
+
+// Print the results
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
 ```
 
 ```bash tab="cURL"
@@ -963,7 +1055,16 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```go tab="Go"
+// query parameters
+var assetId uint64 = 2044572
+var minBalance uint64 = 200
 
+// Query
+result, err := indexerClient.LookupAssetBalances(assetId).CurrencyGreaterThan(minBalance).Do(context.Background())
+
+// Print the results
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
 ```
 
 ``` bash tab="cURL"
@@ -1054,7 +1155,15 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```go tab="Go"
+// query parameters
+var round uint64 = 555
 
+// Lookup block
+result, err := indexerClient.LookupBlock(round).Do(context.Background())
+
+// Print the results
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
 ```
 
 ``` bash tab="cURL"
