@@ -132,7 +132,6 @@ The following REST calls support paginated results.
    ```
 
    ```python tab="Python"
-   # SearchTransactionsPaging.py
    # loop thru all transactions in the search result
    # using next_page to paginate
    nexttoken = ""
@@ -251,7 +250,6 @@ This will return an encoded value of `c2hvd2luZyBwcmVmaXg=`.  This value can the
 ```
 
 ```python tab="Python"
-# SearchTransactionsNote.py
 import base64
 encodednote = base64.b64encode('showing prefix'.encode())
 data = {
@@ -339,6 +337,44 @@ This call also supports the pagination mechanism described in [Paginated Results
 
 This call returns a list of accounts with associated data, the round number the results were calculated for and optionally the `next-token` value if you are using pagination.
 
+??? example "Complete Example - Searching Accounts"
+   ```javascript tab="JavaScript"
+
+   ```
+
+   ```python tab="Python"
+   # gets accounts with a min balance of 100 that have a particular AssetID
+   data = {
+      "min_balance": 100,
+      "asset_id": 312769
+   }
+   response = myindexer.accounts(**data)
+   print(json.dumps(response, indent=2, sort_keys=True))
+   ```
+
+   ```java tab="Java"
+
+   };
+   ```
+
+   ```go tab="Go"
+   // query parameters
+   var assetId uint64 = 312769
+   var minBalance uint64 = 100
+   
+   // Lookup accounts with minimum balance of asset
+	result, err := indexerClient.LookupAssetBalances(assetId).CurrencyGreaterThan(minBalance).Do(context.Background())
+
+	// Print the results
+	JSON, err := json.MarshalIndent(result, "", "\t")
+	fmt.Printf(string(JSON) + "\n")
+   ```
+
+   ```bash tab="Curl"
+   curl localhost:8980/v2/accounts?asset-id=312769\&currency-greater-than=100
+   ```
+
+Results
 ``` bash
 {
    "accounts" : [
@@ -363,12 +399,37 @@ This call returns a list of accounts with associated data, the round number the 
 The `/accounts/{account-id}` can be used to look up ledger data for a specific account.
 For example:
 
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+# gets accounts with a min balance of 100 that have a particular AssetID
+data = {
+   "address": "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI"
+}
+response = myindexer.account_info(**data)
+print(json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+
+```
+
+```bash tab="Curl"
+curl localhost:8980/v2/accounts/TDO7JWA77FH3T2HP5ZOZWFKUQDQEAPD25HDKDVEAAWQKBWTMNMYRXOOYGA | json_pp
+```
+
 ``` bash tab="cURL"
 $ curl localhost:8980/v2/accounts/TDO7JWA77FH3T2HP5ZOZWFKUQDQEAPD25HDKDVEAAWQKBWTMNMYRXOOYGA | json_pp
 ```
 
-Will return the following:
-
+Results
 ``` bash
 {
    "account" : {
@@ -398,13 +459,39 @@ The ledger data will include both Algo balance and if the account has any assets
 
 # Search Transactions for a Specific Account
 The `/accounts/{account-id}/transactions` REST call provides a powerful mechanism for searching for specific transactions for a given account. 
+
 ## Date-Time
 The range of transactions to be searched can be restricted based on the time by using the `before-time` and `after-time` parameters. These parameters must be [rfc3339](http://www.faqs.org/rfcs/rfc3339.html) formatted date-time strings. For example, the following query searches for all transactions that occurred after 10 am (Zulu/UTC) minus 5 hours (EST).
+
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+# gets accounts with a min balance of 100 that have a particular AssetID
+data = {
+   "address": "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
+   "start_time": "2020-06-03T10:00:00-05:00"
+}
+response = myindexer.search_transactions_by_address(**data)
+print("start_time: 06/03/2020 11:00:00 = " + json.dumps(response, indent=2, sort_keys=True))
+
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+
+```
 
 ``` bash tab="cURL"
 $ curl localhost:8980/v2/accounts/XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4/transactions?after-time=2020-06-03T10:00:00-05:00|json_pp
 ```
 
+Results
 ``` bash
 {
    "transactions" : [
@@ -441,11 +528,58 @@ $ curl localhost:8980/v2/accounts/XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4F
 ## Round Range
 Transaction searches can also be restricted to round ranges using the `min-round` and `max-round` parameters. 
 
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+data = {
+   "address": "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
+   "min_round": "7048876",
+   "max_round": "7048878"
+   }
+response = myindexer.search_transactions_by_address(**data)
+print("min-max rounds: 7048876-7048878 = " +
+     json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+
+```
+
 ``` bash tab="cURL"
 $ curl "localhost:8980/v2/accounts/XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4/transactions?min-round=7048876&max-round=7048878" | json_pp
 ```
 
 In addition, you can specify a specific round by using the round parameter.
+
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+data = {
+   "address": "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
+   "block": "7048877"
+   }
+response = myindexer.search_transactions_by_address(**data)
+print("block: 7048877 = " +
+     json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+
+```
 
 ``` bash tab="cURL"
 $ curl "localhost:8980/v2/accounts/XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4/transactions?round=7048877"
@@ -454,6 +588,29 @@ $ curl "localhost:8980/v2/accounts/XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4
 ## Transaction ID
 Searching for a specific transaction can be achieved by supplying the transaction id using the `txid` parameter.
 
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+data = {
+   "address": "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
+   "txid": "QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA"
+   }
+response = myindexer.search_transactions_by_address(**data)
+print("txid: QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA = " +
+     json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+
+```
+
 ``` bash tab="cURL"
 $ curl "localhost:8980/v2/accounts/XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4/transactions?txid=QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA" | json_pp
 ```
@@ -461,10 +618,34 @@ $ curl "localhost:8980/v2/accounts/XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4
 ## Transaction Type
 You can also search for specific transaction types that are described in the [transaction structure](https://developer.algorand.org/docs/features/transactions/#transaction-types) documentation. The Indexer supports looking for `pay`, `keyreg`, `acfg`, `axfer` and `afrz` transaction types. To search for a specific type of transaction use the `tx-type` parameter. The following example searches for the asset creation transaction for the DevDocsCoin.
 
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+data = {
+   "address": "SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU",
+   "txn_type": "acfg"
+   }
+response = myindexer.search_transactions_by_address(**data)
+print("txn_type: acfg = " +
+     json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+
+```
+
 ``` bash tab="cURL"
 $ curl "localhost:8980/v2/accounts/SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU/transactions?tx-type=acfg" | json_pp
 ```
 
+Results
 ``` bash
 {
    "current-round" : 7086205,
@@ -512,10 +693,34 @@ $ curl "localhost:8980/v2/accounts/SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP
 ## Currency
 Searching Transactions that are of certain values can be created by using the `currency-greater-than` and `currency-less-than` parameters. By default, these values are in microAlgos, but if this is used in conjunction with the `asset-id` parameter the currencies will refer to the specific asset. Searching for transactions greater than 50 DevDocsCoin (asset id=2044572) can be done with the following:
 
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+data = {
+   "address": "SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU",
+   "asset_id": "2044572",
+   "min_amount": 50
+   }
+response = myindexer.search_transactions_by_address(**data)
+print(json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+
+```
+
 ``` bash tab="cURL"
 $ curl "localhost:8980/v2/accounts/SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU/transactions?asset-id=2044572&currency-greater-than=50" | json_pp
 ```
 
+Results
 ``` bash
 {
    "transactions" : [
@@ -552,6 +757,30 @@ $ curl "localhost:8980/v2/accounts/SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP
 ## Signature Type
 Transaction searches can also look for specific [signature types](https://developer.algorand.org/docs/reference/transactions/#signed-transaction), which can be standard signatures, multi-signatures, or logic signatures. To search for transactions with a specific signature type use the `sig-type` parameter and specify either `sig`, `msig`, or `lsig` and the parameter values. These are signatures that specifically sign Algorand transactions. The following query will return all transactions that signed with a multi-signature for the specific account.
 
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+data = {
+   "address": "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
+   "sig_type": "msig"
+   }
+response = myindexer.search_transactions_by_address(**data)
+print("sig_type: msig = " +
+     json.dumps(response, indent=2, sort_keys=True))
+
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+
+```
+
 ``` bash tab="cURL"
 $ curl "localhost:8980/v2/accounts/XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4/transactions?sig-type=msig" | json_pp
 ```
@@ -563,10 +792,32 @@ This call returns a list of transactions, the round the results were calculated 
 # Search Assets 
 The Indexer provides the `/assets` REST call to search the blockchain for specific assets. The call supports searching based on the asset id, the name of the asset, the unit name of the asset, and by the creator of the asset. For example, to search for DevDocsCoin the `name` parameter should be used. Note that this is a non case sensitive search.
 
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+data = {
+   "name": "DevDocsCoin"
+}
+response = myindexer.search_assets(**data)
+print(json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+
+```
+
 ``` bash tab="cURL"
 $ curl "localhost:8980/v2/assets?name=DevDocsCoin" | json_pp
 ```
 
+Results
 ```bash 
 {
    "current-round" : 7087643,
@@ -596,6 +847,28 @@ This call returns a list of assets and the round the results were calculated in.
 # Getting an Asset 
 To get the details of a specific asset the indexer provides the `/assets/{asset-id}` REST call.  This call takes no parameters as the asset id is passed in the URL. This call returns the details of the asset and the round the results were calculated in. 
 
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+data = {
+   "asset_id": "2044572"
+}
+response = myindexer.search_assets(**data)
+print(json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+
+```
+
+Results
 ``` bash tab="cURL"
 $ curl "localhost:8980/v2/assets/2044572" | json_pp
 ```
@@ -625,10 +898,32 @@ $ curl "localhost:8980/v2/assets/2044572" | json_pp
 # Searching for Accounts based on Asset 
 The Indexer provides the `/assets/{asset-id}/balances` REST API call to search for accounts that transact in a specific Asset. The call returns a list of balances, with their specific amount, the address holding the asset, and whether the account is frozen. Additionally, the round the results were calculated is returned.
 
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+data = {
+   "asset_id": "2044572"
+}
+response = myindexer.search_assets(**data)
+print(json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+
+```
+
 ```bash tab="cURL"
 $ curl "localhost:8980/v2/assets/2044572/balances" | json_pp
 ```
 
+Results
 ``` bash
 {
    "balances" : [
@@ -649,10 +944,33 @@ $ curl "localhost:8980/v2/assets/2044572/balances" | json_pp
 
 This call can be refined by looking for addresses based on the current amount using the `currency-greater-than` and `currency-less-than` parameters.
 
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+data = {
+   "asset_id": "2044572",
+   "min_balance": 200
+}
+response = myindexer.asset_balances(**data)
+print(json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+
+```
+
 ``` bash tab="cURL"
 $ curl "localhost:8980/v2/assets/2044572/balances?currency-greater-than=200" | json_pp
 ```
 
+Results
 ``` bash
 {
    "balances" : [
@@ -690,6 +1008,25 @@ This call also supports [Paginated Results](#paginated-results) and [Note Field 
 # Address and Role
 When searching for transactions that involve a specific Asset you can search for specific accounts as well as the address role. The roles that can be searched for are `sender`, `receiver`, and `freeze-target`. For example, a specific receiver with a given address for an Asset can be searched using the following:
 
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+data = {
+   "asset_id": "2044572",
+   "address_role": "receiver",
+   "address": "UF7ATOM6PBLWMQMPUQ5QLA5DZ5E35PXQ2IENWGZQLEJJAAPAPGEGC3ZYNI"
+}
+response = myindexer.search_asset_transactions(**data)
+print(json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
 ``` bash tab="cURL"
 $ curl "localhost:8980/v2/assets/2044572/transactions?address-role=receiver&address=UF7ATOM6PBLWMQMPUQ5QLA5DZ5E35PXQ2IENWGZQLEJJAAPAPGEGC3ZYNI" | json_pp
 ```
@@ -699,10 +1036,32 @@ When searching for the receiver like in the above example, a `closeto` transacti
 # Retrieving Blocks 
 The Indexer provides the `/blocks/{round-number}` API call to retrieve specific blocks from the blockchain. This call does not take any parameters and returns data associated with the block.
 
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+data = {
+   "block": "555"
+}
+response = myindexer.block_info(**data)
+print(json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+
+```
+
 ``` bash tab="cURL"
 $ curl "localhost:8980/v2/blocks/555" | json_pp
 ```
 
+Results
 ``` bash
 {
    "transactions" : [],
