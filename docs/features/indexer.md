@@ -35,7 +35,7 @@ myindexer = indexer.IndexerClient(indexer_token="", indexer_address="http://loca
 
 ```java tab="Java"
 // InstantiateIndexer.java
-// requires java-algorand-sdk 1.4.0 or higher (see pom.xml)
+// requires java-algorand-sdk 1.4.1 or higher (see pom.xml)
 package com.algorand.javatest.indexer;
 
 import com.algorand.algosdk.v2.client.common.IndexerClient;
@@ -103,10 +103,10 @@ These values represent the maximum number of results that will be returned when 
 ```
 
 ```python tab="Python"
-data = {
-   "min_amount": 10
-}
-response = myindexer.search_transactions(**data)
+# /indexer/python/SearchTransactionsPaging.py
+
+response = myindexer.search_transactions(min_amount=10) 
+
 # Pretty Printing JSON string
 print(json.dumps(response, indent=2, sort_keys=True))
 ```
@@ -141,11 +141,11 @@ For example, adding a limit parameter of 5 to previous call
 ```
 
 ```python tab="Python"
-data = {
-   "min_amount": 10,
-   "limit": 5,
-}
-response = myindexer.search_transactions(**data)
+# /indexer/python/SearchTransactionsPaging.py
+
+response = myindexer.search_transactions(
+   min_amount=10, limit=5) 
+
 # Pretty Printing JSON string
 print(json.dumps(response, indent=2, sort_keys=True))
 ```
@@ -190,27 +190,24 @@ To get the next 5 transactions simply add the next-token as a parameter to the n
 ```
 
 ```python tab="Python"
-# loop thru all transactions in the search result
-# using next_page to paginate
+# /indexer/python/SearchTransactionsPaging.py
+
 nexttoken = ""
 numtx = 1
-# loop until there are no more tranactions in the response
-# for the limit (max is 1000  per request)
-while (numtx > 0):
-   data = {
-      "min_amount": 100000000000000,
-      "limit": 5,
-      "next_page": nexttoken
-   }
-   response = myindexer.search_transactions(**data)
-   transactions = response['transactions']
-   numtx = len(transactions)
-   if (numtx > 0):
-      nexttoken = response['next-token']
-      parsed = json.loads(response)
-      # Pretty Printing JSON string
-      print(json.dumps(parsed, indent=2, sort_keys=True))
 
+# loop using next_page to paginate until there are no more transactions in the response
+# for the limit (max is 1000  per request)
+
+while (numtx > 0):
+
+    response = myindexer.search_transactions(
+        min_amount=100000000000000, limit=2, next_page=nexttoken) 
+    transactions = response['transactions']
+    numtx = len(transactions)
+    if (numtx > 0):
+        nexttoken = response['next-token']
+        # Pretty Printing JSON string 
+        print("Tranastion Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -282,12 +279,11 @@ Many of the REST calls support getting values at specific rounds. This means tha
 ```
 
 ```python tab="Python"
-data = {
-   "address": "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI",
-   "block": 50
-}
-response = myindexer.account_info(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/AccountInfo.py
+
+response = myindexer.account_info(
+    address="7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI")
+print("Account Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -310,12 +306,11 @@ If the round parameter is used and set to 50 a balance of 200 would be returned.
 ```
 
 ```python tab="Python"
-data = {
-   "address": "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI",
-   "block": 50
-}
-response = myindexer.account_info(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/AccountInfoBlock.py
+
+response = myindexer.account_info(
+    address="7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI", block=50)
+print("Account Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -325,7 +320,7 @@ print(json.dumps(response, indent=2, sort_keys=True))
 
 ```go tab="Go"
 // Parameters 
-var round uint64 = 6127822
+var round uint64 = 50
 var account = "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI"
 
 // Lookup block
@@ -362,14 +357,17 @@ This will return an encoded value of `c2hvd2luZyBwcmVmaXg=`.  This value can the
 ```
 
 ```python tab="Python"
+# /indexer/python/SearchTransactionsNote.py
+
 import base64
 encodednote = base64.b64encode('showing prefix'.encode())
-data = {
-   "note_prefix": base64.b64decode(encodednote)
-}
-response = myindexer.search_transactions(**data)
+decodednote = base64.b64decode(encodednote)
+
+response = myindexer.search_transactions(
+    note_prefix=decodednote)
+
 print("note_prefix = " +
-     json.dumps(response, indent=2, sort_keys=True))
+      json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -440,12 +438,11 @@ The ‘/accounts’ call can be used to search for accounts on the Algorand bloc
 ```
 
 ```python tab="Python"
-# gets accounts with a particular AssetID
-data = {
-   "asset_id": 312769
-}
-response = myindexer.accounts(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/AccountsAssetID.py
+
+response = myindexer.accounts(
+    asset_id=312769)
+print("Account Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -477,13 +474,12 @@ This search can be further refined to search for accounts that have a balance gr
 ```
 
 ```python tab="Python"
+# /indexer/python/AccountsAssetIDMinBalance.py
+
 # gets accounts with a min balance of 100 that have a particular AssetID
-data = {
-   "min_balance": 100,
-   "asset_id": 312769
-}
-response = myindexer.accounts(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+response = myindexer.accounts(
+    asset_id=312769, min_balance=100)
+print("Account Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -542,12 +538,12 @@ For example:
 ```
 
 ```python tab="Python"
+# /indexer/python/AccountInfo.py
+
 # gets account
-data = {
-   "address": "TDO7JWA77FH3T2HP5ZOZWFKUQDQEAPD25HDKDVEAAWQKBWTMNMYRXOOYGA"
-}
-response = myindexer.account_info(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+response = myindexer.account_info(
+    address="TDO7JWA77FH3T2HP5ZOZWFKUQDQEAPD25HDKDVEAAWQKBWTMNMYRXOOYGA")
+print("Account Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -557,7 +553,7 @@ print(json.dumps(response, indent=2, sort_keys=True))
 
 ```go tab="Go"
 // query parameters
-var accountID = "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI"
+var accountID = "TDO7JWA77FH3T2HP5ZOZWFKUQDQEAPD25HDKDVEAAWQKBWTMNMYRXOOYGA"
 
 // Lookup account
 _, result, err := indexerClient.LookupAccountByID(accountID).Do(context.Background())
@@ -610,13 +606,14 @@ The range of transactions to be searched can be restricted based on the time by 
 ```
 
 ```python tab="Python"
+# /indexer/python/SearchTxAddressTime.py
+
 # get transaction at specific time
-data = {
-   "address": "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
-   "start_time": "2020-06-03T10:00:00-05:00"
-}
-response = myindexer.search_transactions_by_address(**data)
-print("start_time: 06/03/2020 11:00:00 = " + json.dumps(response, indent=2, sort_keys=True))
+response = myindexer.search_transactions_by_address(
+    address="XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4", start_time="2020-06-03T10:00:00-05:00")
+
+print("Transaction Start Time 2020-06-03T10:00:00-05:00 = " +
+      json.dumps(response, indent=2, sort_keys=True))
 
 ```
 
@@ -684,14 +681,13 @@ Transaction searches can also be restricted to round ranges using the `min-round
 ```
 
 ```python tab="Python"
-data = {
-   "address": "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
-   "min_round": "7048876",
-   "max_round": "7048878"
-   }
-response = myindexer.search_transactions_by_address(**data)
+# /indexer/python/SearchTxAddressBlockRange.py
+
+response = myindexer.search_transactions_by_address(
+    address="XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4", min_round=7048876, max_round=7048878)
+
 print("min-max rounds: 7048876-7048878 = " +
-     json.dumps(response, indent=2, sort_keys=True))
+      json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -724,13 +720,13 @@ In addition, you can specify a specific round by using the round parameter.
 ```
 
 ```python tab="Python"
-data = {
-   "address": "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
-   "block": "7048877"
-   }
-response = myindexer.search_transactions_by_address(**data)
+# /indexer/python/SearchTxAddressBlock.py
+
+response = myindexer.search_transactions_by_address(
+    address="XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4", block=7048877)
+
 print("block: 7048877 = " +
-     json.dumps(response, indent=2, sort_keys=True))
+      json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -764,13 +760,14 @@ Searching for a specific transaction can be achieved by supplying the transactio
 ```
 
 ```python tab="Python"
-data = {
-   "address": "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
-   "txid": "QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA"
-   }
-response = myindexer.search_transactions_by_address(**data)
+# /indexer/python/SearchTxAddressTxId.py
+
+response = myindexer.search_transactions_by_address(
+    address="XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
+    txid="QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA")
+
 print("txid: QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA = " +
-     json.dumps(response, indent=2, sort_keys=True))
+      json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -803,13 +800,14 @@ You can also search for specific transaction types that are described in the [tr
 ```
 
 ```python tab="Python"
-data = {
-   "address": "SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU",
-   "txn_type": "acfg"
-   }
-response = myindexer.search_transactions_by_address(**data)
+# /indexer/python/SearchTxAddresstxntype.py
+
+response = myindexer.search_transactions_by_address(
+    address="SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU",
+    txn_type="acfg")
+
 print("txn_type: acfg = " +
-     json.dumps(response, indent=2, sort_keys=True))
+      json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -887,13 +885,13 @@ Searching Transactions that are of certain values can be created by using the `c
 ```
 
 ```python tab="Python"
-data = {
-   "address": "SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU",
-   "asset_id": "2044572",
-   "min_amount": 50
-   }
-response = myindexer.search_transactions_by_address(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/AccountsAssetIDMinBalance.py
+
+# gets assets with a min balance of 50 for AssetID
+response = myindexer.asset_balances(
+        address="SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU",asset_id=2044572, min_balance=50)
+
+print("Asset Balances :" + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -903,7 +901,7 @@ print(json.dumps(response, indent=2, sort_keys=True))
 
 ```go tab="Go"
 // query parameters
-var assetId uint64 = 312769
+var assetId uint64 = 2044572
 var minBalance uint64 = 50
 address, _ := types.DecodeAddress("SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU")
 
@@ -961,14 +959,13 @@ Transaction searches can also look for specific [signature types](https://develo
 ```
 
 ```python tab="Python"
-data = {
-   "address": "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
-   "sig_type": "msig"
-   }
-response = myindexer.search_transactions_by_address(**data)
-print("sig_type: msig = " +
-     json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/SearchTxAddresssigtype.py
 
+response = myindexer.search_transactions_by_address(
+    address="XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4", sig_type="msig")
+
+print("sig_type: msig = " +
+      json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -1005,11 +1002,11 @@ The Indexer provides the `/assets` REST call to search the blockchain for specif
 ```
 
 ```python tab="Python"
-data = {
-   "name": "DevDocsCoin"
-}
-response = myindexer.search_assets(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/SearchAssetsName.py
+
+response = myindexer.search_assets(
+    name="DevDocsCoin")
+print("Asset Name Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -1068,11 +1065,12 @@ To get the details of a specific asset the indexer provides the `/assets/{asset-
 ```
 
 ```python tab="Python"
-data = {
-   "asset_id": "2044572"
-}
-response = myindexer.search_assets(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/SearchAssets.py
+
+response = myindexer.search_assets(
+    asset_id=2044572)
+
+print("Asset Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -1127,11 +1125,11 @@ The Indexer provides the `/assets/{asset-id}/balances` REST API call to search f
 ```
 
 ```python tab="Python"
-data = {
-   "asset_id": "2044572"
-}
-response = myindexer.search_assets(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/AssetsBalances.py
+
+response = myindexer.asset_balances(
+    asset_id=2044572)
+print("Asset Balance: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -1181,12 +1179,12 @@ This call can be refined by looking for addresses based on the current amount us
 ```
 
 ```python tab="Python"
-data = {
-   "asset_id": "2044572",
-   "min_balance": 200
-}
-response = myindexer.asset_balances(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/AssetsBalancesMinBalance.py
+
+response = myindexer.asset_balances(
+    asset_id=2044572, min_balance=200)
+
+print("Asset Balances :" + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -1254,13 +1252,12 @@ When searching for transactions that involve a specific Asset you can search for
 ```
 
 ```python tab="Python"
-data = {
-   "asset_id": "2044572",
-   "address_role": "receiver",
-   "address": "UF7ATOM6PBLWMQMPUQ5QLA5DZ5E35PXQ2IENWGZQLEJJAAPAPGEGC3ZYNI"
-}
-response = myindexer.search_asset_transactions(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/SearchAssetTransactionsRole.py
+
+response = myindexer.search_asset_transactions(
+    asset_id=2044572, address_role="receiver", address="UF7ATOM6PBLWMQMPUQ5QLA5DZ5E35PXQ2IENWGZQLEJJAAPAPGEGC3ZYNI")
+
+print("Asset Transaction Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
@@ -1295,11 +1292,11 @@ The Indexer provides the `/blocks/{round-number}` API call to retrieve specific 
 ```
 
 ```python tab="Python"
-data = {
-   "block": "555"
-}
-response = myindexer.block_info(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+# /indexer/python/BlockInfo.py
+
+response = myindexer.block_info(
+    block=555)
+print("Block Info: " + json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
