@@ -99,7 +99,16 @@ When searching large amounts of blockchain data often the results may be too lar
 These values represent the maximum number of results that will be returned when searching for specific results. For example, the following will return the last 1000 transactions that exceeded 10 microAlgos. 
 
 ```javascript tab="JavaScript"
-
+// SearchTransactionsMinAmount.js
+(async () => {
+    let currencyGreater = 10;
+    let transactionInfo = await indexerClient.searchForTransactions()
+        .currencyGreaterThan(currencyGreater).do();
+    console.log("Information for Transaction search: " + JSON.stringify(transactionInfo, undefined, 2));
+})().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -112,7 +121,17 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-
+// SearchTransactionsMinAmount.java
+    public static void main(String args[]) throws Exception {
+        SearchTransactionsMinAmount ex = new SearchTransactionsMinAmount();
+        IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
+        Long min_amount = Long.valueOf(10);     
+        String response = indexerClientInstance
+                .searchForTransactions()
+                .currencyGreaterThan(min_amount).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Transaction Info: " + jsonObj.toString(2)); // pretty print json
+    }
 };
 ```
 
@@ -137,7 +156,18 @@ When trying to find specific transactions, the Indexer supplies a pagination met
 For example, adding a limit parameter of 5 to previous call
 
 ```javascript tab="JavaScript"
-
+// SearchTransactionsLimit.js
+(async () => {
+    let currencyGreater = 10;
+    let limit = 5;
+    let transactionInfo = await indexerClient.searchForTransactions()
+        .currencyGreaterThan(currencyGreater)
+        .limit(limit).do();
+    console.log("Information for Transaction search: " + JSON.stringify(transactionInfo, undefined, 2));
+})().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -151,8 +181,20 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-
-};
+// SearchTransactionsLimit.js
+    public static void main(String args[]) throws Exception {
+        SearchTransactionsLimit ex = new SearchTransactionsLimit();
+        IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
+        Long min_amount = Long.valueOf(10);
+        Long limit = Long.valueOf(2);       
+        String response = indexerClientInstance
+                .searchForTransactions()
+                .currencyGreaterThan(min_amount)
+                .limit(limit)
+        .execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Transaction Info: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -185,8 +227,34 @@ Results showing "next-token"
 
 To get the next 5 transactions simply add the next-token as a parameter to the next REST call. The parameter is named `next` and this token is only good for the next 5 results.
 
-```python tab="JavaScript"
-
+```javascript tab="JavaScript"
+// SearchTransactionsPaging.js
+let nexttoken = "";
+let numtx = 1;
+// loop until there are no more transactions in the response
+// for the limit(max limit is 1000  per request)    
+(async () => {
+    let min_amount = 100000000000000;
+    let limit = 2;
+    while (numtx > 0) {
+        // execute code as long as condition is true
+        let next_page = nexttoken;
+        let response = await indexerClient.searchForTransactions()
+            .limit(limit)
+            .currencyGreaterThan(min_amount)
+            .nextToken(next_page).do();
+        let transactions = response['transactions'];
+        numtx = transactions.length;
+        if (numtx > 0)
+        {
+            nexttoken = response['next-token']; 
+            console.log("Transaction Information: " + JSON.stringify(response, undefined, 2));           
+        }
+    }
+})().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -214,7 +282,31 @@ while (numtx > 0):
 ```
 
 ```java tab="Java"
+// SearchTransactionsPaging.java
+    public static void main(String args[]) throws Exception {
+        SearchTransactionsPaging ex = new SearchTransactionsPaging();
+        IndexerClient indexerClientInstance = (IndexerClient) ex.connectToNetwork();
+        String nexttoken = "";
+        Integer numtx = 1;               
+        // loop until there are no more transactions in the response
+        // for the limit (max limit is 1000 per request)
+        while (numtx > 0) {
+            Long min_amount = Long.valueOf(100000000000000L);
+            Long limit = Long.valueOf(2);
+            String next_page = nexttoken;
+            String response = indexerClientInstance.searchForTransactions().next(next_page)
+                    .currencyGreaterThan(min_amount).limit(limit).execute().toString();
+            JSONObject jsonObj = new JSONObject(response.toString());
 
+            JSONArray jsonArray = (JSONArray) jsonObj.get("transactions");
+            numtx = jsonArray.length();
+            if (numtx > 0) {
+
+                nexttoken = jsonObj.get("next-token").toString();
+                JSONObject jsonObjAll = new JSONObject(response.toString());
+                System.out.println("Transaction Info: " + jsonObjAll.toString(2)); // pretty print json
+            }
+        }
 ```
 
 ```go tab="Go"
@@ -278,21 +370,31 @@ The following REST calls support paginated results.
 Many of the REST calls support getting values at specific rounds. This means that the Indexer will do calculations that determine what specific values were at a specific round. For example, if account A starts at round 50 with 200 ARCC tokens and spends 50 of those tokens in round 75, the following command would return a balance of 150
 
 ```javascript tab="JavaScript"
-
+// AccountInfo.js
+(async () => {
+    let acct = "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI";
+    let accountInfo = await indexerClient.lookupAccountByID(acct).do();
+    console.log("Information for Account: " + JSON.stringify(accountInfo, undefined, 2));
+})().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
-data = {
-   "address": "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI",
-   "block": 50
-}
-response = myindexer.account_info(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+
 ```
 
 ```java tab="Java"
-
-};
+// AccountInfo.java
+    public static void main(String args[]) throws Exception {
+        AccountInfo ex = new AccountInfo();
+        IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
+        Address account = new Address("7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI");
+         String response = indexerClientInstance.lookupAccountByID(account).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Account Info: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -306,7 +408,16 @@ curl localhost:8980/v2/accounts/7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5A
 If the round parameter is used and set to 50 a balance of 200 would be returned.
 
 ```javascript tab="JavaScript"
-
+(async () => {
+    let acct = "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI";
+    let round = 50;
+    let accountInfo = await indexerClient.lookupAccountByID(acct)
+        .round(round).do();
+    console.log("Information for Account at block: " + JSON.stringify(accountInfo, undefined, 2));
+})().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -319,8 +430,16 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-
-};
+// AccountInfoBlock.java
+    public static void main(String args[]) throws Exception {
+        AccountInfoBlock ex = new AccountInfoBlock();
+        IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
+        Address account = new Address("7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI");
+        Long round = Long.valueOf(50);
+        String response = indexerClientInstance.lookupAccountByID(account).round(round).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Account Info for block: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -358,7 +477,17 @@ $ python3 -c "import base64;print(base64.b64encode('showing prefix'.encode()))"
 This will return an encoded value of `c2hvd2luZyBwcmVmaXg=`.  This value can then be passed to the search. To search all transactions use the following commmand.
 
 ```javascript tab="JavaScript"
-
+// SearchTransactionsNote.js
+(async () => {
+    //let s = buffer.toString('base64');   
+    let s = "c2hvd2luZyBwcmVmaXg=";
+    let transactionInfo = await indexerClient.searchForTransactions()
+        .notePrefix(s).do();
+    console.log("Information for Transaction search: " + JSON.stringify(transactionInfo, undefined, 2));
+})().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -373,8 +502,17 @@ print("note_prefix = " +
 ```
 
 ```java tab="Java"
-
-};
+// SearchTransactionsNote.java
+    public static void main(String args[]) throws Exception {
+        SearchTransactionsNote ex = new SearchTransactionsNote();
+        IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
+        byte[] encodednote = Encoder.decodeFromBase64("c2hvd2luZyBwcmVmaXg="); // "showing prefix"
+        String response = indexerClientInstance
+                .searchForTransactions()
+                .notePrefix(encodednote).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Transaction Info: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -436,7 +574,16 @@ Results
 The ‘/accounts’ call can be used to search for accounts on the Algorand blockchain. This query provides two main parameters for returning accounts with specific balances. These two calls are `currency-greater-than` and `currency-less-than` which returns all accounts with balances that match the criteria. By default, the currency these parameters look for is the Algo and the values are specified in microAlgos. This behavior can be changed by supplying the `asset-id` parameter which specifies the asset to search accounts for in the ledger. For example to search accounts that have the Tether UDSt token the following command would be used.
 
 ```javascript tab="JavaScript"
-
+// AccountsAssetID.js
+(async () => {
+    let assetIndex = 312769;
+    let accountInfo = await indexerClient.searchAccounts()
+        .assetID(assetIndex).do();
+    console.log("Information for account info for Asset: " + JSON.stringify(accountInfo, undefined, 2));
+})().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -449,8 +596,15 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-
-};
+// AccountsAssetID.java
+    public static void main(String args[]) throws Exception {
+        AccountsAssetID ex = new AccountsAssetID();
+        IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
+        Long asset_id = Long.valueOf(312769);
+        String response = indexerClientInstance.searchForAccounts().assetId(asset_id).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Pretty Print of Account for Asset: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -473,7 +627,18 @@ curl localhost:8980/v2/accounts?asset-id=312769
 This search can be further refined to search for accounts that have a balance greater than 100 USDt by using the following query.
 
 ```javascript tab="JavaScript"
-
+// AccountsAssetIDMinBalance.js
+(async () => {
+    let assetIndex = 312769;
+    let currencyGreater = 100;
+    let accountInfo = await indexerClient.searchAccounts()
+        .assetID(assetIndex)
+        .currencyGreaterThan(currencyGreater).do();
+    console.log("Information for Account Info for Asset: " + JSON.stringify(accountInfo, undefined, 2));
+})().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -487,8 +652,19 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-
-};
+// AccountsAssetIDMinBalance.java
+    public static void main(String args[]) throws Exception {
+        AccountsAssetIDMinBalance ex = new AccountsAssetIDMinBalance();
+        IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
+        Long asset_id = Long.valueOf(312769);
+        Long currencyGreaterThan = Long.valueOf(100);
+        // searches for asset greater than currencyGreaterThan
+        String response = indexerClientInstance.searchForAccounts()
+                .assetId(asset_id)
+                .currencyGreaterThan(currencyGreaterThan).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Account Info for Asset Min Balance: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -538,7 +714,15 @@ The `/accounts/{account-id}` can be used to look up ledger data for a specific a
 For example:
 
 ```javascript tab="JavaScript"
-
+// AccountInfo.js
+(async () => {
+    let acct = "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI";
+    let accountInfo = await indexerClient.lookupAccountByID(acct).do();
+    console.log("Information for Account: " + JSON.stringify(accountInfo, undefined, 2));
+})().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -551,8 +735,15 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-
-};
+// AccountInfo.java
+    public static void main(String args[]) throws Exception {
+        AccountInfo ex = new AccountInfo();
+        IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
+        Address account = new Address("7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI");
+         String response = indexerClientInstance.lookupAccountByID(account).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Account Info: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -606,7 +797,19 @@ The `/accounts/{account-id}/transactions` REST call provides a powerful mechanis
 The range of transactions to be searched can be restricted based on the time by using the `before-time` and `after-time` parameters. These parameters must be [rfc3339](http://www.faqs.org/rfcs/rfc3339.html) formatted date-time strings. For example, the following query searches for all transactions that occurred after 10 am (Zulu/UTC) minus 5 hours (EST).
 
 ```javascript tab="JavaScript"
-
+// SearchTxAddressTime.js
+(async () => {
+    let address = "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4";
+    let start_time = "2020-06-03T10:00:00-05:00"; 
+    let response = await indexerClient.searchForTransactions()
+        .address(address)
+        .afterTime(start_time).do();
+    console.log("start_time: 06/03/2020 11:00:00 = " + JSON.stringify(response, undefined, 2));
+    }   
+)().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -621,8 +824,20 @@ print("start_time: 06/03/2020 11:00:00 = " + json.dumps(response, indent=2, sort
 ```
 
 ```java tab="Java"
-
-};
+// SearchTxAddressTime.java
+    public static void main(String args[]) throws Exception {
+        SearchTxAddressTime ex = new SearchTxAddressTime();
+        IndexerClient indexerClientInstance = (IndexerClient) ex.connectToNetwork();
+        Address account = new Address("XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4");
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+        Date start_time = sdf.parse("2020-06-03T10:00:00-05:00");
+        String response = indexerClientInstance
+                .searchForTransactions()
+                .address(account)
+                .afterTime(start_time).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("start_time: 06/03/2020 11:00:00-05:00 = " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -680,23 +895,39 @@ Results
 Transaction searches can also be restricted to round ranges using the `min-round` and `max-round` parameters. 
 
 ```javascript tab="JavaScript"
-
+// SearchTxAddressBlockRange.js
+(async () => {
+    let address = "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4";
+    let min_round = 7048876;
+    let max_round = 7048878;    
+    let response = await indexerClient.searchForTransactions()
+        .address(address).maxRound(max_round)
+        .minRound(min_round).do();
+    console.log("Information for Transaction search: " + JSON.stringify(response, undefined, 2));
+    }  
+)().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
-data = {
-   "address": "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
-   "min_round": "7048876",
-   "max_round": "7048878"
-   }
-response = myindexer.search_transactions_by_address(**data)
-print("min-max rounds: 7048876-7048878 = " +
-     json.dumps(response, indent=2, sort_keys=True))
+
 ```
 
 ```java tab="Java"
-
-};
+// SearchTxAddressBlockRange.java
+    public static void main(String args[]) throws Exception {
+        SearchTxAddressBlockRange ex = new SearchTxAddressBlockRange();
+        IndexerClient indexerClientInstance = (IndexerClient) ex.connectToNetwork();
+        Address account = new Address("XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4");
+        Long min_round = Long.valueOf(7048876);
+        Long max_round = Long.valueOf(7048878);       
+        String response = indexerClientInstance.searchForTransactions().address(account)
+                    .minRound(min_round).maxRound(max_round).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Transaction Info: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -720,7 +951,19 @@ $ curl "localhost:8980/v2/accounts/XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4
 In addition, you can specify a specific round by using the round parameter.
 
 ```javascript tab="JavaScript"
-
+// SearchTxAddressBlock.js
+(async () => {
+    let address = "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4";
+    let round = 7048877;
+    let response = await indexerClient.searchForTransactions()
+        .address(address)
+        .round(round).do();
+    console.log("Information for Transaction search: " + JSON.stringify(response, undefined, 2));
+    }   
+)().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -734,8 +977,17 @@ print("block: 7048877 = " +
 ```
 
 ```java tab="Java"
-
-};
+// SearchTxAddressBlock.java
+    public static void main(String args[]) throws Exception {
+        SearchTxAddressBlock ex = new SearchTxAddressBlock();
+        IndexerClient indexerClientInstance = (IndexerClient) ex.connectToNetwork();
+        Address account = new Address("XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4");
+        Long block = Long.valueOf(7048877);             
+        String response = indexerClientInstance.searchForTransactions().address(account)
+                    .round(block).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Transaction Info: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -760,7 +1012,19 @@ $ curl "localhost:8980/v2/accounts/XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4
 Searching for a specific transaction can be achieved by supplying the transaction id using the `txid` parameter.
 
 ```javascript tab="JavaScript"
-
+// SearchTxAddressTxId.js
+(async () => {
+    let address = "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4";
+    let txid = "QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA"; 
+    let response = await indexerClient.searchForTransactions()
+        .address(address)
+        .txid(txid).do();
+    console.log("txid: QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA = " + JSON.stringify(response, undefined, 2));
+    }  
+)().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -774,8 +1038,16 @@ print("txid: QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA = " +
 ```
 
 ```java tab="Java"
-
-};
+// SearchTxAddressTxId.java
+    public static void main(String args[]) throws Exception {
+        SearchTxAddressTxId ex = new SearchTxAddressTxId();
+        IndexerClient indexerClientInstance = (IndexerClient) ex.connectToNetwork();
+        Address account = new Address("XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4");
+        String txid = "QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA";
+        String response = indexerClientInstance.searchForTransactions().address(account).txid(txid).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("txid: QZS3B2XBBS47S6X5CZGKKC2FC7HRP5VJ4UNS7LPGHP24DUECHAAA = " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -799,7 +1071,19 @@ $ curl "localhost:8980/v2/accounts/XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4
 You can also search for specific transaction types that are described in the [transaction structure](https://developer.algorand.org/docs/features/transactions/#transaction-types) documentation. The Indexer supports looking for `pay`, `keyreg`, `acfg`, `axfer` and `afrz` transaction types. To search for a specific type of transaction use the `tx-type` parameter. The following example searches for the asset creation transaction for the DevDocsCoin.
 
 ```javascript tab="JavaScript"
-
+// SearchTxAddresstxntype.js
+(async () => {
+    let address = "SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU";
+    let txn_type = "acfg"; 
+    let response = await indexerClient.searchForTransactions()
+        .address(address)
+        .txType(txn_type).do();
+    console.log("txn_type: acfg = " + JSON.stringify(response, undefined, 2));
+    }  
+)().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -813,8 +1097,16 @@ print("txn_type: acfg = " +
 ```
 
 ```java tab="Java"
-
-};
+// SearchTxAddresstxntype.java
+    public static void main(String args[]) throws Exception {
+        SearchTxAddresstxntype ex = new SearchTxAddresstxntype();
+        IndexerClient indexerClientInstance = (IndexerClient) ex.connectToNetwork();
+        Address account = new Address("SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU");
+        TxType txType = TxType.ACFG;
+        String response = indexerClientInstance.searchForTransactions().address(account).txType(txType).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("txn_type: acfg = " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -883,7 +1175,22 @@ Results
 Searching Transactions that are of certain values can be created by using the `currency-greater-than` and `currency-less-than` parameters. By default, these values are in microAlgos, but if this is used in conjunction with the `asset-id` parameter the currencies will refer to the specific asset. Searching for transactions greater than 50 DevDocsCoin (asset id=2044572) can be done with the following:
 
 ```javascript tab="JavaScript"
+// SearchTxAddressAsset.js
+(async () => {
+    let address = "SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU";
+    let asset_id = 2044572;
+    let min_amount = 50;
 
+    let response = await indexerClient.searchForTransactions()
+            .address(address)
+            .currencyGreaterThan(min_amount)
+            .assetID(asset_id).do();
+    console.log("Information for Transaction search: " + JSON.stringify(response, undefined, 2));
+    }   
+)().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -897,8 +1204,18 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-
-};
+// SearchTxAddressAsset.java
+    public static void main(String args[]) throws Exception {
+        SearchTxAddressAsset ex = new SearchTxAddressAsset();
+        IndexerClient indexerClientInstance = (IndexerClient) ex.connectToNetwork();
+        Address account = new Address("SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU");
+        Long asset_id = Long.valueOf(2044572);   
+        Long min_amount = Long.valueOf(50);              
+        String response = indexerClientInstance.searchForTransactions().address(account)
+                    .currencyGreaterThan(min_amount).assetId(asset_id).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Transaction Info: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -957,7 +1274,20 @@ Results
 Transaction searches can also look for specific [signature types](https://developer.algorand.org/docs/reference/transactions/#signed-transaction), which can be standard signatures, multi-signatures, or logic signatures. To search for transactions with a specific signature type use the `sig-type` parameter and specify either `sig`, `msig`, or `lsig` and the parameter values. These are signatures that specifically sign Algorand transactions. The following query will return all transactions that signed with a multi-signature for the specific account.
 
 ```javascript tab="JavaScript"
-
+// SearchTxAddresssigtype.js
+(async () => {
+    let address = "XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4";
+    let sig_type = "msig"; 
+    let response = await indexerClient.searchForTransactions()
+        .address(address)
+        .sigType(sig_type).do();
+    console.log("Information for Transaction search: " + JSON.stringify(response, undefined, 2));
+    }
+   
+)().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -972,8 +1302,16 @@ print("sig_type: msig = " +
 ```
 
 ```java tab="Java"
-
-};
+// SearchTxAddresssigtype.java
+    public static void main(String args[]) throws Exception {
+        SearchTxAddresssigtype ex = new SearchTxAddresssigtype();
+        IndexerClient indexerClientInstance = (IndexerClient) ex.connectToNetwork();
+        Address account = new Address("XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4");
+        SigType sig_type = SigType.MSIG;    
+        String response = indexerClientInstance.searchForTransactions().address(account).sigType(sig_type).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Transaction Info SigType msig: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -998,10 +1336,19 @@ The call also supports [Paginated Results](#paginated-results) and [Note Field S
 This call returns a list of transactions, the round the results were calculated in and if using pagination the next token to retrieve more results.
 
 # Search Assets 
-The Indexer provides the `/assets` REST call to search the blockchain for specific assets. The call supports searching based on the asset id, the name of the asset, the unit name of the asset, and by the creator of the asset. For example, to search for DevDocsCoin the `name` parameter should be used. Note that this is a non case sensitive search.
+The Indexer provides the `/assets` REST call to search the blockchain for specific assets. The call supports searching based on the asset id, the name of the asset, the unit name of the asset, and by the creator of the asset. For example, to search for DevDocsCoin the `name` parameter should be used. Note that this is a non-case sensitive search.
 
 ```javascript tab="JavaScript"
-
+// SearchAssetName.js
+(async () => {
+    let name = "DevDocsCoin";
+    let assetInfo = await indexerClient.searchForAssets()
+        .name(name).do();
+    console.log("Information for Asset Name: " + JSON.stringify(assetInfo, undefined, 2));
+})().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -1013,8 +1360,16 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-
-};
+// SearchAssetsName.java
+    public static void main(String args[]) throws Exception {
+        SearchAssetsName ex = new SearchAssetsName();
+        IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
+        String name = "DevDocsCoin";        
+        String response = indexerClientInstance.searchForAssets()
+                        .name(name).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Asset Info for Name: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -1064,7 +1419,16 @@ This call returns a list of assets and the round the results were calculated in.
 To get the details of a specific asset the indexer provides the `/assets/{asset-id}` REST call.  This call takes no parameters as the asset id is passed in the URL. This call returns the details of the asset and the round the results were calculated in. 
 
 ```javascript tab="JavaScript"
-
+// SearchAssets.js
+(async () => {
+    let assetIndex = 2044572;
+    let assetInfo = await indexerClient.searchForAssets()
+        .index(assetIndex).do();
+    console.log("Information for Asset: " + JSON.stringify(assetInfo, undefined, 2));
+})().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -1076,8 +1440,16 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-
-};
+// SearchAssets.java
+    public static void main(String args[]) throws Exception {
+        SearchAssets ex = new SearchAssets();
+        IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
+        Long asset_id = Long.valueOf(2044572);        
+        String response = indexerClientInstance.searchForAssets()
+                        .assetId(asset_id).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Asset Info: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -1123,20 +1495,32 @@ Results
 The Indexer provides the `/assets/{asset-id}/balances` REST API call to search for accounts that transact in a specific Asset. The call returns a list of balances, with their specific amount, the address holding the asset, and whether the account is frozen. Additionally, the round the results were calculated is returned.
 
 ```javascript tab="JavaScript"
-
+// AssetsBalances.js
+(async () => {
+    let assetIndex = 2044572;
+    let assetInfo = await indexerClient.lookupAssetBalances(assetIndex).do();
+    console.log("Information for Asset: " + JSON.stringify(assetInfo, undefined, 2));
+})().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
-data = {
-   "asset_id": "2044572"
-}
-response = myindexer.search_assets(**data)
-print(json.dumps(response, indent=2, sort_keys=True))
+
 ```
 
 ```java tab="Java"
-
-};
+// AssetsBalances.java
+    public static void main(String args[]) throws Exception {
+        AssetsBalances ex = new AssetsBalances();
+        IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
+        Long asset_id = Long.valueOf(2044572);
+        // searhes for asset greater than currencyGreaterThan
+        String response = indexerClientInstance.lookupAssetBalances(asset_id).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Asset Info: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -1177,7 +1561,17 @@ Results
 This call can be refined by looking for addresses based on the current amount using the `currency-greater-than` and `currency-less-than` parameters.
 
 ```javascript tab="JavaScript"
-
+// AssetsBalancesMinBalance.js
+(async () => {
+    let assetIndex = 2044572;
+    let currencyGreater = 200;
+    let assetInfo = await indexerClient.lookupAssetBalances(assetIndex)
+        .currencyGreaterThan(currencyGreater).do();
+    console.log("Information for Asset: " + JSON.stringify(assetInfo, undefined, 2));
+})().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -1190,8 +1584,19 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-
-};
+// AccountsAssetIDMinBalance.java
+    public static void main(String args[]) throws Exception {
+        AccountsAssetIDMinBalance ex = new AccountsAssetIDMinBalance();
+        IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
+        Long asset_id = Long.valueOf(312769);
+        Long currencyGreaterThan = Long.valueOf(100);
+        // searches for asset greater than currencyGreaterThan
+        String response = indexerClientInstance.searchForAccounts()
+                .assetId(asset_id)
+                .currencyGreaterThan(currencyGreaterThan).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Account Info for Asset Min Balance: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -1250,7 +1655,19 @@ This call also supports [Paginated Results](#paginated-results) and [Note Field 
 When searching for transactions that involve a specific Asset you can search for specific accounts as well as the address role. The roles that can be searched for are `sender`, `receiver`, and `freeze-target`. For example, a specific receiver with a given address for an Asset can be searched using the following:
 
 ```javascript tab="JavaScript"
-
+// SearchAssetTransactionsRole.js
+(async () => {
+    let asset_id = 2044572;
+    let address_role = "receiver";
+    let address = "UF7ATOM6PBLWMQMPUQ5QLA5DZ5E35PXQ2IENWGZQLEJJAAPAPGEGC3ZYNI";
+    let tracsactionInfo = await indexerClient.lookupAssetTransactions(asset_id)
+        .addressRole(address_role)
+        .address(address).do();
+    console.log("Information for Transaction for Asset: " + JSON.stringify(tracsactionInfo, undefined, 2));
+})().catch(e => {
+    console.log(e);
+    console.trace();
+})
 ```
 
 ```python tab="Python"
@@ -1264,8 +1681,17 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-
-};
+// SearchAssetsTransactionsRole.java
+    public static void main(String args[]) throws Exception {
+        SearchAssetsTransactionsRole ex = new SearchAssetsTransactionsRole();
+        IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
+        Long asset_id = Long.valueOf(2044572);
+        AddressRole addressRole = AddressRole.RECEIVER;
+        Address account = new Address("UF7ATOM6PBLWMQMPUQ5QLA5DZ5E35PXQ2IENWGZQLEJJAAPAPGEGC3ZYNI");           
+        String response = indexerClientInstance.searchForTransactions().address(account).assetId(asset_id).addressRole(addressRole).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Asset Info for Name: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
@@ -1291,7 +1717,15 @@ When searching for the receiver like in the above example, a `closeto` transacti
 The Indexer provides the `/blocks/{round-number}` API call to retrieve specific blocks from the blockchain. This call does not take any parameters and returns data associated with the block.
 
 ```javascript tab="JavaScript"
-
+// BlockInfo.js
+(async () => {
+    let block = 50;
+    let blockInfo = await indexerClient.lookupBlock(block).do();
+    console.log("Information for Block: " + JSON.stringify(blockInfo, undefined, 2));
+})().catch(e => {
+    console.log(e);
+    console.trace();
+});
 ```
 
 ```python tab="Python"
@@ -1303,8 +1737,15 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```java tab="Java"
-
-};
+// BlockInfo.java
+    public static void main(String args[]) throws Exception {
+        BlockInfo ex = new BlockInfo();
+        IndexerClient indexerClientInstance = (IndexerClient)ex.connectToNetwork();
+        Long block = Long.valueOf(50);
+        String response = indexerClientInstance.lookupBlock(block).execute().toString();
+        JSONObject jsonObj = new JSONObject(response.toString());
+        System.out.println("Block Info: " + jsonObj.toString(2)); // pretty print json
+    }
 ```
 
 ```go tab="Go"
