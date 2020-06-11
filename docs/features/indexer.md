@@ -230,7 +230,7 @@ for numTx > 0 {
 
 ```
 
-```bash tab="Curl"
+```bash tab="cURL"
 # note the "next-token" field in the most resent results and supply the value to the "next" parameter
 curl "localhost:8980/v2/transactions?currency-greater-than=10&limit=5&next=cAoBAAAAAAAAAAAA"
 ```
@@ -315,7 +315,7 @@ JSON, err := json.MarshalIndent(result, "", "\t")
 fmt.Printf(string(JSON) + "\n")
 ```
 
-```bash tab="Curl"
+```bash tab="cURL"
 curl localhost:8980/v2/accounts/7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI?round=50
 ```
 
@@ -372,7 +372,7 @@ fmt.Printf(string(JSON) + "\n")
 
 ```
 
-```bash tab="Curl"
+```bash tab="cURL"
 python3 -c "import base64;print(base64.b64encode('showing prefix'.encode()))"
 curl "localhost:8980/v2/transactions?note-prefix=c2hvd2luZyBwcmVmaXg=" | json_pp
 ```
@@ -445,7 +445,7 @@ JSON, err := json.MarshalIndent(result, "", "\t")
 fmt.Printf(string(JSON) + "\n")
 ```
 
-```bash tab="Curl"
+```bash tab="cURL"
 curl localhost:8980/v2/accounts?asset-id=312769
 ```
 
@@ -483,7 +483,7 @@ JSON, err := json.MarshalIndent(result, "", "\t")
 fmt.Printf(string(JSON) + "\n")
 ```
 
-```bash tab="Curl"
+```bash tab="cURL"
 curl localhost:8980/v2/accounts?asset-id=312769\&currency-greater-than=100
 ```
 
