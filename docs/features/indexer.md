@@ -75,15 +75,60 @@ When searching large amounts of blockchain data often the results may be too lar
 | Asset Search | 100 |
 | Asset Balance Search | 1000 |
 
-These values represent the maximum number of results that will be returned when searching for specific results. For example, using the following curl statement:
+These values represent the maximum number of results that will be returned when searching for specific results. For example, the following will return the last 1000 transactions that exceeded 10 microAlgos. 
 
-```bash tab="cURL"
- curl localhost:8980/v2/transactions?currency-greater-than=10
+```javascript tab="JavaScript"
+
 ```
 
-Will only return the last 1000 transactions that exceeded 10 microAlgos. That may not be very useful when trying to find specific transactions. The Indexer supplies a pagination method that allows separating the results into several REST calls to return larger result sets. When used with the limit parameter the results for large data sets can be returned in expected result counts.
+```python tab="Python"
+data = {
+   "min_amount": 10
+}
+response = myindexer.search_transactions(**data)
+# Pretty Printing JSON string
+print(json.dumps(response, indent=2, sort_keys=True))
+```
 
-For example, using the same cURL statement above and adding a limit parameter of 5:
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+
+```
+
+```bash tab="cURL"
+ curl "localhost:8980/v2/transactions?currency-greater-than=10"
+```
+
+When trying to find specific transactions, the Indexer supplies a pagination method that allows separating the results into several REST calls to return larger result sets. When used with the limit parameter the results for large data sets can be returned in expected result counts.
+
+For example, adding a limit parameter of 5 to previous call
+
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+data = {
+   "min_amount": 10,
+   "limit": 5,
+}
+response = myindexer.search_transactions(**data)
+# Pretty Printing JSON string
+print(json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+
+```
 
 ```bash tab="cURL"
  curl "localhost:8980/v2/transactions?currency-greater-than=10&limit=5"
@@ -91,8 +136,8 @@ For example, using the same cURL statement above and adding a limit parameter of
 
 Will return the last 5 transactions over 10 microAlgos. In addition, a token will be added to the result list that allows querying the next 5 transactions over 5 microAlgos.
 
+Results showing "next-token"
 ```bash
-$ curl "localhost:8980/v2/transactions?currency-greater-than=10&limit=5" | json_pp
 {
    "next-token" : "cAoBAAAAAAAAAAAA",
    "current-round" : 7050272,
@@ -103,7 +148,44 @@ $ curl "localhost:8980/v2/transactions?currency-greater-than=10&limit=5" | json_
 
 To get the next 5 transactions simply add the next-token as a parameter to the next REST call. The parameter is named `next` and this token is only good for the next 5 results.
 
-```bash tab="cURL"
+```python tab="JavaScript"
+
+```
+
+```python tab="Python"
+# loop thru all transactions in the search result
+# using next_page to paginate
+nexttoken = ""
+numtx = 1
+# loop until there are no more tranactions in the response
+# for the limit (max is 1000  per request)
+while (numtx > 0):
+   data = {
+      "min_amount": 100000000000000,
+      "limit": 5,
+      "next_page": nexttoken
+   }
+   response = myindexer.search_transactions(**data)
+   transactions = response['transactions']
+   numtx = len(transactions)
+   if (numtx > 0):
+      nexttoken = response['next-token']
+      parsed = json.loads(response)
+      # Pretty Printing JSON string
+      print(json.dumps(parsed, indent=2, sort_keys=True))
+
+```
+
+```java tab="Java"
+
+```
+
+```go tab="Go"
+
+```
+
+```bash tab="Curl"
+# note the "next-token" field in the most resent results and supply the value to the "next" parameter
 curl "localhost:8980/v2/transactions?currency-greater-than=10&limit=5&next=cAoBAAAAAAAAAAAA"
 ```
 
@@ -125,108 +207,73 @@ The following REST calls support paginated results.
 * `/assets/{asset-id}/transactions` - Search for Transactions with a specific Asset.
 * `/transactions` - Search all transactions
 
-??? example "Complete Example - Paginated Results"
-
-   ```python tab="JavaScript"
-
-   ```
-
-   ```python tab="Python"
-   # loop thru all transactions in the search result
-   # using next_page to paginate
-   nexttoken = ""
-   numtx = 1
-   responseall = ""
-   # loop until there are no more tranactions in the response
-   # for the limit (max is 1000  per request)
-   while (numtx > 0):
-      data = {
-         "min_amount": 100000000000000,
-         "limit": 5,
-         "next_page": nexttoken
-      }
-      response = myindexer.search_transactions(**data)
-      transactions = response['transactions']
-      numtx = len(transactions)
-      if (numtx > 0):
-         nexttoken = response['next-token']
-         # concatinate response
-         responseall = responseall + json.dumps(response)
-   #json.load method converts JSON string to Python Object
-   parsed = json.loads(responseall)
-   # Pretty Printing JSON string
-   print(json.dumps(parsed, indent=2, sort_keys=True))
-   ```
-
-   ```java tab="Java"
-
-   ```
-
-   ```go tab="Go"
-
-   ```
-
-   ```bash tab="Curl"
-   # loop thru all transactions in the search result
-   # using next_page to paginate
-   # get most recent transactions where balance greater than 10, limit results to 5 per page
-   curl localhost:8980/v2/transactions?currency-greater-than=10\&limit=5
-   # note the "next-token" field in the results and supply the value in future queries
-   curl localhost:8980/v2/transactions?currency-greater-than=10\&limit=5\&next=
-   ```
-   
-
 # Historical Data Searches 
 Many of the REST calls support getting values at specific rounds. This means that the Indexer will do calculations that determine what specific values were at a specific round. For example, if account A starts at round 50 with 200 ARCC tokens and spends 50 of those tokens in round 75, the following command would return a balance of 150
 
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+data = {
+   "address": "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI",
+   "block": 50
+}
+response = myindexer.account_info(**data)
+print(json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+
+```
+
 ```bash tab="cURL"
-curl localhost:8980/v2/accounts/A
+curl localhost:8980/v2/accounts/7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI
 ```
 
 If the round parameter is used and set to 50 a balance of 200 would be returned.
 
-```bash tab="cURL"
-curl localhost:8980/v2/accounts/A?round=50
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+data = {
+   "address": "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI",
+   "block": 50
+}
+response = myindexer.account_info(**data)
+print(json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+// Parameters 
+var round uint64 = 6127822
+var account = "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI"
+
+// Lookup block
+_, result, err := indexerClient.LookupAccountByID(account).Round(round).Do(context.Background())
+
+// Print results
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
+```
+
+```bash tab="Curl"
+curl localhost:8980/v2/accounts/7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI?round=50
 ```
 
 The round parameter results are inclusive of all transactions within the given round. This parameter is available in many of the REST calls. This can be very computationally expensive so for performance reasons, it is by default disabled on the `/accounts` REST call but can be enabled by using the `--dev-mode` flag when starting the Indexer.
-
-??? example "Complete Example - Historical Data Searchest"
-
-   ```javascript tab="JavaScript"
-
-   ```
-
-   ```python tab="Python"
-   data = {
-      "address": "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI",
-      "block": 50
-   }
-   response = myindexer.account_info(**data)
-   print(json.dumps(response, indent=2, sort_keys=True))
-   ```
-
-   ```java tab="Java"
-
-   };
-   ```
-
-   ```go tab="Go"
-   // Parameters 
-   var round uint64 = 6127822
-   var account = "7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI"
-
-   // Lookup block
-   _, result, err := indexerClient.LookupAccountByID(account).Round(round).Do(context.Background())
-
-   // Print results
-   JSON, err := json.MarshalIndent(result, "", "\t")
-   fmt.Printf(string(JSON) + "\n")
-   ```
-
-   ```bash tab="Curl"
-   curl localhost:8980/v2/accounts/7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI?round=50
-   ```
 
 # Note Field Searching
 Every transaction has the ability to add up to a 1kb note in the note field. Several of the REST APIs provide the ability to search for a prefix that is present in the note field, meaning that the note starts with a specific string. This can be a very powerful way to quickly locate transactions that are specific to an application. The REST calls that support prefix searching are the following.
@@ -242,8 +289,6 @@ $ python3 -c "import base64;print(base64.b64encode('showing prefix'.encode()))"
 ```
 
 This will return an encoded value of `c2hvd2luZyBwcmVmaXg=`.  This value can then be passed to the search. To search all transactions use the following commmand.
-
-??? example "Complete Example - Note Field Searcing"
 
 ```javascript tab="JavaScript"
 
@@ -323,56 +368,78 @@ Results
 # Searching Accounts
 The ‘/accounts’ call can be used to search for accounts on the Algorand blockchain. This query provides two main parameters for returning accounts with specific balances. These two calls are `currency-greater-than` and `currency-less-than` which returns all accounts with balances that match the criteria. By default, the currency these parameters look for is the Algo and the values are specified in microAlgos. This behavior can be changed by supplying the `asset-id` parameter which specifies the asset to search accounts for in the ledger. For example to search accounts that have the Tether UDSt token the following command would be used.
 
-```bash tab="cURL"
+```javascript tab="JavaScript"
+
+```
+
+```python tab="Python"
+# gets accounts with a particular AssetID
+data = {
+   "asset_id": 312769
+}
+response = myindexer.accounts(**data)
+print(json.dumps(response, indent=2, sort_keys=True))
+```
+
+```java tab="Java"
+
+};
+```
+
+```go tab="Go"
+// query parameters
+var assetId uint64 = 312769
+var minBalance uint64 = 100
+
+// Lookup accounts with minimum balance of asset
+result, err := indexerClient.LookupAssetBalances(assetId).CurrencyGreaterThan(minBalance).Do(context.Background())
+
+// Print the results
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
+```
+
+```bash tab="Curl"
 curl localhost:8980/v2/accounts?asset-id=312769
 ```
 
 This search can be further refined to search for accounts that have a balance greater than 100 USDt by using the following query.
 
-```bash tab="cURL"
-curl "localhost:8980/v2/accounts?asset-id=312769&currency-greater-than=100"
+```javascript tab="JavaScript"
+
 ```
 
-This call also supports the pagination mechanism described in [Paginated Results](/#paginated-results) using the `next` and `limit` query parameters. This call also supports [Historical Data Searches](#historical-data-searches) if the Indexer is configured for the `/accounts` call.
+```python tab="Python"
+# gets accounts with a min balance of 100 that have a particular AssetID
+data = {
+   "min_balance": 100,
+   "asset_id": 312769
+}
+response = myindexer.accounts(**data)
+print(json.dumps(response, indent=2, sort_keys=True))
+```
 
-This call returns a list of accounts with associated data, the round number the results were calculated for and optionally the `next-token` value if you are using pagination.
+```java tab="Java"
 
-??? example "Complete Example - Searching Accounts"
-   ```javascript tab="JavaScript"
+};
+```
 
-   ```
+```go tab="Go"
+// query parameters
+var assetId uint64 = 312769
+var minBalance uint64 = 100
 
-   ```python tab="Python"
-   # gets accounts with a min balance of 100 that have a particular AssetID
-   data = {
-      "min_balance": 100,
-      "asset_id": 312769
-   }
-   response = myindexer.accounts(**data)
-   print(json.dumps(response, indent=2, sort_keys=True))
-   ```
+// Lookup accounts with minimum balance of asset
+result, err := indexerClient.LookupAssetBalances(assetId).CurrencyGreaterThan(minBalance).Do(context.Background())
 
-   ```java tab="Java"
+// Print the results
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
+```
 
-   };
-   ```
-
-   ```go tab="Go"
-   // query parameters
-   var assetId uint64 = 312769
-   var minBalance uint64 = 100
-   
-   // Lookup accounts with minimum balance of asset
-	result, err := indexerClient.LookupAssetBalances(assetId).CurrencyGreaterThan(minBalance).Do(context.Background())
-
-	// Print the results
-	JSON, err := json.MarshalIndent(result, "", "\t")
-	fmt.Printf(string(JSON) + "\n")
-   ```
-
-   ```bash tab="Curl"
-   curl localhost:8980/v2/accounts?asset-id=312769\&currency-greater-than=100
-   ```
+```bash tab="Curl"
+curl localhost:8980/v2/accounts?asset-id=312769\&currency-greater-than=100
+```
 
 Results
 ``` bash
@@ -394,6 +461,10 @@ Results
    "current-round" : 7069819
 }
 ```
+
+This call also supports the pagination mechanism described in [Paginated Results](/#paginated-results) using the `next` and `limit` query parameters. This call also supports [Historical Data Searches](#historical-data-searches) if the Indexer is configured for the `/accounts` call.
+
+This call returns a list of accounts with associated data, the round number the results were calculated for and optionally the `next-token` value if you are using pagination.
 
 # Getting an Account
 The `/accounts/{account-id}` can be used to look up ledger data for a specific account.
@@ -956,6 +1027,7 @@ fmt.Printf(string(JSON) + "\n")
 ``` bash tab="cURL"
 $ curl "localhost:8980/v2/assets/2044572" | json_pp
 ```
+
 Results
 ``` bash
 {
@@ -1126,6 +1198,19 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```java tab="Java"
 
 };
+```
+
+```go tab="Go"
+// query parameters
+var assetID uint64 = 2044572
+address, _ := types.DecodeAddress("UF7ATOM6PBLWMQMPUQ5QLA5DZ5E35PXQ2IENWGZQLEJJAAPAPGEGC3ZYNI")
+
+// Lookup asset
+result, err := indexerClient.SearchForTransactions().AssetID(assetID).AddressRole(role).Address(address).Do(context.Background())
+
+// Search asset trnsaction by role
+JSON, err := json.MarshalIndent(result, "", "\t")
+fmt.Printf(string(JSON) + "\n")
 ```
 
 ``` bash tab="cURL"
