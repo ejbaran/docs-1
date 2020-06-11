@@ -96,7 +96,15 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```go tab="Go"
+// query parameters
+var minAmount uint64 = 10
 
+// Query
+result, err := indexerClient.SearchForTransactions().CurrencyGreaterThan(minAmount).Do
+
+// Print results
+result, err := json.MarshalIndent(transactions, "", "\t")
+fmt.Printf(string(JSON) + "\n")
 ```
 
 ```bash tab="cURL"
@@ -127,7 +135,15 @@ print(json.dumps(response, indent=2, sort_keys=True))
 ```
 
 ```go tab="Go"
+// query parameters
+var minAmount uint64 = 10
+var limit uint64 = 5
+// Query
+result, err := indexerClient.SearchForTransactions().CurrencyGreaterThan(minAmount).Limit(limit).Do
 
+// Print results
+result, err := json.MarshalIndent(transactions, "", "\t")
+fmt.Printf(string(JSON) + "\n")
 ```
 
 ```bash tab="cURL"
@@ -181,6 +197,36 @@ while (numtx > 0):
 ```
 
 ```go tab="Go"
+// query parameters
+var nextToken = ""
+var numTx = 1
+var numPages = 1
+var minAmount uint64 = 100000000000000
+var limit uint64 = 2
+
+for numTx > 0 {
+   // Query
+   result, err := indexerClient.SearchForTransactions().CurrencyGreaterThan(minAmount).Limit(limit).NextToken(nextToken).Do(context.Background())
+   if err != nil {
+      return
+   }
+   transactions := result.Transactions
+   numTx = len(transactions)
+   nextToken = result.NextToken
+
+   if numTx > 0 {
+      // Print results
+      JSON, err := json.MarshalIndent(transactions, "", "\t")
+      if err != nil {
+         return
+      }
+      fmt.Printf(string(JSON) + "\n")
+      fmt.Println("End of page : ", numPages)
+      fmt.Println("Transaction printed : ", len(transactions))
+      fmt.Println("Next Token : ", nextToken)
+      numPages++
+   }
+}
 
 ```
 
@@ -561,6 +607,7 @@ print("start_time: 06/03/2020 11:00:00 = " + json.dumps(response, indent=2, sort
 ```go tab="Go"
 // query parameters
 var startTime = "2020-06-03T10:00:00-05:00"
+address, _ := types.DecodeAddress("XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4")
 
 // Query
 result, err := indexerClient.SearchForTransactions().Address(address).AfterTimeString(startTime).Do(context.Background())
