@@ -112,7 +112,7 @@ These values represent the maximum number of results that will be returned when 
 ```
 
 ```python tab="Python"
-# /indexer/python/SearchTransactionsPaging.py
+# /indexer/python/search_transactions_min_amount.py
 
 response = myindexer.search_transactions(min_amount=10) 
 
@@ -171,7 +171,7 @@ For example, adding a limit parameter of 5 to the previous call
 ```
 
 ```python tab="Python"
-# /indexer/python/SearchTransactionsPaging.py
+# /indexer/python/search_transactions_limit.py
 
 response = myindexer.search_transactions(
    min_amount=10, limit=5) 
@@ -258,7 +258,7 @@ let numtx = 1;
 ```
 
 ```python tab="Python"
-# /indexer/python/SearchTransactionsPaging.py
+# /indexer/python/search_transactions_paging.py
 
 nexttoken = ""
 numtx = 1
@@ -379,7 +379,7 @@ Many of the REST calls support getting values at specific rounds. This means tha
 ```
 
 ```python tab="Python"
-# /indexer/python/AccountInfo.py
+# /indexer/python/account_info.py
 
 response = myindexer.account_info(
     address="7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI")
@@ -423,7 +423,7 @@ If the round parameter is used and set to 50 a balance of 200 would be returned.
 ```
 
 ```python tab="Python"
-# /indexer/python/AccountInfoBlock.py
+# /indexer/python/account_info_block.py
 
 response = myindexer.account_info(
     address="7WENHRCKEAZHD37QMB5T7I2KWU7IZGMCC3EVAO7TQADV7V5APXOKUBILCI", block=50)
@@ -492,7 +492,7 @@ This will return an encoded value of `c2hvd2luZyBwcmVmaXg=`.  This value can the
 ```
 
 ```python tab="Python"
-# /indexer/python/SearchTransactionsNote.py
+# /indexer/python/search_transactions_note.py
 
 import base64
 encodednote = base64.b64encode('showing prefix'.encode())
@@ -591,7 +591,7 @@ The ‘/accounts’ call can be used to search for accounts on the Algorand bloc
 ```
 
 ```python tab="Python"
-# /indexer/python/AccountsAssetID.py
+# /indexer/python/accounts_assetid.py
 
 response = myindexer.accounts(
     asset_id=312769)
@@ -645,7 +645,7 @@ This search can be further refined to search for accounts that have a balance gr
 ```
 
 ```python tab="Python"
-# /indexer/python/AccountsAssetIDMinBalance.py
+# /indexer/python/accounts_assets_min_balance.py
 
 # gets accounts with a min balance of 100 that have a particular AssetID
 response = myindexer.accounts(
@@ -728,7 +728,7 @@ For example:
 ```
 
 ```python tab="Python"
-# /indexer/python/AccountInfo.py
+# /indexer/python/account_info.py
 
 # gets account
 response = myindexer.account_info(
@@ -815,7 +815,7 @@ The range of transactions to be searched can be restricted based on the time by 
 ```
 
 ```python tab="Python"
-# /indexer/python/SearchTxAddressTime.py
+# /indexer/python/search_tx_address_time.py
 
 # get transaction at specific time
 response = myindexer.search_transactions_by_address(
@@ -915,7 +915,7 @@ Transaction searches can also be restricted to round ranges using the `min-round
 ```
 
 ```python tab="Python"
-# /indexer/python/SearchTxAddressBlockRange.py
+# /indexer/python/search_tx_address_block_range.py
 
 response = myindexer.search_transactions_by_address(
     address="XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4", min_round=7048876, max_round=7048878)
@@ -976,7 +976,7 @@ In addition, you can specify a specific round by using the round parameter.
 ```
 
 ```python tab="Python"
-# /indexer/python/SearchTxAddressBlock.py
+# /indexer/python/search_tx_address_block.py
 
 response = myindexer.search_transactions_by_address(
     address="XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4", block=7048877)
@@ -1037,7 +1037,7 @@ Searching for a specific transaction can be achieved by supplying the transactio
 ```
 
 ```python tab="Python"
-# /indexer/python/SearchTxAddressTxId.py
+# /indexer/python/search_tx_address_txId.py
 
 response = myindexer.search_transactions_by_address(
     address="XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4",
@@ -1097,7 +1097,7 @@ You can also search for specific transaction types that are described in the [tr
 ```
 
 ```python tab="Python"
-# /indexer/python/SearchTxAddresstxntype.py
+# /indexer/python/search_tx_address_txntype.py
 
 response = myindexer.search_transactions_by_address(
     address="SWOUICD7Y5PQBWWEYC4XZAQZI7FJRZLD5O3CP4GU2Y7FP3QFKA7RHN2WJU",
@@ -1205,7 +1205,7 @@ Searching Transactions that are of certain values can be created by using the `c
 ```
 
 ```python tab="Python"
-# /indexer/python/AccountsAssetIDMinBalance.py
+# /indexer/python/accounts_assets_min_balance.py
 
 # gets assets with a min balance of 50 for AssetID
 response = myindexer.asset_balances(
@@ -1302,7 +1302,7 @@ Transaction searches can also look for specific [signature types](https://develo
 ```
 
 ```python tab="Python"
-# /indexer/python/SearchTxAddresssigtype.py
+# /indexer/python/search_tx_address_sigtype.py
 
 response = myindexer.search_transactions_by_address(
     address="XIU7HGGAJ3QOTATPDSIIHPFVKMICXKHMOR2FJKHTVLII4FAOA3CYZQDLG4", sig_type="msig")
@@ -1362,7 +1362,7 @@ The Indexer provides the `/assets` REST call to search the blockchain for specif
 ```
 
 ```python tab="Python"
-# /indexer/python/SearchAssetsName.py
+# /indexer/python/search_assets_name.py
 
 response = myindexer.search_assets(
     name="DevDocsCoin")
@@ -1442,7 +1442,7 @@ To get the details of a specific asset the indexer provides the `/assets/{asset-
 ```
 
 ```python tab="Python"
-# /indexer/python/SearchAssets.py
+# /indexer/python/search_assets.py
 
 response = myindexer.search_assets(
     asset_id=2044572)
@@ -1518,7 +1518,7 @@ The Indexer provides the `/assets/{asset-id}/balances` REST API call to search f
 ```
 
 ```python tab="Python"
-# /indexer/python/AssetsBalances.py
+# /indexer/python/assets_balances.py
 
 response = myindexer.asset_balances(
     asset_id=2044572)
@@ -1590,7 +1590,7 @@ This call can be refined by looking for addresses based on the current amount us
 ```
 
 ```python tab="Python"
-# /indexer/python/AssetsBalancesMinBalance.py
+# /indexer/python/assets_balances_min_balance.py
 
 response = myindexer.asset_balances(
     asset_id=2044572, min_balance=200)
@@ -1686,7 +1686,7 @@ When searching for transactions that involve a specific Asset you can search for
 ```
 
 ```python tab="Python"
-# /indexer/python/SearchAssetTransactionsRole.py
+# /indexer/python/search_asset_transactions_role.py
 
 response = myindexer.search_asset_transactions(
     asset_id=2044572, address_role="receiver", address="UF7ATOM6PBLWMQMPUQ5QLA5DZ5E35PXQ2IENWGZQLEJJAAPAPGEGC3ZYNI")
@@ -1743,7 +1743,7 @@ The Indexer provides the `/blocks/{round-number}` API call to retrieve specific 
 ```
 
 ```python tab="Python"
-# /indexer/python/BlockInfo.py
+# /indexer/python/block_info.py
 
 response = myindexer.block_info(
     block=555)
