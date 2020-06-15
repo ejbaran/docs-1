@@ -13,7 +13,7 @@ The primary purpose of this Indexer is to provide a REST API interface of API ca
 The Indexer provides a set of REST API calls for searching blockchain Transactions, Accounts, Assets and Blocks. Each of these calls also provides several filter parameters to support refining searches. The latest Algorand native SDKs (Python, JavaScript, Go, and Java) provide similar functionality. Thes REST calls are based on the Open API specification and are described in the REST SDK reference documentation. 
 
 !!! info
-    Example code snippets are provided throughout this section with links to full running code examples in the github repo at [https://github.com/algorand/docs/examples/indexer/indexer.zip](https://github.com/algorand/docs/examples/indexer/indexer.zip)
+    Example code snippets are provided throughout this page. Full running code examples for each SDK are available within the GitHub repo at [/examples/indexer](https://github.com/algorand/docs/examples/indexer/) and for [download](https://github.com/algorand/docs/examples/indexer/indexer.zip) (.zip).
 
 # SDK Client Instantiations
 
@@ -1836,3 +1836,9 @@ This call contains many parameters to refine the search for specific values. The
 Similar to asset searches this method supports searching based on address and role as well.
 
 This call also supports [Paginated Results](#paginated-results) and [Note Field Searching](#note-field-searching).
+
+# Complete Code Examples
+
+!!! info
+    Full running code examples for each SDK are available within the GitHub repo at [/examples/indexer](https://github.com/algorand/docs/examples/indexer/) and for [download](https://github.com/algorand/docs/examples/indexer/indexer.zip) (.zip).
+
