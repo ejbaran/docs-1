@@ -49,21 +49,6 @@ npm list algosdk
             ```
         </td>
     </tr>
-    <!--tr>
-        <td>
-            kmd
-        </td>
-        <td>
-            ```javascript
-            const algosdk = require('algosdk');
-            ```
-        </td>
-        <td>
-            ```javascript
-            // not implemented, continue using V1
-            ```
-        </td>
-    </tr-->
     <tr>
         <td>
             indexer
@@ -97,16 +82,6 @@ npm list algosdk
             ```
         </td>
     </tr>
-    <!--tr>
-        <td>
-            kmd
-        </td>
-        <td>
-            ```javascript
-            let kmdClient = new algosdk.Kmd(kmd_token, kmd_server, kmd_port);
-            ```
-        </td>
-    </tr-->
     <tr>
         <td>
             indexer
@@ -159,21 +134,6 @@ pip3 list | grep "py-algorand-sdk"
             ```
         </td>
     </tr>
-    <!--tr>
-        <td>
-            kmd
-        </td>
-        <td>
-            ```python
-            from algosdk import kmd # unchanged
-            ```
-        </td>
-        <td>
-            ```python
-            # not implemented, use V1
-            ```
-        </td>
-    </tr-->
     <tr>
         <td>
             indexer
@@ -235,7 +195,7 @@ Maven:
 | SDK Version | Supported V1 APIs | Supported V2 APIs |
 | ----------- | -------------------- | -------------------- |
 | thru java-algorand-sdk 1.3.1 | `algod`, `kmd`       | n/a                  |
-| from java-algorand-sdk 1.4.0 | `kmd`                | `algod`, `algorand-indexer` |
+| from java-algorand-sdk 1.4.1 | `kmd`                | `algod`, `algorand-indexer` |
 
 
 ### Supported Library Imports
@@ -251,37 +211,17 @@ Maven:
         </td>
         <td>
             ```java
-           :
             import com.algorand.algosdk.algod.client.AlgodClient;
-            import com.algorand.algosdk.algod.client.ApiException;
-            import com.algorand.algosdk.algod.client.api.AlgodApi;
+            import com.algorand.algosdk.algod.client.auth.ApiKeyAuth;
             ```
         </td>
         <td>
             ```java
-           :
             import com.algorand.algosdk.v2.client.common.AlgodClient;
+            import com.algorand.algosdk.algod.client.auth.ApiKeyAuth;
             ```
         </td>
     </tr>
-    <!--tr>
-        <td>
-            kmd
-        </td>
-        <td>
-            ```java
-           :
-            import com.algorand.algosdk.kmd.client.KmdClient;
-            import com.algorand.algosdk.kmd.client.ApiException;
-            import com.algorand.algosdk.kmd.client.api.KmdApi;
-            ```
-        </td>
-        <td>
-            ```java
-            // not implemented, use V1
-            ```
-        </td>
-    </tr-->
     <tr>
         <td>
             indexer
@@ -293,8 +233,7 @@ Maven:
         </td>
         <td>
             ```java
-            // new:
-            import com.algorand.algosdk.v2.client.common.IndexerClient;
+            import com.algorand.algosdk.v2.client.common.IndexerClient; // new
             ```
         </td>
     </tr>
@@ -312,7 +251,10 @@ Maven:
         </td>
         <td>
             ```java
-            let algodClient = new algosdk.Algodv2(algod_token, algod_server, algod_port);
+            AlgodClient algodClient = new AlgodClient();
+            algodClient.setBasePath(ALGOD_API_ADDR);
+            ApiKeyAuth algodApiKey = (ApiKeyAuth) algodClient.getAuthentication("algodApiKey");
+            algodApiKey.setApiKey(ALGOD_API_TOKEN);
             ```
         </td>
     </tr>
@@ -322,7 +264,8 @@ Maven:
         </td>
         <td>
             ```java
-            let indexerClient = new algosdk.Indexer(indexer_token, indexer_server, indexer_port); // new
+            IndexerClient indeerClient = new IndexerClient();
+            indeerClient.setBasePath(INDEXER_API_ADDR);
             ```
         </td>
     </tr>
@@ -370,23 +313,6 @@ make build
             ```
         </td>
     </tr>
-    <!--tr>
-        <td>
-            kmd
-        </td>
-        <td>
-            ```go
-            import ( 
-                "github.com/algorand/go-algorand-sdk/client/kmd" 
-            )
-            ```
-        </td>
-        <td>
-            ```go
-            // not implemented, use V1
-            ```
-        </td>
-    </tr-->
     <tr>
         <td>
             indexer
