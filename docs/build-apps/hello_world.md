@@ -18,12 +18,10 @@ In order to send a transaction, you first need an [account](../features/accounts
 ```javascript tab="JavaScript"
 const algosdk = require('algosdk');
 
-function generateAlgorandKeyPair() {
-	var account = algosdk.generateAccount();
-	var passphrase = algosdk.secretKeyToMnemonic(account.sk);
-	console.log( "My address: " + account.addr );
-	console.log( "My passphrase: " + passphrase );
-}
+var account = algosdk.generateAccount();
+var passphrase = algosdk.secretKeyToMnemonic(account.sk);
+console.log( "My address: " + account.addr );
+console.log( "My passphrase: " + passphrase );
 ```
 
 ```python tab="Python"
@@ -97,16 +95,12 @@ Each SDK provides a client which must instantiate prior to making calls to the A
 _Learn more about [Connecting to a Node](connect.md)._
 
 ```JavaScript tab=
-const algosdk = require('algosdk');
+const algodToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+const algodServer = "http://localhost";
+const algodPort = 8888;
 
-async function connectToNetwork() {
-
-	const server = <algod-address>;
-	const port = <port-number>;
-	const token = <algod-token>;
-
-	let algodClient = new algosdk.Algodv2(token, server, port);
-	...
+let algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
+```
 }
 ```
 
@@ -168,9 +162,8 @@ Check your balance to confirm the added funds.
 	let myAccount = algosdk.mnemonicToSecretKey(passphrase)
 	console.log("My address: %s", myAccount.addr)
 
-	let accountInfo = await algodClient.accountInformation(myAccount.addr);
-    console.log("Account balance: %d microAlgos", accountInfo.amount)
-...
+    let accountInfo = await algodClient.accountInformation(myAccount.addr).do();
+    console.log("Account balance: %d microAlgos", accountInfo.amount);
 ```
 
 ```python tab="Python"
@@ -238,21 +231,16 @@ Transactions require a certain minimum set of parameters to be valid. Mandatory 
 fields. 
 
 ```javascript tab="JavaScript"
-...
-	let params = await algodClient.getTransactionParams();
-	let note = algosdk.encodeObj("Hello World");
-	let txn = {
-		"from": myAccount.addr,
-		"to": receiver,
-		"fee": params.minFee,
-		"amount": 1000000,
-		"firstRound": params.lastRound,
-		"lastRound": params.lastRound + 1000,
-		"note": note,
-		"genesisID": params.genesisID,
-		"genesisHash": params.genesishashb64
-	};
-...
+        let params = await algodClient.getTransactionParams().do();
+        console.log(params);
+
+        let note = algosdk.encodeObj("Hello World");
+        console.log(note);
+
+        // comment out the next two lines to use suggested fee
+        params.fee = 1000;
+        params.flatFee = true;
+        let txn = algosdk.makePaymentTxnWithSuggestedParams(myAccount.addr, receiver, 1000000, undefined, note, params);        
 ```
 
 ```python tab="Python"
@@ -345,11 +333,9 @@ _Learn more about the [Structure of Transactions on Algorand](../features/transa
 Sign the transaction with your private key. This creates a new signed transaction object in the SDKs. Retrieve the transaction ID of the signed transaction.
 
 ```javascript tab="JavaScript"
-...
-	let signedTxn = algosdk.signTransaction(txn, myAccount.sk);
-	let txId = signedTxn.txID;
-    console.log("Signed transaction with txId: %s", txId);
-...
+let signedTxn = txn.signTxn(myAccount.sk);
+let txId = txn.txID().toString();
+console.log("Signed transaction with txID: %s", txId);
 ```
 
 ```python tab="Python"
@@ -391,9 +377,7 @@ _Learn more about [Authorizing Transactions on Algorand](../features/transaction
 Send the signed transaction to the network with your algod client. 
 
 ```javascript tab="JavaScript"
-...
-    await postAlgodClient.sendRawTransaction(signedTxn.blob)
-...
+await algodClient.sendRawTransaction(signedTxn).do();
 ```
 
 ```python tab="Python"
@@ -488,21 +472,20 @@ Successfully submitting your transaction to the network does not necessarily mea
     On Algorand, transactions are final as soon as they are incorporated into a block and blocks are produced, on average, every 5 seconds. This means that transactions are confirmed, on average, in **5 seconds**! Read more about the [Algorand's Consensus Protocol](../algorand_consensus.md) and how it achieves such high confirmation speeds and immediate transaction finality.
 
 ```javascript tab="JavaScript"
-...
-// function used to wait for a tx confirmation
-var waitForConfirmation = async function(algodclient, txId) {
-    while (true) {
-		let lastround = (await algodclient.status()).lastRound;
-        let pendingInfo = await algodclient.pendingTransactionInformation(txId);
-        if (pendingInfo.round != null && pendingInfo.round > 0) {
-            //Got the completed Transaction
-            console.log("Transaction " + pendingInfo.tx + " confirmed in round " + pendingInfo.round);
-            break;
+const waitForConfirmation = async function (algodclient, txId) {
+    let status = (await algodclient.status().do());
+    let lastRound = status["last-round"];
+      while (true) {
+        const pendingInfo = await algodclient.pendingTransactionInformation(txId).do();
+        if (pendingInfo["confirmed-round"] !== null && pendingInfo["confirmed-round"] > 0) {
+          //Got the completed Transaction
+          console.log("Transaction " + txId + " confirmed in round " + pendingInfo["confirmed-round"]);
+          break;
         }
-        await algodclient.statusAfterBlock(lastround + 1);
-    }
-};
-...
+        lastRound++;
+        await algodclient.statusAfterBlock(lastRound).do();
+      }
+    };
 ```
 
 ```python tab="Python"
@@ -598,15 +581,9 @@ Read your transaction back from the blockchain.
     Although you can read any transaction on the blockchain, only archival nodes store the whole history. By default, most nodes store only the last 1000 rounds and the APIs return errors when calling for information from earlier rounds. If you need to access data further back, make sure your algod client is connected to an archival, indexer node. Read more about node configurations in the Network Participation Guide or reach out to your service provider to understand how their node is configured. 
 
 ```javascript tab="JavaScript"
-...
-try {
-	let confirmedTxn = await algodClient.transactionInformation(myAccount.addr, txId);
-	console.log("Transaction information: %o", confirmedTxn);
-	console.log("Decoded note: %s", algosdk.decodeObj(confirmedTxn.note));
-} catch(e) {
-	console.log(e.response.text);
-}
-...
+let confirmedTxn = await algodClient.pendingTransactionInformation(txId).do();
+console.log("Transaction information: %o", confirmedTxn.txn.txn);
+console.log("Decoded note: %s", algosdk.decodeObj(confirmedTxn.txn.txn.note));
 ```
 
 ```python tab="Python"
@@ -660,64 +637,78 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
     const algosdk = require('algosdk');
 
     // function used to wait for a tx confirmation
-    var waitForConfirmation = async function(algodclient, txId) {
+    const waitForConfirmation = async function (algodclient, txId) {
+        let status = (await algodclient.status().do());
+        let lastRound = status["last-round"];
         while (true) {
-            let lastround = (await algodclient.status()).lastRound;
-            let pendingInfo = await algodclient.pendingTransactionInformation(txId);
-            if (pendingInfo.round != null && pendingInfo.round > 0) {
-                //Got the completed Transaction
-                console.log("Transaction " + pendingInfo.tx + " confirmed in round " + pendingInfo.round);
-                break;
+            const pendingInfo = await algodclient.pendingTransactionInformation(txId).do();
+            if (pendingInfo["confirmed-round"] !== null && pendingInfo["confirmed-round"] > 0) {
+            //Got the completed Transaction
+            console.log("Transaction " + txId + " confirmed in round " + pendingInfo["confirmed-round"]);
+            break;
             }
-            await algodclient.statusAfterBlock(lastround + 1);
+            lastRound++;
+            await algodclient.statusAfterBlock(lastRound).do();
         }
-    };
+        };
 
     async function gettingStartedExample() {
 
-        try{
-            const token = <algod-token>;
-            const server = <algod-address>;
-            const port = <port>;        
+        try{        
+            // Generate a public/private key pair
+            const passphrase = "liquid million govern habit nasty danger spoil air monitor lobster solar misery confirm problem tuna hollow ritual assume mean return enrich mistake seven abstract tent";
+            let myAccount = algosdk.mnemonicToSecretKey(passphrase);
+            console.log("My address: %s", myAccount.addr);
+            console.log( "My passphrase: " + passphrase );
 
-            let algodClient = new algosdk.Algodv2(algod_token, algod_server, algod_port);
+            // Add funds
+            // TestNet Faucet: https://bank.testnet.algorand.network/
+            // BetaNet Faucet: https://bank.betanet.algodev.network/
 
+            // Connect your client
+            const algodToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+            const algodServer = "http://localhost";
+            const algodPort = 8888;
+
+            let algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
+            
+            //Check your balance
+            let accountInfo = await algodClient.accountInformation(myAccount.addr).do();
+            console.log("Account balance: %d microAlgos", accountInfo.amount);
+
+            // Construct the transaction
+            // receiver defined as TestNet faucet address 
             const receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A";    
-            const passphrase = <your-25-word-mnemonic>;
 
-            let myAccount = algosdk.mnemonicToSecretKey(passphrase)
-            console.log("My address: %s", myAccount.addr)
-
-            let accountInfo = await algodClient.accountInformation(myAccount.addr);
-            console.log("Account balance: %d microAlgos", accountInfo.amount)
-
-            let params = await algodClient.getTransactionParams();
+            let params = await algodClient.getTransactionParams().do();
             console.log(params);
 
+            // note field defined as "Hello World"
             let note = algosdk.encodeObj("Hello World");
+            console.log(note);
 
-            let txn = {
-                "from": myAccount.addr,
-                "to": receiver,
-                "fee": params.minFee,
-                "flatFee": true,
-                "amount": 1000000,
-                "firstRound": params.lastRound,
-                "lastRound": params.lastRound + 1000,
-                "note": note,
-                "genesisID": params.genesisID,
-                "genesisHash": params.genesishashb64
-            };
+            // comment out the next two lines to use suggested fee
+            params.fee = 1000;
+            params.flatFee = true;
+            let txn = algosdk.makePaymentTxnWithSuggestedParams(myAccount.addr, receiver, 1000000, undefined, note, params);        
 
-            let signedTxn = algosdk.signTransaction(txn, myAccount.sk);
-            let txId = signedTxn.txID;
+            // Sign the transaction
+            let signedTxn = txn.signTxn(myAccount.sk);
+            let txId = txn.txID().toString();
             console.log("Signed transaction with txID: %s", txId);
 
-            await algodClient.sendRawTransaction(signedTxn.blob)
+            // Submit the transaction
+            await algodClient.sendRawTransaction(signedTxn).do();
 
             // Wait for confirmation
             await waitForConfirmation(algodClient, txId);
-        }catch (err){
+
+            // Read the transaction from the blockchain
+            let confirmedTxn = await algodClient.pendingTransactionInformation(txId).do();
+            console.log("Transaction information: %o", confirmedTxn.txn.txn);
+            console.log("Decoded note: %s", algosdk.decodeObj(confirmedTxn.txn.txn.note));
+        }
+        catch (err){
             console.log("err", err);  
         }
     };
