@@ -94,6 +94,9 @@ npm list algosdk
     </tr>
 </table>
 
+!!! info
+    The JavaScript SDK V2 clients implements a new pattern when calling methods. Each will append `.do()` to the method call. Example: `let status = (await algodclient.status().do());`
+
 ## Python
 
 ```bash
