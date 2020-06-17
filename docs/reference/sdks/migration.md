@@ -359,6 +359,9 @@ make build
     </tr>
 </table>
 
+!!! info
+    The Go SDK V2 clients implements a new pattern when calling methods. Each will append `.Do(context.Background())` to the method call. Example: `status, err := client.Status().Do(context.Background())`
+
 # kmd Client Instantiations<a name="kmd-instantiations"></a>
 <table>
     <tr>
