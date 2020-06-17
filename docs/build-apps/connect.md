@@ -10,23 +10,18 @@ Instantiate an **algod** client with your preferred SDK.
 ```JavaScript tab=
 const algosdk = require('algosdk');
 
-async function connectToNetwork() {
+const algodToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+const algodServer = "http://localhost";
+const algodPort = 8888;
 
-	const server = <algod-address>;
-	const port = <port-number>;
-	const token = <algod-token>;
-
-	let algodClient = new algosdk.Algodv2(token, server, port);
-	...
-}
+let algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
 ```
 
 ```Python tab=
 from algosdk.v2client import algod
 
-algod_address = <algod-address>
-algod_token = <algod-token>
-
+algod_address = "http://localhost:8888"
+algod_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 algod_client = algod.AlgodClient(algod_token, algod_address)
 ```
 
@@ -34,145 +29,118 @@ algod_client = algod.AlgodClient(algod_token, algod_address)
 import com.algorand.algosdk.v2.client.common.AlgodClient;
 import com.algorand.algosdk.v2.client.common.Client;
 
-public class ConnectToNetwork {
-    public static void main(String args[]) throws Exception {
-        
-        final String ALGOD_API_ADDR = <algod-address>;
-        final String ALGOD_API_TOKEN = <algod-token>;
+final String ALGOD_API_ADDR = "localhost";
+final Integer ALGOD_PORT = 8888;
+final String ALGOD_API_TOKEN = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
-        //Create an instance of the algod API client
-        AlgodClient client = (AlgodClient) new AlgodClient()
-		client.setBasePath(ALGOD_API_ADDR);
-        ApiKeyAuth api_key = (ApiKeyAuth) client.getAuthentication("api_key");
-        api_key.setApiKey(ALGOD_API_TOKEN);
-        AlgodApi algodApiInstance = new AlgodApi(client); 
-		...
-	}
-}
+AlgodClient client = (AlgodClient) new AlgodClient(ALGOD_API_ADDR, ALGOD_PORT, ALGOD_API_TOKEN);
 ```
 
 ```Go tab=
 package main
 
 import (
-	"github.com/algorand/go-algorand-sdk/client/v2/algod" 
+    "github.com/algorand/go-algorand-sdk/client/v2/algod" 
 )
 
-const algodAddress = <algod-address>
-const algodToken = <algod-token>
+const algodAddress = "http://localhost:8888"
+const algodToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 func main() {
-	algodClient, err := algod.MakeClient(algodAddress, algodToken)
-	if err != nil {
-		return
-	}
+    algodClient, err := algod.MakeClient(algodAddress, algodToken)
+    if err != nil {
+        fmt.Printf("Issue with creating algod client: %s\n", err)
+        return
+    }
 }
 ```
 
 If you are using a third-party service, use the API key header instead when instantiating an algod client.
 
 ```JavaScript tab=
-const algosdk = require("algosdk");
+from algosdk.v2client import algod
 
-async function connectToNetwork() {
-
-	const server = <algod-address>;
-	const port = "";
-	const token = {
-		'X-API-Key': <service-api-key>
-	};
-
-	let algodClient = new algosdk.Algodv2(token, server, port);
-	...
-}
-
+const algodServer = "https://api.host.com";
+const port = "";
+const token = {
+	'X-API-Key': "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+};
+let algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
 ```
 
 ```Python tab=
 from algosdk.v2client import algod
 
-algod_address = <algod-address>
+algod_address = "https://api.host.com"
 algod_token = ""
 headers = {
-   	"X-API-Key": <service-api-key>,
+   	"X-API-Key": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 }
 
 algod_client = algod.AlgodClient(algod_token, algod_address, headers)
 ```
 
 ```Java tab=
-	import com.algorand.algosdk.v2.client.common.AlgodClient;
-	import com.algorand.algosdk.v2.client.common.Client;
+import com.algorand.algosdk.v2.client.common.AlgodClient;
+import com.algorand.algosdk.v2.client.common.Client;
 
-public class ConnectToNetwork {
-	public static void main(String[] args) {
+final String ALGOD_API_ADDR = "https://api.host.com";
+final String ALGOD_API_KEY = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 
-		final String ALGOD_API_ADDR = <algod-address>;
-		final String ALGOD_API_KEY = <service-api-key>;
-
-		AlgodClient client = new AlgodClient();
-		client.setBasePath(ALGOD_API_ADDR);
-		client.addDefaultHeader("X-API-Key", ALGOD_API_KEY);
-		AlgodApi algodApiInstance = new AlgodApi(client);
-		...
-	}
-}
+AlgodClient client = new AlgodClient();
+client.setBasePath(ALGOD_API_ADDR);
+client.addDefaultHeader("X-API-Key", ALGOD_API_KEY);
+AlgodApi algodApiInstance = new AlgodApi(client);
 ```
 
 ```Go tab=
+package main
+
 import (
-	"github.com/algorand/go-algorand-sdk/client/v2/algod" 
+    "github.com/algorand/go-algorand-sdk/client/v2/algod" 
 )
-const algodAddress = <algod-address>
-const apiKey = <your-api-key>
+
+const algodAddress = "https://api.host.com"
+const apiKey = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 
 func main() {
 	var headers []*algod.Header
 	headers = append(headers, &algod.Header{"X-API-Key", apiKey})
-	algodClient, err := algod.MakeClientWithHeaders(algodAddress, "", headers)
-	...
+
+    algodClient, err := algod.MakeClientWithHeaders(algodAddress, "", headers)
+    if err != nil {
+        fmt.Printf("Issue with creating algod client: %s\n", err)
+        return
+    }
 }
 ```
-
-
 
 # Check node status
 
 Call the _status_ method from the algod client to check the details of your connection. This information is also available through equivalent REST API calls and `goal` commands.
 
 ```javascript tab="JavaScript"
-...
-	let status = await algodClient.status();
-	console.log("Algorand network status: %o", status);
-...
+let status = (await algodclient.status().do());
+console.log("Algorand network status: %o", status);
 ```
 
 ```python tab="Python"
-...
-	try:
-		status = algod_client.status()
-		print(json.dumps(status, indent=4))
-	except Exception as e:
-		print(e)
-...
+status = algod_client.status()
+print(json.dumps(status, indent=4))
 ```
 
 ```java tab="Java"
-
-	...
-        try {
-            NodeStatus status = algodApiInstance.getStatus();
-            System.out.println("Algorand network status: " + status);
-        } catch (ApiException e) {
-            System.err.println("Exception when calling algod#getStatus");
-            e.printStackTrace();
-        }
-	...
+try {
+	NodeStatus status = algodApiInstance.getStatus();
+	System.out.println("Algorand network status: " + status);
+} catch (ApiException e) {
+	System.err.println("Exception when calling algod#getStatus");
+	e.printStackTrace();
+}
 ```
 
 ```go tab="Go"
-...
-	status, err := algodClient.Status()
+	status, err := algodClient.Status().Do(context.Background())
 	if err != nil {
 		fmt.Printf("Error getting status: %s\n", err)
 		return
@@ -182,7 +150,6 @@ Call the _status_ method from the algod client to check the details of your conn
 		fmt.Printf("Can not marshall status data: %s\n", err)
 	}
 	fmt.Printf("%s\n", statusJSON)
-...
 ```
 
 ```bash tab="cURL"
@@ -225,7 +192,6 @@ The _status_ methods returns information about the status of the node, such as t
     "stopped-at-unsupported-round": false,
     "time-since-last-round": 4261519666,
 }
-
 ```
 
 Check if the node is caught up by validating against others running nodes, like a [public block explorer](../community.md#block-explorers). As a secondary check, see if your `catchup-time` is 0 and your rounds are progressing at a rate of less than 5 seconds on average. This is the time it takes to confirm a block on Algorand. Note that the `time-since-last-round` is represented in nanoseconds.
@@ -233,25 +199,23 @@ Check if the node is caught up by validating against others running nodes, like 
 !!! warning
 	If your node is out-of-sync with the rest of the network you cannot send transactions and account balances will be out-of-date. 
 
-# TODO: Check suggested transaction parameters
+# Check suggested transaction parameters
 
 The _/v2/transactions/params_ endpoint returns information about the identity of the network and parameters for constructing a new transaction. 
 
 
 ```javascript tab="JavaScript"
 ...
-	TODO:
-	let version = await algodClient.versions();
-	console.log("Algorand protocol version: %o", version)
+	let params = await algodClient.getTransactionParams().do();
+	console.log("Algorand suggested parameters: %o", params)
 ...
 ```
 
 ```python tab="Python"
 ...
-	TODO:
 	try:
-		versions = algod_client.versions()
-		print(json.dumps(versions, indent=4))
+		params = algod_client.suggested_params()
+		print(json.dumps(params, indent=4))
 	except Exception as e:
 		print(e)
 ...
@@ -259,12 +223,11 @@ The _/v2/transactions/params_ endpoint returns information about the identity of
 
 ```java tab="Java"
 	...
-	TODO:
         try {
-            Version version = algodApiInstance.getVersion();
-            System.out.println("Algorand network version: " + version);
+            TransactionParametersResponse params = client.TransactionParams().execute().body();
+            System.out.println("Algorand suggested parameters: " + TransactionParametersResponse);
         } catch (ApiException e) {
-            System.err.println("Exception when calling algod#getVersion");
+            System.err.println("Exception when calling algod#TransactionParams");
             e.printStackTrace();
         }
 	...
@@ -272,17 +235,16 @@ The _/v2/transactions/params_ endpoint returns information about the identity of
 
 ```go tab="Go"
 ...
-	TODO:
-	version, err := algodClient.Versions()
+	txParams, err := algodClient.SuggestedParams().Do(context.Background())
 	if err != nil {
-		fmt.Printf("Error getting versions: %s\n", err)
+		fmt.Printf("Error Algorand suggested parameters: %s\n", err)
 		return
 	}
-	versionJSON, err := json.MarshalIndent(version, "", "\t")
+	txParams, err := json.MarshalIndent(version, "", "\t")
 	if err != nil {
-		fmt.Printf("Can not marshall version data: %s\n", err)
+		fmt.Printf("Can not marshall suggested parameters data: %s\n", err)
 	}
-	fmt.Printf("%s\n", versionJSON)
+	fmt.Printf("%s\n", txParams)
 ...
 ```
 
@@ -309,250 +271,13 @@ Genesis hash: [GENESIS_HASH]
 
 Check the `genesis-id` and the `genesis-hash`, as shown in the REST response below. Ensure both match your chosen network before proceeding.
 
-```json hl_lines="5 6" tab="Response"
+```json hl_lines="4 5" tab="Response"
 {
-    "consensus-version": "https://github.com/algorandfoundation/specs/tree/4a9db6a25595c6fd097cf9cc137cc83027787eaa",
+    "consensus-version": "https://github.com/algorandfoundation/specs/tree/e5f565421d720c6f75cdd186f7098495caf9101f",
     "fee": 1,
-    "genesis-hash": "TODO:betanet?",
-    "genesis-id": "TODO:betanet?",
-    "last-round": 3311,
+    "genesis-hash": "mFgazF+2uRS1tMiL9dsj01hJGySEmPN28B/TjjvpVW0=",
+    "genesis-id": "betanet-v1.0",
+    "last-round": 3958909,
     "min-fee": 1000
 }
-
 ```
-
-??? example "Complete Example - Connect to the Network"
-
-	```javascript tab="JavaScript"
-	const algosdk = require('algosdk');
-
-	async function ConnectToNetwork() {
-
-		const token = <algod-token>;
-		const server = <algod-address>;
-		const port = <port>;
-
-		let algodClient = new algosdk.Algodv2(algod_token, algod_server, algod_port);
-
-		let status = await algodClient.status();
-		console.log("Algorand network status: %o", status);
-
-		let version = await algodClient.versions();
-		console.log("Algorand protocol version: %o", version)
-	}
-	```
-
-	```python tab="Python"
-	import json
-	from algosdk.v2client import algod
-
-	def main():
-		algod_address = <algod-address>
-		algod_token = <algod-token>
-		algod_client = algod.AlgodClient(algod_token, algod_address)
-
-		try:
-			status = algod_client.status()
-			versions = algod_client.versions()
-			print(json.dumps(status, indent=4))
-			print(json.dumps(versions, indent=4))
-		except Exception as e:
-			print(e)
-	main()
-	```
-
-	```java tab="Java"
-	import com.algorand.algosdk.v2.client.common.AlgodClient;
-	import com.algorand.algosdk.v2.client.common.Client;
-
-	public class ConnectToNetwork { 
-		public static void main(String args[]) throws Exception {
-			
-			final String ALGOD_API_ADDR = <algod-address>;
-			final String ALGOD_API_TOKEN = <algod-token>;
-
-			//Create an instance of the algod API client
-			AlgodClient client = (AlgodClient) new AlgodClient()
-			client.setBasePath(ALGOD_API_ADDR);
-			ApiKeyAuth api_key = (ApiKeyAuth) client.getAuthentication("api_key");
-			api_key.setApiKey(ALGOD_API_TOKEN);
-			AlgodApi algodApiInstance = new AlgodApi(client); 
-			try {
-				NodeStatus status = algodApiInstance.getStatus();
-				Version version = algodApiInstance.getVersion();
-				System.out.println("Algorand network status: " + status);
-				System.out.println("Algorand network version: " + version);
-			} catch (ApiException e) {
-				System.err.println("Exception when calling algod#getStatus or algod#getVersion");
-				e.printStackTrace();
-			}
-		}
-	}
-	```
-
-	```go tab="Go"
-	package main
-
-	import (
-		"encoding/json"
-		"fmt"
-
-		"github.com/algorand/go-algorand-sdk/client/v2/algod"
-	)
-
-	const algodAddress = <algod-address>
-	const algodToken = <algod-token>
-
-	func main() {
-
-		algodClient, err := algod.MakeClient(algodAddress, algodToken)
-		if err != nil {
-			return
-		}
-
-		status, err := algodClient.Status()
-		if err != nil {
-			fmt.Printf("Error getting status: %s\n", err)
-			return
-		}
-		statusJSON, err := json.MarshalIndent(status, "", "\t")
-		if err != nil {
-			fmt.Printf("Can not marshall status data: %s\n", err)
-		}
-		fmt.Printf("%s\n", statusJSON)
-
-		version, err := algodClient.Versions()
-		if err != nil {
-			fmt.Printf("Error getting versions: %s\n", err)
-			return
-		}
-		versionJSON, err := json.MarshalIndent(version, "", "\t")
-		if err != nil {
-			fmt.Printf("Can not marshall version data: %s\n", err)
-		}
-		fmt.Printf("%s\n", versionJSON)
-	}
-	```
-
-??? example "Complete Example - Connect to the Network with API Service"
-
-	```javascript tab="JavaScript"
-	const algosdk = require('algosdk');
-
-	async function ConnectToNetwork() {
-
-		const server = <algod-address>;
-		const port = "";
-		const token = {
-			'X-API-Key': <service-api-key>
-		};
-
-		let algodClient = new algosdk.Algodv2(token, server, port);
-
-		let status = await algodClient.status();
-		console.log("Algorand network status: %o", status);
-
-		let version = await algodClient.versions();
-		console.log("Algorand protocol version: %o", version)
-	}
-	```
-
-	```python tab="Python"
-	import json
-	from algosdk.v2client import algod
-
-	def main():
-		algod_address = <algod-address>
-		algod_token = ""
-		headers = {
-			'X-API-Key': <service-api-key>
-		}
-		algod_client = algod.AlgodClient(algod_token, algod_address, headers)
-
-		try:
-			status = algod_client.status()
-			versions = algod_client.versions()
-			print(json.dumps(status, indent=4))
-			print(json.dumps(versions, indent=4))
-		except Exception as e:
-			print(e)
-	main()
-	```
-
-	```java tab="Java"
-	package example;
-
-	import java.math.BigInteger;
-
-	import java.util.concurrent.TimeUnit;
-
-	import com.algorand.algosdk.account.Account;
-	import com.algorand.algosdk.v2.client.common.AlgodClient;
-	import com.algorand.algosdk.v2.client.common.Client;
-
-	public class ConnectToNetwork {
-
-		public static void main(String args[]) throws Exception {
-
-			final String ALGOD_API_ADDR = <algod-address>;
-			final String ALGOD_API_KEY = <service-api-key>;
-
-			AlgodClient client = new AlgodClient();
-			client.setBasePath(ALGOD_API_ADDR);
-			client.addDefaultHeader("X-API-Key", ALGOD_API_KEY);
-			AlgodApi algodApiInstance = new AlgodApi(client);
-			try {
-				NodeStatus status = algodApiInstance.getStatus();
-				Version version = algodApiInstance.getVersion();
-				System.out.println("Algorand network status: " + status);
-				System.out.println("Algorand network version: " + version);
-			} catch (ApiException e) {
-				System.err.println("Exception when calling algod#getStatus or algod#getVersion");
-				e.printStackTrace();
-			}
-		}
-	}
-	```
-	
-	```go tab="Go"
-	package main
-
-	import (
-		"encoding/json"
-		"fmt"
-
-		"github.com/algorand/go-algorand-sdk/client/v2/algod"
-	)
-
-	const algodAddress = <algod-address>
-	const apiKey = <your-api-key>
-
-	func main() {
-		var headers []*algod.Header
-		headers = append(headers, &algod.Header{"X-API-Key", apiKey})
-		algodClient, err := algod.MakeClientWithHeaders(algodAddress, "", headers)
-
-		status, err := algodClient.Status()
-		if err != nil {
-			fmt.Printf("Error getting status: %s\n", err)
-			return
-		}
-		statusJSON, err := json.MarshalIndent(status, "", "\t")
-		if err != nil {
-			fmt.Printf("Can not marshall status data: %s\n", err)
-		}
-		fmt.Printf("%s\n", statusJSON)
-
-		version, err := algodClient.Versions()
-		if err != nil {
-			fmt.Printf("Error getting versions: %s\n", err)
-			return
-		}
-		versionJSON, err := json.MarshalIndent(version, "", "\t")
-		if err != nil {
-			fmt.Printf("Can not marshall version data: %s\n", err)
-		}
-		fmt.Printf("%s\n", versionJSON)
-	}
-	```
-
