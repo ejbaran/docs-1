@@ -5,18 +5,32 @@ This section is a getting started guide for developers looking to build applicat
 # What does it mean to build on Algorand?
 Building an application on Algorand means that your application, directly or indirectly, reads from or writes to the Algorand blockchain. Writing to the Algorand blockchain is synonymous with issuing a transaction that will later be confirmed within a block. Reading from the blockchain means reading back transactions that have been confirmed within prior blocks.
 
-A program connects to the Algorand blockchain through an **algod** client. The algod client requires a valid **algod REST endpoint IP address** and **algod token** from an Algorand node that is connected to the network you plan to interact with. 
+The following is a brief primer on some terms and relationships of the components that comprise the Algorand development environment. Figure 1. below illustrates these components and how they fit together. 
+
+![Figure 1. Algorand Developer Environment](../../../imgs/algo_dev_stack.png "Algorand Development Environment")
+
+The Algorand blockchain is a distributed system of **nodes** each maintaining their **local state** based on validating the history of blocks and the transactions therein. State data is maintained by the consensus protocol which is implemented within the `algod` daemon, often referred to as the node software. As a developer, this is most likely the base layer for your applications.
+
+An application connects to the Algorand blockchain through an **algod** client. The algod client requires a valid **algod REST endpoint IP address** and **algod token** from an Algorand node that is connected to the network you plan to interact with. 
 
 # Available tools
-Algorand officially supports four SDKs for developing applications on Algorand: [Javascript](../reference/sdks/index.md#javascript), [Java](../reference/sdks/index.md#java), [Python](../reference/sdks/index.md#python), and [Go](../reference/sdks/index.md#go). 
+## Software Development Kits (SDK)
 
-There are also three command-line utilities packaged with Algorand node software: [`goal`](../reference/cli/goal/goal.md), [`kmd`](../reference/cli/kmd.md), and [`algokey`](../reference/cli/algokey/algokey.md).
+Algorand officially supports four SDKs for developing applications: [Javascript](../reference/sdks/index.md#javascript), [Java](../reference/sdks/index.md#java), [Python](../reference/sdks/index.md#python), and [Go](../reference/sdks/index.md#go). Additionally, [Community Provided SDKs](./community/#sdks) expand the development reach. 
+
+## Command Line Interface (CLI) Tools 
+
+Algorand provides three command-line utilities packaged with Algorand node software: [`goal`](../reference/cli/goal/goal.md), [`kmd`](../reference/cli/kmd.md), and [`algokey`](../reference/cli/algokey/algokey.md).
 
 `goal` is the primary tool for operating a node and it also contains functionality to manage keys, sign and send transactions, create assets, and perform many of the same or similar functions that are available in the SDKs. Although not required to build an application, developers who run nodes may find it useful to achieve some level of fluency in `goal` as a complementary tool during testing and validation. `goal` _is_ required to setup more advanced testing environments using private networks.
 
 `kmd` is the CLI for the Algorand Key Management daemon and `algokey` is a standalone utility for generating Algorand accounts and for signing transactions. It is often used as a lightweight offline client for secure key signing. These two tools are not essential for getting started, so details of their use are described elsewhere.
 
 There are also REST APIs available for both **algod** and **kmd** processes.
+
+## Indexer
+
+Algorand provides a standalone daemon [algorand-indexer](../reference/indexer.md) that reads committed blocks from the Algorand blockchain and maintains a local database of transactions and accounts that are searchable and indexed. A [REST API](../reference/rest-apis/indexer.md) is available which enables application developers to perform rich and efficient queries on accounts, transactions, assets, and so forth.
 
 # Choosing a network
 There are three **public** Algorand Networks paired with the functionality to create **private** networks using any protocol version. 
