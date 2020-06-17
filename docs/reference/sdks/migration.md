@@ -251,10 +251,7 @@ Maven:
         </td>
         <td>
             ```java
-            AlgodClient algodClient = new AlgodClient();
-            algodClient.setBasePath(ALGOD_API_ADDR);
-            ApiKeyAuth algodApiKey = (ApiKeyAuth) algodClient.getAuthentication("algodApiKey");
-            algodApiKey.setApiKey(ALGOD_API_TOKEN);
+            AlgodClient client = (AlgodClient) new AlgodClient(ALGOD_API_ADDR, ALGOD_PORT, ALGOD_API_TOKEN);
             ```
         </td>
     </tr>
@@ -264,8 +261,7 @@ Maven:
         </td>
         <td>
             ```java
-            IndexerClient indeerClient = new IndexerClient();
-            indeerClient.setBasePath(INDEXER_API_ADDR);
+            IndexerClient indexerClient = (AlgodClient) new IndexerClient(INDEXER_API_ADDR, INDEXER_PORT);
             ```
         </td>
     </tr>
