@@ -36,13 +36,9 @@ def generate_algorand_keypair():
 ```java tab="Java"
 import com.algorand.algosdk.account.Account;	
 
-public class GenerateAlgorandKeyPair {
-	public static void main(String args[]) {
-		Account myAccount = new Account();
-        System.out.println("My Address: " + myAccount.getAddress());
-		System.out.println("My Passphrase: " + myAccount.toMnemonic());
-	}
-}
+Account myAccount = new Account();
+System.out.println("My Address: " + myAccount.getAddress());
+System.out.println("My Passphrase: " + myAccount.toMnemonic());
 ```
 
 ```go tab="Go"
@@ -114,21 +110,11 @@ algod_client = algod.AlgodClient(algod_token, algod_address)
 import com.algorand.algosdk.v2.client.common.AlgodClient;
 import com.algorand.algosdk.v2.client.common.Client;
 
-public class ConnectToNetwork {
-    public static void main(String args[]) throws Exception {
-        
-        final String ALGOD_API_ADDR = <algod-address>;
-        final String ALGOD_API_TOKEN = <algod-token>;
+final String ALGOD_API_ADDR = "localhost";
+final Integer ALGOD_PORT = 8888;
+final String ALGOD_API_TOKEN = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
-        //Create an instance of the algod API client
-        AlgodClient client = (AlgodClient) new AlgodClient()
-		client.setBasePath(ALGOD_API_ADDR);
-        ApiKeyAuth api_key = (ApiKeyAuth) client.getAuthentication("api_key");
-        api_key.setApiKey(ALGOD_API_TOKEN);
-        AlgodApi algodApiInstance = new AlgodApi(client); 
-		...
-	}
-}
+AlgodClient client = (AlgodClient) new AlgodClient(ALGOD_API_ADDR, ALGOD_PORT, ALGOD_API_TOKEN);
 ```
 
 ```Go tab=
@@ -155,7 +141,7 @@ func main() {
 Check your balance to confirm the added funds.
 
 ```javascript tab="JavaScript"
-...
+
 	const passphrase = "Your 25-word mnemonic generated and displayed above";
 
 	let myAccount = algosdk.mnemonicToSecretKey(passphrase)
@@ -166,28 +152,23 @@ Check your balance to confirm the added funds.
 ```
 
 ```python tab="Python"
-...
-	passphrase = "Your 25-word mnemonic generated and displayed above"
+passphrase = "Your 25-word mnemonic generated and displayed above"
 
-	private_key = mnemonic.to_private_key(passphrase)
-	my_address = mnemonic.to_public_key(passphrase)
-	print("My address: {}".format(my_address))
+private_key = mnemonic.to_private_key(passphrase)
+my_address = mnemonic.to_public_key(passphrase)
+print("My address: {}".format(my_address))
 
-	account_info = algod_client.account_info(my_address)
-	print("Account balance: {} microAlgos".format(account_info.get('amount')))
-...
+account_info = algod_client.account_info(my_address)
+print("Account balance: {} microAlgos".format(account_info.get('amount')))
 ```
 
 ```java tab="Java"
-...
-    final String PASSPHRASE = "Your 25-word mnemonic generated and displayed above";
-    com.algorand.algosdk.account.Account myAccount = new Account(PASSPHRASE);
-    String myAddress = myAccount.getAddress().toString();
-    System.out.println("My Address: " + myAddress);
+final String PASSPHRASE = "Your 25-word mnemonic generated and displayed above";
+String myAddress = myAccount.getAddress().toString();
 
-    Account accountInfo = algodApiInstance.accountInformation(myAddress);
-    System.out.println(String.format("Account Balance: %d microAlgos", accountInfo.getAmount()));
-...
+com.algorand.algosdk.v2.client.model.Account accountInfo = client.AccountInformation(myAccount.getAddress()).execute().body();
+
+System.out.println(String.format("Account Balance: %d microAlgos", accountInfo.amount));
 ```
 
 ```go tab="Go"
@@ -253,31 +234,17 @@ unsigned_txn = PaymentTxn(my_address, params, receiver, 1000000, None, note)
 ```
 
 ```java tab="Java"
-...
-final RECEIVER = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A";
-...
-BigInteger fee;
-String genesisID;
-Digest genesisHash;
-BigInteger firstValidRound;
-fee = BigInteger.valueOf(1000);
-try {
-    TransactionParams params = algodApiInstance.transactionParams();
-    genesisHash = new Digest(params.getGenesishashb64());
-    genesisID = params.getGenesisID();
-    System.out.println("Minimum Fee: " + fee);
-    firstValidRound = params.getLastRound();
-    System.out.println("Current Round: " + firstValidRound);
-} catch (ApiException e) {
-    throw new RuntimeException("Could not get params", e);
-}
-BigInteger amount = BigInteger.valueOf(1000000); // microAlgos
-BigInteger lastValidRound = firstValidRound.add(BigInteger.valueOf(1000)); // 1000 is the max tx window
+// Construct the transaction
+final String RECEIVER = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A";
 String note = "Hello World";
-Transaction txn = new Transaction(myAccount.getAddress(), fee, firstValidRound,
-        lastValidRound, note.getBytes(), amount, new Address(RECEIVER),
-        genesisID, genesisHash);
-...
+TransactionParametersResponse params = client.TransactionParams().execute().body();
+Transaction txn = Transaction.PaymentTransactionBuilder()
+.sender(myAddress)
+.note(note.getBytes())
+.amount(100000)
+.receiver(new Address(RECEIVER))
+.suggestedParams(params)
+.build();
 ```
 
 ```go tab="Go"
@@ -330,8 +297,8 @@ signed_txn = unsigned_txn.sign(mnemonic.to_private_key(passphrase))
 ```
 
 ```java tab="Java"
-    SignedTransaction signedTx = myAccount.signTransaction(txn);
-    System.out.println("Signed transaction with txId: " + signedTx.transactionID);
+SignedTransaction signedTxn = myAccount.signTransaction(txn);
+System.out.println("Signed transaction with txid: " + signedTxn.transactionID);
 ```
 
 ```go tab="Go"
@@ -360,22 +327,14 @@ await algodClient.sendRawTransaction(signedTxn).do();
 ```
 
 ```python tab="Python"
-...
 txid = algod_client.send_transaction(signed_txn)
-print("Signed transaction with txID: {}".format(txid))
-...
+print("Successfully sent transaction with txID: {}".format(txid)
 ```
 
 ```java tab="Java"
-...
-try {
-    byte[] encodedTxBytes = Encoder.encodeToMsgPack(signedTx);
-    TransactionID id = algodApiInstance.rawTransaction(encodedTxBytes);
-    System.out.println("Successfully sent tx with ID: " + id);
-} catch (ApiException e) {
-    System.err.println("Exception when calling algod#rawTransaction: " + e.getResponseBody());
-}
-...
+byte[] encodedTxBytes = Encoder.encodeToMsgPack(signedTxn);
+String id = client.RawTransaction().rawtxn(encodedTxBytes).execute().body().txId;
+System.out.println("Successfully sent tx with ID: " + id);
 ```
 
 ```go tab="Go"
@@ -410,7 +369,7 @@ Transaction [TXID] committed in round [COMMITTED_ROUND]
 
 !!! Info
     If you are using a third-party service, it may require you to specify a `Content-Type` header when you send transactions to the network. Set the `Content-Type` to `application/x-binary` and add it as a header to the algod client or the specific request that sends the transaction.
-    
+
     ```JavaScript tab=
 	const algosdk = require("algosdk");
 
@@ -424,22 +383,17 @@ Transaction [TXID] committed in round [COMMITTED_ROUND]
 		};
 
 		let postAlgodClient = new algosdk.Algod(token, server, port);
-		...
+		
 	}
-
 	```
 
-	```Python tab=
-    ...
-	algod_client.send_transaction(signed_txn, headers={'content-type': 'application/x-binary'})
-    ...
+	```Python tab= 
+	algod_client.send_transaction(signed_txn, headers={'content-type': 'application/x-binary'})  
 	```
 
 	```Go tab=
-    ...
-        txHeaders := append([]*algod.Header{}, &algod.Header{"Content-Type", "application/x-binary"})
-        sendResponse, err := algodClient.SendRawTransaction(bytes, txHeaders...)
-    ...
+    txHeaders := append([]*algod.Header{}, &algod.Header{"Content-Type", "application/x-binary"})
+    sendResponse, err := algodClient.SendRawTransaction(bytes, txHeaders)
 	```
 
 # Wait for confirmation
@@ -478,32 +432,30 @@ while True:
         print("Transaction {} confirmed in round {}.".format(txid, txinfo.get('confirmed-round')))
         return txinfo
     else:
-        print("Waiting for confirmation...")
+        print("Waiting for confirmation")
         last_round += 1
         client.status_after_block(last_round)
 ```
 
 ```java tab="Java"
-...
-    // utility function to wait on a transaction to be confirmed    
-    public void waitForConfirmation( String txID ) throws Exception{
-        if( algodApiInstance == null ) connectToNetwork();
-        while(true) {
-            try {
-                //Check the pending tranactions
-                com.algorand.algosdk.algod.client.model.Transaction pendingInfo = algodApiInstance.pendingTransactionInformation(txID);
-                if (pendingInfo.getRound() != null && pendingInfo.getRound().longValue() > 0) {
-                    //Got the completed Transaction
-                    System.out.println("Transaction " + pendingInfo.getTx() + " confirmed in round " + pendingInfo.getRound().longValue());
-                    break;
-                } 
-                algodApiInstance.waitForBlock(BigInteger.valueOf( algodApiInstance.getStatus().getLastRound().longValue() +1 ) );
-            } catch (Exception e) {
-                throw( e );
-            }
+// utility function to wait on a transaction to be confirmed    
+public void waitForConfirmation( String txID ) throws Exception{
+    if( algodApiInstance == null ) connectToNetwork();
+    while(true) {
+        try {
+            //Check the pending tranactions
+            com.algorand.algosdk.algod.client.model.Transaction pendingInfo = algodApiInstance.pendingTransactionInformation(txID);
+            if (pendingInfo.getRound() != null && pendingInfo.getRound().longValue() > 0) {
+                //Got the completed Transaction
+                System.out.println("Transaction " + pendingInfo.getTx() + " confirmed in round " + pendingInfo.getRound().longValue());
+                break;
+            } 
+            algodApiInstance.waitForBlock(BigInteger.valueOf( algodApiInstance.getStatus().getLastRound().longValue() +1 ) );
+        } catch (Exception e) {
+            throw( e );
         }
     }
-...
+}
 ```
 
 ```go tab="Go"
@@ -525,7 +477,7 @@ func waitForConfirmation(txID string, client *algod.Client) {
 			fmt.Printf("Transaction "+txID+" confirmed in round %d\n", pt.ConfirmedRound)
 			break
 		}
-		fmt.Printf("waiting for confirmation...\n")
+		fmt.Printf("waiting for confirmation\n")
 		lastRound++
 		status, err = client.StatusAfterBlock(lastRound).Do(context.Background())
 	}
@@ -565,24 +517,15 @@ console.log("Decoded note: %s", algosdk.decodeObj(confirmedTxn.txn.txn.note));
 ```
 
 ```python tab="Python"
-...
-    confirmed_txn = algod_client.pending_transaction_info(txid)
-    print("Transaction information: {}".format(json.dumps(confirmed_txn, indent=4)))
-    print("Decoded note: {}".format(base64.b64decode(confirmed_txn["txn"]["txn"]["note"]).decode()))
-...
+confirmed_txn = algod_client.pending_transaction_info(txid)
+print("Transaction information: {}".format(json.dumps(confirmed_txn, indent=4)))
+print("Decoded note: {}".format(base64.b64decode(confirmed_txn["txn"]["txn"]["note"]).decode()))
 ```
 
 ```java tab="Java"
-...
-    try {
-        com.algorand.algosdk.algod.client.model.Transaction confirmedTxn =
-                algodApiInstance.transactionInformation(RECEIVER, signedTxn.transactionID);
-        System.out.println("Transaction information (with notes): " + confirmedTxn.toString());
-        System.out.println("Decoded note: " + new String(confirmedTxn.getNoteb64()));
-    } catch (ApiException e) {
-        System.err.println("Exception when calling algod#transactionInformation: " + e.getCode());
-    }
-...
+PendingTransactionResponse pTrx = client.PendingTransactionInformation(id).execute().body();
+System.out.println("Transaction information (with notes): " + pTrx.toString());
+System.out.println("Decoded note: " + new String(pTrx.txn.tx.note));
 ```
 
 ```go tab="Go"
@@ -707,7 +650,7 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
                 print("Transaction {} confirmed in round {}.".format(txid, txinfo.get('confirmed-round')))
                 return txinfo
             else:
-                print("Waiting for confirmation...")
+                print("Waiting for confirmation")
                 last_round += 1
                 client.status_after_block(last_round)
 
@@ -756,51 +699,46 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
     ```
 
     ```java tab="Java"
-    package com.algorand.javatest;
+    package com.algorand.tutorial;
 
-    import java.math.BigInteger;
-
-    import java.util.concurrent.TimeUnit;
 
     import com.algorand.algosdk.account.Account;
-    import com.algorand.algosdk.algod.client.AlgodClient;
-    import com.algorand.algosdk.algod.client.ApiException;
-    import com.algorand.algosdk.algod.client.api.AlgodApi;
-    import com.algorand.algosdk.algod.client.auth.ApiKeyAuth;
-    import com.algorand.algosdk.algod.client.model.*;
     import com.algorand.algosdk.crypto.Address;
-    import com.algorand.algosdk.crypto.Digest;
-    import com.algorand.algosdk.transaction.Transaction;
     import com.algorand.algosdk.transaction.SignedTransaction;
+    import com.algorand.algosdk.transaction.Transaction;
     import com.algorand.algosdk.util.Encoder;
-
+    import com.algorand.algosdk.v2.client.common.AlgodClient;
+    import com.algorand.algosdk.v2.client.common.Response;
+    import com.algorand.algosdk.v2.client.model.PendingTransactionResponse;
+    import com.algorand.algosdk.v2.client.model.TransactionParametersResponse;
     public class Tutorial {
-        public AlgodApi algodApiInstance = null;
+        public AlgodClient client = null;
         // utility function to connect to a node
-        private AlgodApi connectToNetwork(){
+        private AlgodClient connectToNetwork(){
 
             // Initialize an algod client
-            final String ALGOD_API_ADDR = "algod-address<PLACEHOLDER>";
-            final String ALGOD_API_TOKEN = "algod-token<PLACEHOLDER>";
-            AlgodClient client = (AlgodClient) new AlgodClient().setBasePath(ALGOD_API_ADDR);
-            ApiKeyAuth api_key = (ApiKeyAuth) client.getAuthentication("api_key");
-            api_key.setApiKey(ALGOD_API_TOKEN);
-            algodApiInstance = new AlgodApi(client);   
-            return algodApiInstance;
+            final String ALGOD_API_ADDR = "localhost";
+            final Integer ALGOD_PORT = 8888;
+            final String ALGOD_API_TOKEN = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+
+            AlgodClient client = (AlgodClient) new AlgodClient(ALGOD_API_ADDR, ALGOD_PORT, ALGOD_API_TOKEN);
+            return client;
         }
         // utility function to wait on a transaction to be confirmed    
         public void waitForConfirmation( String txID ) throws Exception{
-            if( algodApiInstance == null ) connectToNetwork();
+            if( client == null ) this.client = connectToNetwork();
+            Long lastRound = client.GetStatus().execute().body().lastRound;
             while(true) {
                 try {
                     //Check the pending tranactions
-                    com.algorand.algosdk.algod.client.model.Transaction pendingInfo = algodApiInstance.pendingTransactionInformation(txID);
-                    if (pendingInfo.getRound() != null && pendingInfo.getRound().longValue() > 0) {
+                    Response<PendingTransactionResponse> pendingInfo = client.PendingTransactionInformation(txID).execute();
+                    if (pendingInfo.body().confirmedRound != null && pendingInfo.body().confirmedRound > 0) {
                         //Got the completed Transaction
-                        System.out.println("Transaction " + pendingInfo.getTx() + " confirmed in round " + pendingInfo.getRound().longValue());
+                        System.out.println("Transaction " + txID + " confirmed in round " + pendingInfo.body().confirmedRound);
                         break;
                     } 
-                    algodApiInstance.waitForBlock(BigInteger.valueOf( algodApiInstance.getStatus().getLastRound().longValue() +1 ) );
+                    lastRound++;
+                    client.WaitForBlock(lastRound).execute();
                 } catch (Exception e) {
                     throw( e );
                 }
@@ -809,69 +747,53 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
 
         public void gettingStartedExample() throws Exception {
 
-            if( algodApiInstance == null ) connectToNetwork();
+            if( client == null ) this.client = connectToNetwork();
 
             // Import your private key mnemonic and address
-            final String PASSPHRASE = <25-word-mnemonic>;
+            final String PASSPHRASE = "liquid million govern habit nasty danger spoil air monitor lobster solar misery confirm problem tuna hollow ritual assume mean return enrich mistake seven abstract tent";
             com.algorand.algosdk.account.Account myAccount = new Account(PASSPHRASE);
             System.out.println("My Address: " + myAccount.getAddress());
 
             String myAddress = myAccount.getAddress().toString();
-            com.algorand.algosdk.algod.client.model.Account accountInfo = 
-                algodApiInstance.accountInformation(myAddress);
-            System.out.println(String.format("Account Balance: %d microAlgos", accountInfo.getAmount()));
 
-            // Construct the transaction
-            final String RECEIVER = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A";
-            BigInteger fee;
-            String genesisID;
-            Digest genesisHash;
-            BigInteger firstValidRound;
-            fee = BigInteger.valueOf(1000);
+            com.algorand.algosdk.v2.client.model.Account accountInfo = client.AccountInformation(myAccount.getAddress()).execute().body();
+
+            System.out.println(String.format("Account Balance: %d microAlgos", accountInfo.amount));
+
             try {
-                TransactionParams params = algodApiInstance.transactionParams();
-                genesisHash = new Digest(params.getGenesishashb64());
-                genesisID = params.getGenesisID();
-                System.out.println("Minimum Fee: " + fee);
-                firstValidRound = params.getLastRound();
-                System.out.println("Current Round: " + firstValidRound);
-            } catch (ApiException e) {
-                throw new RuntimeException("Could not get params", e);
-            }
-            BigInteger amount = BigInteger.valueOf(1000000); // microAlgos
-            BigInteger lastValidRound = firstValidRound.add(BigInteger.valueOf(1000)); // 1000 is the max tx window
-            String note = "Hello World";
+                // Construct the transaction
+                final String RECEIVER = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A";
+                String note = "Hello World";
+                TransactionParametersResponse params = client.TransactionParams().execute().body();
+                Transaction txn = Transaction.PaymentTransactionBuilder()
+                .sender(myAddress)
+                .note(note.getBytes())
+                .amount(100000)
+                .receiver(new Address(RECEIVER))
+                .suggestedParams(params)
+                .build();
 
 
-            Transaction txn = new Transaction(myAccount.getAddress(), fee, firstValidRound,
-                    lastValidRound, note.getBytes(), amount, new Address(RECEIVER),
-                    genesisID, genesisHash);
+                // Sign the transaction
+                SignedTransaction signedTxn = myAccount.signTransaction(txn);
+                System.out.println("Signed transaction with txid: " + signedTxn.transactionID);
 
-            // Sign the transaction
-            SignedTransaction signedTxn = myAccount.signTransaction(txn);
-            System.out.println("Signed transaction with txid: " + signedTxn.transactionID);
-
-            // Submit the transaction to the network
-            try {
+                // Submit the transaction to the network
                 byte[] encodedTxBytes = Encoder.encodeToMsgPack(signedTxn);
-                TransactionID id = algodApiInstance.rawTransaction(encodedTxBytes);
+                String id = client.RawTransaction().rawtxn(encodedTxBytes).execute().body().txId;
                 System.out.println("Successfully sent tx with ID: " + id);
 
                 // Wait for transaction confirmation
-                waitForConfirmation(id.getTxId());
-            } catch (ApiException e) {
-                System.err.println("Exception when calling algod#rawTransaction: " + e.getResponseBody());
-            }
+                waitForConfirmation(id);
+
+                //Read the transaction
+                PendingTransactionResponse pTrx = client.PendingTransactionInformation(id).execute().body();
+                System.out.println("Transaction information (with notes): " + pTrx.toString());
+                System.out.println("Decoded note: " + new String(pTrx.txn.tx.note));
 
 
-            //Read the transaction from the blockchain
-            try {
-                com.algorand.algosdk.algod.client.model.Transaction confirmedTxn =
-                        algodApiInstance.transactionInformation(RECEIVER, signedTxn.transactionID);
-                System.out.println("Transaction information (with notes): " + confirmedTxn.toString());
-                System.out.println("Decoded note: " + new String(confirmedTxn.getNoteb64()));
-            } catch (ApiException e) {
-                System.err.println("Exception when calling algod#transactionInformation: " + e.getCode());
+            } catch (Exception e) {
+                System.err.println("Exception when calling algod#transactionInformation: " + e.getMessage());
             }
         }
 
@@ -918,7 +840,7 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
                 fmt.Printf("Transaction "+txID+" confirmed in round %d\n", pt.ConfirmedRound)
                 break
             }
-            fmt.Printf("waiting for confirmation...\n")
+            fmt.Printf("waiting for confirmation\n")
             lastRound++
             status, err = client.StatusAfterBlock(lastRound).Do(context.Background())
         }
