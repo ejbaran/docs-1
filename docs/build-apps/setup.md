@@ -16,11 +16,11 @@ An application connects to the Algorand blockchain through an **algod** client. 
 # Available tools
 ## Software Development Kits (SDK)
 
-Algorand officially supports four SDKs for developing applications: [Javascript](./reference/sdks.md#javascript), [Java](./reference/sdks.md#java), [Python](./reference/sdks.md#python), and [Go](./reference/sdks.md#go). Additionally, [Community Provided SDKs](./community/#sdks) expand the development reach. 
+Algorand officially supports four SDKs for developing applications: [Javascript](../reference/sdks/index.md#javascript), [Java](../reference/sdks/index.md#java), [Python](../reference/sdks/index.md#python), and [Go](../reference/sdks/index.md#go). Additionally, [Community Provided SDKs](./community/#sdks) expand the development reach. 
 
 ## Command Line Interface (CLI) Tools 
 
-Algorand provides three command-line utilities packaged with Algorand node software: [`goal`](./reference/cli/goal/goal.md), [`kmd`](./reference/cli/kmd.md), and [`algokey`](./reference/cli/algokey/algokey.md).
+Algorand provides three command-line utilities packaged with Algorand node software: [`goal`](../reference/cli/goal/goal.md), [`kmd`](../reference/cli/kmd.md), and [`algokey`](../reference/cli/algokey/algokey.md).
 
 `goal` is the primary tool for operating a node and it also contains functionality to manage keys, sign and send transactions, create assets, and perform many of the same or similar functions that are available in the SDKs. Although not required to build an application, developers who run nodes may find it useful to achieve some level of fluency in `goal` as a complementary tool during testing and validation. `goal` _is_ required to setup more advanced testing environments using private networks.
 
@@ -108,7 +108,7 @@ $ cat $ALGORAND_DATA/algod.token
 **Production Ready**| ✅ | ❌ | ✅
 
 # Install your preferred SDK
-Install your preferred SDK by following the setup instructions in the [SDK reference docs](../reference/sdks.md).
+Install your preferred SDK by following the setup instructions in the [SDK reference docs](../reference/sdks/index.md).
 
 # Other Setup Tips
 
