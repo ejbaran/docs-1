@@ -187,7 +187,7 @@ Maven:
 <dependency>
     <groupId>com.algorand</groupId>
     <artifactId>algosdk</artifactId>
-    <version>1.4.0</version>
+    <version>1.4.1</version>
 </dependency>
 ```
 ### Supported Clients by Version
@@ -284,7 +284,7 @@ make build
 | SDK Version | Supported V1 APIs | Supported V2 APIs |
 | ----------- | -------------------- | -------------------- |
 | thru go-algorand-sdk 1.3.0 | `algod`, `kmd`       | n/a                  |
-| from go-algorand-sdk 1.4.0 | `kmd`                | `algod`, `algorand-indexer` |
+| from go-algorand-sdk 1.4.2 | `kmd`                | `algod`, `algorand-indexer` |
 
 
 ### Supported Library Imports
