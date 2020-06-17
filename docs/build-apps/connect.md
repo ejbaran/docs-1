@@ -12,7 +12,7 @@ const algosdk = require('algosdk');
 
 const algodToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const algodServer = "http://localhost";
-const algodPort = 8888;
+const algodPort = 4001;
 
 let algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
 ```
@@ -20,7 +20,7 @@ let algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
 ```Python tab=
 from algosdk.v2client import algod
 
-algod_address = "http://localhost:8888"
+algod_address = "http://localhost:4001"
 algod_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 algod_client = algod.AlgodClient(algod_token, algod_address)
 ```
@@ -30,7 +30,7 @@ import com.algorand.algosdk.v2.client.common.AlgodClient;
 import com.algorand.algosdk.v2.client.common.Client;
 
 final String ALGOD_API_ADDR = "localhost";
-final Integer ALGOD_PORT = 8888;
+final Integer ALGOD_PORT = 4001;
 final String ALGOD_API_TOKEN = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
 AlgodClient client = (AlgodClient) new AlgodClient(ALGOD_API_ADDR, ALGOD_PORT, ALGOD_API_TOKEN);
@@ -43,7 +43,7 @@ import (
     "github.com/algorand/go-algorand-sdk/client/v2/algod" 
 )
 
-const algodAddress = "http://localhost:8888"
+const algodAddress = "http://localhost:4001"
 const algodToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 func main() {
@@ -173,7 +173,7 @@ Genesis ID: [GENESIS_ID]
 Genesis hash: [GENESIS_HASH]
 ```
 
-The _status_ methods returns information about the status of the node, such as the latest round<LINK TO GLOSSARY>, referred to as `lastRound`, from the perspective of the node you are connected to. Each of the SDKs may differ slightly in which information they return for each call. Shown below is the response from the REST API call.
+The _status_ methods returns information about the status of the node, such as the latest round<LINK TO GLOSSARY>, referred to as `last-round`, from the perspective of the node you are connected to. Each of the SDKs may differ slightly in which information they return for each call. Shown below is the response from the REST API call.
 
 ```json tab="Response"
 {
@@ -240,11 +240,11 @@ The _/v2/transactions/params_ endpoint returns information about the identity of
 		fmt.Printf("Error Algorand suggested parameters: %s\n", err)
 		return
 	}
-	txParams, err := json.MarshalIndent(version, "", "\t")
+	JSON, err := json.MarshalIndent(txParams, "", "\t")
 	if err != nil {
 		fmt.Printf("Can not marshall suggested parameters data: %s\n", err)
 	}
-	fmt.Printf("%s\n", txParams)
+	fmt.Printf("%s\n", JSON)
 ...
 ```
 
@@ -275,9 +275,9 @@ Check the `genesis-id` and the `genesis-hash`, as shown in the REST response bel
 {
     "consensus-version": "https://github.com/algorandfoundation/specs/tree/e5f565421d720c6f75cdd186f7098495caf9101f",
     "fee": 1,
-    "genesis-hash": "mFgazF+2uRS1tMiL9dsj01hJGySEmPN28B/TjjvpVW0=",
-    "genesis-id": "betanet-v1.0",
-    "last-round": 3958909,
+    "genesis-hash": "SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=",
+    "genesis-id": "testnet-v1.0",
+    "last-round": 7430522,
     "min-fee": 1000
 }
 ```

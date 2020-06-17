@@ -86,14 +86,14 @@ For [TestNet](../../reference/algorand-networks/testnet/#faucet) and [BetaNet](.
 
 ## Connect your client
 
-Each SDK provides a client which must instantiate prior to making calls to the API endopoints. You must provide values for `<algod-taddress>`, `<port>` and `<algod-token>`. The CLI Tools implement the client natively. 
+Each SDK provides a client which must instantiate prior to making calls to the API endopoints. You must provide values for `<algod-address>`, `<port>` and `<algod-token>`. The CLI tools implement the client natively. 
 
 _Learn more about [Connecting to a Node](connect.md)._
 
 ```JavaScript tab=
 const algodToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const algodServer = "http://localhost";
-const algodPort = 8888;
+const algodPort = 4001;
 
 let algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
 ```
@@ -101,7 +101,7 @@ let algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
 ```Python tab=
 from algosdk.v2client import algod
 
-algod_address = "http://localhost:8888"
+algod_address = "http://localhost:4001"
 algod_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 algod_client = algod.AlgodClient(algod_token, algod_address)
 ```
@@ -111,7 +111,7 @@ import com.algorand.algosdk.v2.client.common.AlgodClient;
 import com.algorand.algosdk.v2.client.common.Client;
 
 final String ALGOD_API_ADDR = "localhost";
-final Integer ALGOD_PORT = 8888;
+final Integer ALGOD_PORT = 4001;
 final String ALGOD_API_TOKEN = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
 AlgodClient client = (AlgodClient) new AlgodClient(ALGOD_API_ADDR, ALGOD_PORT, ALGOD_API_TOKEN);
@@ -124,7 +124,7 @@ import (
 	"github.com/algorand/go-algorand-sdk/client/v2/algod" 
 )
 
-const algodAddress = "http://localhost:8888"
+const algodAddress = "http://localhost:4001"
 const algodToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 func main() {
@@ -587,7 +587,7 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
             // Connect your client
             const algodToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
             const algodServer = "http://localhost";
-            const algodPort = 8888;
+            const algodPort = 4001;
 
             let algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
             
@@ -655,7 +655,7 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
                 client.status_after_block(last_round)
 
     def gettingStartedExample():
-        algod_address = "http://localhost:8888"
+        algod_address = "http://localhost:4001"
         algod_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         algod_client = algod.AlgodClient(algod_token, algod_address)
 
@@ -718,7 +718,7 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
 
             // Initialize an algod client
             final String ALGOD_API_ADDR = "localhost";
-            final Integer ALGOD_PORT = 8888;
+            final Integer ALGOD_PORT = 4001;
             final String ALGOD_API_TOKEN = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
             AlgodClient client = (AlgodClient) new AlgodClient(ALGOD_API_ADDR, ALGOD_PORT, ALGOD_API_TOKEN);
@@ -819,7 +819,7 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
         "github.com/algorand/go-algorand-sdk/types"
     )
 
-    const algodAddress = "http://localhost:8888"
+    const algodAddress = "http://localhost:4001"
     const algodToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
     // Function that waits for a given txId to be confirmed by the network
