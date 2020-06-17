@@ -575,7 +575,7 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
 
         try{        
             // Generate a public/private key pair
-            const passphrase = "liquid million govern habit nasty danger spoil air monitor lobster solar misery confirm problem tuna hollow ritual assume mean return enrich mistake seven abstract tent";
+            const passphrase = "Your 25-word mnemonic generated and displayed above";
             let myAccount = algosdk.mnemonicToSecretKey(passphrase);
             console.log("My address: %s", myAccount.addr);
             console.log( "My passphrase: " + passphrase );
@@ -659,7 +659,7 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
         algod_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         algod_client = algod.AlgodClient(algod_token, algod_address)
 
-        passphrase = "liquid million govern habit nasty danger spoil air monitor lobster solar misery confirm problem tuna hollow ritual assume mean return enrich mistake seven abstract tent"
+        passphrase = "Your 25-word mnemonic generated and displayed above"
 
         # generate a public/private key pair
         private_key = mnemonic.to_private_key(passphrase)
@@ -750,7 +750,7 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
             if( client == null ) this.client = connectToNetwork();
 
             // Import your private key mnemonic and address
-            final String PASSPHRASE = "liquid million govern habit nasty danger spoil air monitor lobster solar misery confirm problem tuna hollow ritual assume mean return enrich mistake seven abstract tent";
+            final String PASSPHRASE = "Your 25-word mnemonic generated and displayed above";
             com.algorand.algosdk.account.Account myAccount = new Account(PASSPHRASE);
             System.out.println("My Address: " + myAccount.getAddress());
 
@@ -853,7 +853,7 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
             return
         }
 
-        passphrase := "liquid million govern habit nasty danger spoil air monitor lobster solar misery confirm problem tuna hollow ritual assume mean return enrich mistake seven abstract tent"
+        passphrase := "Your 25-word mnemonic generated and displayed above"
 
         privateKey, err := mnemonic.ToPrivateKey(passphrase)
         if err != nil {
