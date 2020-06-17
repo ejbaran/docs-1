@@ -101,15 +101,12 @@ const algodPort = 8888;
 
 let algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
 ```
-}
-```
 
 ```Python tab=
 from algosdk.v2client import algod
 
-algod_address = <algod-address>
-algod_token = <algod-token>
-
+algod_address = "http://localhost:8888"
+algod_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 algod_client = algod.AlgodClient(algod_token, algod_address)
 ```
 
@@ -141,13 +138,14 @@ import (
 	"github.com/algorand/go-algorand-sdk/client/v2/algod" 
 )
 
-const algodAddress = <algod-address>
-const algodToken = <algod-token>
+const algodAddress = "http://localhost:8888"
+const algodToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 func main() {
 	algodClient, err := algod.MakeClient(algodAddress, algodToken)
 	if err != nil {
-		return
+        fmt.Printf("Issue with creating algod client: %s\n", err)
+        return
 	}
 }
 ```
@@ -158,7 +156,8 @@ Check your balance to confirm the added funds.
 
 ```javascript tab="JavaScript"
 ...
-	const passphrase = "<25-word-mnemonic>";
+	const passphrase = "Your 25-word mnemonic generated and displayed above";
+
 	let myAccount = algosdk.mnemonicToSecretKey(passphrase)
 	console.log("My address: %s", myAccount.addr)
 
@@ -168,7 +167,8 @@ Check your balance to confirm the added funds.
 
 ```python tab="Python"
 ...
-	passphrase = <25-word-mnemonic>
+	passphrase = "Your 25-word mnemonic generated and displayed above"
+
 	private_key = mnemonic.to_private_key(passphrase)
 	my_address = mnemonic.to_public_key(passphrase)
 	print("My address: {}".format(my_address))
@@ -180,7 +180,7 @@ Check your balance to confirm the added funds.
 
 ```java tab="Java"
 ...
-    final String PASSPHRASE = <25-word-mnemonic>;
+    final String PASSPHRASE = "Your 25-word mnemonic generated and displayed above";
     com.algorand.algosdk.account.Account myAccount = new Account(PASSPHRASE);
     String myAddress = myAccount.getAddress().toString();
     System.out.println("My Address: " + myAddress);
@@ -191,25 +191,25 @@ Check your balance to confirm the added funds.
 ```
 
 ```go tab="Go"
-...
-	passphrase := <25-word-mnemonic>
-	privateKey, err := mnemonic.ToPrivateKey(passphrase)
-	if err != nil {
-		fmt.Printf("Issue with mnemonic conversion: %s\n", err)
-	}
+passphrase := "Your 25-word mnemonic generated and displayed above"
+privateKey, err := mnemonic.ToPrivateKey(passphrase)
+if err != nil {
+    fmt.Printf("Issue with mnemonic conversion: %s\n", err)
+    return
+}
 
-	var myAddress types.Address
-	publicKey := privateKey.Public()
-	cpk := publicKey.(ed25519.PublicKey)
-	copy(myAddress[:], cpk[:])
-	fmt.Printf("My address: %s\n", myAddress.String())
+var myAddress types.Address
+publicKey := privateKey.Public()
+cpk := publicKey.(ed25519.PublicKey)
+copy(myAddress[:], cpk[:])
+fmt.Printf("My address: %s\n", myAddress.String())
 
-    accountInfo, err := algodClient.AccountInformation(myAddress.String()).Do(context.Background())
-    if err != nil {
-        fmt.Printf("Error getting account info: %s\n", err)
-    }
-    fmt.Printf("Account balance: %d microAlgos\n", accountInfo.Amount)
-...
+accountInfo, err := algodClient.AccountInformation(myAddress.String()).Do(context.Background())
+if err != nil {
+    fmt.Printf("Error getting account info: %s\n", err)
+    return
+}
+fmt.Printf("Account balance: %d microAlgos\n", accountInfo.Amount)
 ```
 
 ```bash tab="cURL"
@@ -231,39 +231,25 @@ Transactions require a certain minimum set of parameters to be valid. Mandatory 
 fields. 
 
 ```javascript tab="JavaScript"
-        let params = await algodClient.getTransactionParams().do();
-        console.log(params);
+let params = await algodClient.getTransactionParams().do();
+// comment out the next two lines to use suggested fee
+params.fee = 1000;
+params.flatFee = true;
+const receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A";
+let note = algosdk.encodeObj("Hello World");
 
-        let note = algosdk.encodeObj("Hello World");
-        console.log(note);
-
-        // comment out the next two lines to use suggested fee
-        params.fee = 1000;
-        params.flatFee = true;
-        let txn = algosdk.makePaymentTxnWithSuggestedParams(myAccount.addr, receiver, 1000000, undefined, note, params);        
+let txn = algosdk.makePaymentTxnWithSuggestedParams(myAccount.addr, receiver, 1000000, undefined, note, params);        
 ```
 
 ```python tab="Python"
-...
-	params = algod_client.suggested_params()
-	note = "Hello World".encode()
-	receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A"
+params = algod_client.suggested_params()
+# comment out the next two (2) lines to use suggested fees
+params.flat_fee = True
+params.fee = 1000
+receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A"
+note = "Hello World".encode()
 
-    data = {
-        "sender": my_address,
-        "receiver": receiver,
-        "fee": params.fee,
-        "flat_fee": True,
-        "amt": 1000000,
-        "first": params.first,
-        "last": params.last,
-        "note": note,
-        "gen": params.gen,
-        "gh": params.gh
-    }
-	
-	txn = transaction.PaymentTxn(**data)
-...
+unsigned_txn = PaymentTxn(my_address, params, receiver, 1000000, None, note)
 ```
 
 ```java tab="Java"
@@ -295,29 +281,30 @@ Transaction txn = new Transaction(myAccount.getAddress(), fee, firstValidRound,
 ```
 
 ```go tab="Go"
-...
-    txParams, err := algodClient.SuggestedParams().Do(context.Background())
-    if err != nil {
-        fmt.Printf("Error getting suggested tx params: %s\n", err)
-        return
-    }
-    
-	fromAddr := myAddress
-	toAddr := "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A"
-    var amount uint64 = 1000000
-    var minFee uint64 = 1000
-    note := []byte("Hello World")
-    genID := txParams.GenesisID
-    genHash := txParams.GenesisHash
-    firstValidRound := uint64(txParams.FirstRoundValid)
-    lastValidRound := uint64(txParams.LastRoundValid)
+txParams, err := algodClient.SuggestedParams().Do(context.Background())
+if err != nil {
+    fmt.Printf("Error getting suggested tx params: %s\n", err)
+    return
+}
+// comment out the next two (2) lines to use suggested fees
+txParams.FlatFee = true
+txParams.Fee = 1000
 
-	txn, err := transaction.MakePaymentTxnWithFlatFee(fromAddr.String(), toAddr, minFee, amount, firstValidRound, lastValidRound, note, "", genID, genHash)
-	if err != nil {
-		fmt.Printf("Error creating transaction: %s\n", err)
-		return
-    }
-...
+fromAddr := myAddress.String()
+toAddr := "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A"
+var amount uint64 = 1000000
+var minFee uint64 = 1000
+note := []byte("Hello World")
+genID := txParams.GenesisID
+genHash := txParams.GenesisHash
+firstValidRound := uint64(txParams.FirstRoundValid)
+lastValidRound := uint64(txParams.LastRoundValid)
+
+txn, err := transaction.MakePaymentTxnWithFlatFee(fromAddr, toAddr, minFee, amount, firstValidRound, lastValidRound, note, "", genID, genHash)
+if err != nil {
+    fmt.Printf("Error creating transaction: %s\n", err)
+    return
+}
 ```
 
 ```bash tab="goal"
@@ -339,29 +326,21 @@ console.log("Signed transaction with txID: %s", txId);
 ```
 
 ```python tab="Python"
-...
-	signed_txn = txn.sign(private_key)
-	txid = signed_txn.transaction.get_txid()
-	print("Signed transaction with txID: {}".format(txid))
-...
+signed_txn = unsigned_txn.sign(mnemonic.to_private_key(passphrase))
 ```
 
 ```java tab="Java"
-...
     SignedTransaction signedTx = myAccount.signTransaction(txn);
     System.out.println("Signed transaction with txId: " + signedTx.transactionID);
-...
 ```
 
 ```go tab="Go"
-...
-    txID, bytes, err := crypto.SignTransaction(privateKey, txn)
-    if err != nil {
-        fmt.Printf("Failed to sign transaction: %s\n", err)
-        return
-    }
-    fmt.Printf("Signed txid: %s\n", txID)
-...
+txID, signedTxn, err := crypto.SignTransaction(privateKey, txn)
+if err != nil {
+    fmt.Printf("Failed to sign transaction: %s\n", err)
+    return
+}
+fmt.Printf("Signed txid: %s\n", txID)
 ```
 
 ```bash tab="goal"
@@ -382,7 +361,8 @@ await algodClient.sendRawTransaction(signedTxn).do();
 
 ```python tab="Python"
 ...
-	algod_client.send_transaction(signed_txn)
+txid = algod_client.send_transaction(signed_txn)
+print("Signed transaction with txID: {}".format(txid))
 ...
 ```
 
@@ -399,14 +379,12 @@ try {
 ```
 
 ```go tab="Go"
-...
-    sendResponse, err := algodClient.SendRawTransaction(bytes).Do(context.Background())
-    if err != nil {
-        fmt.Printf("failed to send transaction: %s\n", err)
-        return
-    }
-    fmt.Printf("Submitted transaction %s\n", sendResponse)
-...
+sendResponse, err := algodClient.SendRawTransaction(signedTxn).Do(context.Background())
+if err != nil {
+    fmt.Printf("failed to send transaction: %s\n", err)
+    return
+}
+fmt.Printf("Submitted transaction %s\n", sendResponse)
 ```
 
 ```bash tab="cURL"
@@ -475,30 +453,34 @@ Successfully submitting your transaction to the network does not necessarily mea
 const waitForConfirmation = async function (algodclient, txId) {
     let status = (await algodclient.status().do());
     let lastRound = status["last-round"];
-      while (true) {
+    while (true) {
         const pendingInfo = await algodclient.pendingTransactionInformation(txId).do();
         if (pendingInfo["confirmed-round"] !== null && pendingInfo["confirmed-round"] > 0) {
-          //Got the completed Transaction
-          console.log("Transaction " + txId + " confirmed in round " + pendingInfo["confirmed-round"]);
-          break;
+            //Got the completed Transaction
+            console.log("Transaction " + txId + " confirmed in round " + pendingInfo["confirmed-round"]);
+            break;
         }
         lastRound++;
         await algodclient.statusAfterBlock(lastRound).do();
-      }
-    };
+    }
+};
 ```
 
 ```python tab="Python"
-# utility for waiting on a transaction confirmation
-def wait_for_confirmation( algod_client, txid ):
-    while True:
-        txinfo = algod_client.pending_transaction_info(txid)
-        if txinfo.get('confirmed-round'):
-            print("Transaction {} confirmed in round {}.".format(txid, txinfo.get('confirmed-round')))
-            break
-        else:
-            print("Waiting for confirmation...")
-            algod_client.status_after_block(algod_client.status().get('last-round') +1)
+"""
+Utility function to wait until the transaction is
+confirmed before proceeding.
+"""
+last_round = client.status().get('last-round')
+while True:
+    txinfo = client.pending_transaction_info(txid)
+    if txinfo.get('confirmed-round') and txinfo.get('confirmed-round') > 0:
+        print("Transaction {} confirmed in round {}.".format(txid, txinfo.get('confirmed-round')))
+        return txinfo
+    else:
+        print("Waiting for confirmation...")
+        last_round += 1
+        client.status_after_block(last_round)
 ```
 
 ```java tab="Java"
@@ -525,33 +507,29 @@ def wait_for_confirmation( algod_client, txid ):
 ```
 
 ```go tab="Go"
-...
 // Function that waits for a given txId to be confirmed by the network
-func waitForConfirmation(txID string) {
-    algodClient, err := algod.MakeClient(algodAddress, algodToken)
-    if err != nil {
-        return
-    }
-    for {
-        pt, stxn, err := algodClient.PendingTransactionInformation(txID).Do(context.Background())
-        fmt.Print(pt)
-        if pt.ConfirmedRound == 0 {
-            fmt.Printf("waiting for confirmation...\n")
-            continue
-        }
-        if pt.ConfirmedRound > 0 {
-            fmt.Printf("Transaction "+string(stxn.Txn.Amount)+" confirmed in round %d\n", pt.ConfirmedRound)
-            break
-        }
-        nodeStatus, err := algodClient.Status().Do(context.Background())
-        if err != nil {
-            fmt.Printf("error getting algod status: %s\n", err)
-            return
-        }
-        algodClient.StatusAfterBlock(nodeStatus.LastRound + 1)
-    }
+func waitForConfirmation(txID string, client *algod.Client) {
+	status, err := client.Status().Do(context.Background())
+	if err != nil {
+		fmt.Printf("error getting algod status: %s\n", err)
+		return
+	}
+	lastRound := status.LastRound
+	for {
+		pt, _, err := client.PendingTransactionInformation(txID).Do(context.Background())
+		if err != nil {
+			fmt.Printf("error getting pending transaction: %s\n", err)
+			return
+		}
+		if pt.ConfirmedRound > 0 {
+			fmt.Printf("Transaction "+txID+" confirmed in round %d\n", pt.ConfirmedRound)
+			break
+		}
+		fmt.Printf("waiting for confirmation...\n")
+		lastRound++
+		status, err = client.StatusAfterBlock(lastRound).Do(context.Background())
+	}
 }
-...
 ```
 
 ```bash tab="cURL"
@@ -608,19 +586,17 @@ console.log("Decoded note: %s", algosdk.decodeObj(confirmedTxn.txn.txn.note));
 ```
 
 ```go tab="Go"
-...
-    confirmedTxn, stxn, err := algodClient.PendingTransactionInformation(txID).Do(context.Background())
-    if err != nil {
-        fmt.Printf("Error retrieving transaction %s\n", txID)
-        return
-    }
-    txnJSON, err := json.MarshalIndent(confirmedTxn, "", "\t")
-    if err != nil {
-        fmt.Printf("Can not marshall txn data: %s\n", err)
-    }
-    fmt.Printf("Transaction information: %s\n", txnJSON)
-    fmt.Printf("Decoded note: %s\n", string(stxn.Txn.Note))
-...
+confirmedTxn, stxn, err := algodClient.PendingTransactionInformation(txID).Do(context.Background())
+if err != nil {
+    fmt.Printf("Error retrieving transaction %s\n", txID)
+    return
+}
+txnJSON, err := json.MarshalIndent(confirmedTxn.Transaction.Txn, "", "\t")
+if err != nil {
+    fmt.Printf("Can not marshall txn data: %s\n", err)
+}
+fmt.Printf("Transaction information: %s\n", txnJSON)
+fmt.Printf("Decoded note: %s\n", string(stxn.Txn.Note))
 ```
 
 ```bash tab="cURL"
@@ -643,14 +619,14 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
         while (true) {
             const pendingInfo = await algodclient.pendingTransactionInformation(txId).do();
             if (pendingInfo["confirmed-round"] !== null && pendingInfo["confirmed-round"] > 0) {
-            //Got the completed Transaction
-            console.log("Transaction " + txId + " confirmed in round " + pendingInfo["confirmed-round"]);
-            break;
+                //Got the completed Transaction
+                console.log("Transaction " + txId + " confirmed in round " + pendingInfo["confirmed-round"]);
+                break;
             }
             lastRound++;
             await algodclient.statusAfterBlock(lastRound).do();
         }
-        };
+    };
 
     async function gettingStartedExample() {
 
@@ -677,20 +653,16 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
             console.log("Account balance: %d microAlgos", accountInfo.amount);
 
             // Construct the transaction
-            // receiver defined as TestNet faucet address 
-            const receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A";    
-
             let params = await algodClient.getTransactionParams().do();
-            console.log(params);
-
-            // note field defined as "Hello World"
-            let note = algosdk.encodeObj("Hello World");
-            console.log(note);
-
             // comment out the next two lines to use suggested fee
             params.fee = 1000;
             params.flatFee = true;
-            let txn = algosdk.makePaymentTxnWithSuggestedParams(myAccount.addr, receiver, 1000000, undefined, note, params);        
+
+            // receiver defined as TestNet faucet address 
+            const receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A";
+            let note = algosdk.encodeObj("Hello World");
+
+            let txn = algosdk.makePaymentTxnWithSuggestedParams(myAccount.addr, receiver, 1000000, undefined, note, params);       
 
             // Sign the transaction
             let signedTxn = txn.signTxn(myAccount.sk);
@@ -721,26 +693,32 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
     import base64
     from algosdk.v2client import algod
     from algosdk import mnemonic
-    from algosdk import transaction
+    from algosdk.future.transaction import PaymentTxn
 
-    # utility for waiting on a transaction confirmation
-    def wait_for_confirmation( algod_client, txid ):
+    def wait_for_confirmation(client, txid):
+        """
+        Utility function to wait until the transaction is
+        confirmed before proceeding.
+        """
+        last_round = client.status().get('last-round')
         while True:
-            txinfo = algod_client.pending_transaction_info(txid)
-            if txinfo.get('confirmed-round'):
+            txinfo = client.pending_transaction_info(txid)
+            if txinfo.get('confirmed-round') and txinfo.get('confirmed-round') > 0:
                 print("Transaction {} confirmed in round {}.".format(txid, txinfo.get('confirmed-round')))
-                break
+                return txinfo
             else:
                 print("Waiting for confirmation...")
-                algod_client.status_after_block(algod_client.status().get('last-round') +1)
+                last_round += 1
+                client.status_after_block(last_round)
 
     def gettingStartedExample():
-        algod_address = <algod-address>
-        algod_token = <algod-token>
+        algod_address = "http://localhost:8888"
+        algod_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         algod_client = algod.AlgodClient(algod_token, algod_address)
 
-        passphrase = <25-word-mnemonic>
+        passphrase = "liquid million govern habit nasty danger spoil air monitor lobster solar misery confirm problem tuna hollow ritual assume mean return enrich mistake seven abstract tent"
 
+        # generate a public/private key pair
         private_key = mnemonic.to_private_key(passphrase)
         my_address = mnemonic.to_public_key(passphrase)
         print("My address: {}".format(my_address))
@@ -748,34 +726,25 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
         account_info = algod_client.account_info(my_address)
         print("Account balance: {} microAlgos".format(account_info.get('amount')))
 
+        # build transaction
         params = algod_client.suggested_params()
-        note = "Hello World".encode()
+        # comment out the next two (2) lines to use suggested fees
+        params.flat_fee = True
+        params.fee = 1000
         receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A"
+        note = "Hello World".encode()
+    
+        unsigned_txn = PaymentTxn(my_address, params, receiver, 1000000, None, note)
 
-        data = {
-            "sender": my_address,
-            "receiver": receiver,
-            "fee": params.fee,
-            "flat_fee": True,
-            "amt": 1000000,
-            "first": params.first,
-            "last": params.last,
-            "note": note,
-            "gen": params.gen,
-            "gh": params.gh
-        }
-
-        txn = transaction.PaymentTxn(**data)
-        signed_txn = txn.sign(private_key)
-        txid = signed_txn.transaction.get_txid()
+        # sign transaction
+        signed_txn = unsigned_txn.sign(mnemonic.to_private_key(passphrase))
+        txid = algod_client.send_transaction(signed_txn)
         print("Signed transaction with txID: {}".format(txid))
 
-        algod_client.send_transaction(signed_txn)
-
         # wait for confirmation
-        wait_for_confirmation( algod_client, txid) 
+        wait_for_confirmation(algod_client, txid) 
 
-        # Read the transction
+        # read transction
         try:
             confirmed_txn = algod_client.pending_transaction_info(txid)
         except Exception as err:
@@ -918,10 +887,8 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
 
     import (
         "context"
-        "encoding/json"
+        "crypto/ed25519"
         "fmt"
-
-        "golang.org/x/crypto/ed25519"
 
         "github.com/algorand/go-algorand-sdk/client/v2/algod"
         "github.com/algorand/go-algorand-sdk/crypto"
@@ -930,47 +897,46 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
         "github.com/algorand/go-algorand-sdk/types"
     )
 
-    const algodAddress = <algod-address>
-    const algodToken = <algod-tokenn>
+    const algodAddress = "http://localhost:8888"
+    const algodToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
     // Function that waits for a given txId to be confirmed by the network
-    func waitForConfirmation(txID string) {
-        algodClient, err := algod.MakeClient(algodAddress, algodToken)
+    func waitForConfirmation(txID string, client *algod.Client) {
+        status, err := client.Status().Do(context.Background())
         if err != nil {
+            fmt.Printf("error getting algod status: %s\n", err)
             return
         }
+        lastRound := status.LastRound
         for {
-            pt, stxn, err := algodClient.PendingTransactionInformation(txID).Do(context.Background())
-            fmt.Print(pt)
-            if pt.ConfirmedRound == 0 {
-                fmt.Printf("waiting for confirmation...\n")
-                continue
-            }
-            if pt.ConfirmedRound > 0 {
-                fmt.Printf("Transaction "+string(stxn.Txn.Amount)+" confirmed in round %d\n", pt.ConfirmedRound)
-                break
-            }
-            nodeStatus, err := algodClient.Status().Do(context.Background())
+            pt, _, err := client.PendingTransactionInformation(txID).Do(context.Background())
             if err != nil {
-                fmt.Printf("error getting algod status: %s\n", err)
+                fmt.Printf("error getting pending transaction: %s\n", err)
                 return
             }
-            algodClient.StatusAfterBlock(nodeStatus.LastRound + 1)
+            if pt.ConfirmedRound > 0 {
+                fmt.Printf("Transaction "+txID+" confirmed in round %d\n", pt.ConfirmedRound)
+                break
+            }
+            fmt.Printf("waiting for confirmation...\n")
+            lastRound++
+            status, err = client.StatusAfterBlock(lastRound).Do(context.Background())
         }
     }
 
-
     func main() {
-
         algodClient, err := algod.MakeClient(algodAddress, algodToken)
         if err != nil {
+            fmt.Printf("Issue with creating algod client: %s\n", err)
             return
         }
 
-        passphrase := <25-word-mnemonic>
-        
+        passphrase := "liquid million govern habit nasty danger spoil air monitor lobster solar misery confirm problem tuna hollow ritual assume mean return enrich mistake seven abstract tent"
+
         privateKey, err := mnemonic.ToPrivateKey(passphrase)
         if err != nil {
             fmt.Printf("Issue with mnemonic conversion: %s\n", err)
+            return
         }
 
         var myAddress types.Address
@@ -983,6 +949,7 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
         accountInfo, err := algodClient.AccountInformation(myAddress.String()).Do(context.Background())
         if err != nil {
             fmt.Printf("Error getting account info: %s\n", err)
+            return
         }
         fmt.Printf("Account balance: %d microAlgos\n", accountInfo.Amount)
 
@@ -992,8 +959,11 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
             fmt.Printf("Error getting suggested tx params: %s\n", err)
             return
         }
+        // comment out the next two (2) lines to use suggested fees
+        txParams.FlatFee = true
+        txParams.Fee = 1000
 
-        fromAddr := myAddress
+        fromAddr := myAddress.String()
         toAddr := "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A"
         var amount uint64 = 1000000
         var minFee uint64 = 1000
@@ -1003,14 +973,13 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
         firstValidRound := uint64(txParams.FirstRoundValid)
         lastValidRound := uint64(txParams.LastRoundValid)
 
-        txn, err := transaction.MakePaymentTxnWithFlatFee(fromAddr.String(), toAddr, minFee, amount, firstValidRound, lastValidRound, note, "", genID, genHash)
+        txn, err := transaction.MakePaymentTxnWithFlatFee(fromAddr, toAddr, minFee, amount, firstValidRound, lastValidRound, note, "", genID, genHash)
         if err != nil {
             fmt.Printf("Error creating transaction: %s\n", err)
             return
         }
-
         // Sign the transaction
-        txID, bytes, err := crypto.SignTransaction(privateKey, txn)
+        txID, signedTxn, err := crypto.SignTransaction(privateKey, txn)
         if err != nil {
             fmt.Printf("Failed to sign transaction: %s\n", err)
             return
@@ -1018,8 +987,7 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
         fmt.Printf("Signed txid: %s\n", txID)
 
         // Submit the transaction
-
-        sendResponse, err := algodClient.SendRawTransaction(bytes).Do(context.Background())
+        sendResponse, err := algodClient.SendRawTransaction(signedTxn).Do(context.Background())
         if err != nil {
             fmt.Printf("failed to send transaction: %s\n", err)
             return
@@ -1027,15 +995,15 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
         fmt.Printf("Submitted transaction %s\n", sendResponse)
 
         // Wait for confirmation
-        waitForConfirmation(txID)
+        waitForConfirmation(txID, algodClient)
 
-        // Read confirmed transaction from block
+        // Read transaction
         confirmedTxn, stxn, err := algodClient.PendingTransactionInformation(txID).Do(context.Background())
         if err != nil {
             fmt.Printf("Error retrieving transaction %s\n", txID)
             return
         }
-        txnJSON, err := json.MarshalIndent(confirmedTxn, "", "\t")
+        txnJSON, err := json.MarshalIndent(confirmedTxn.Transaction.Txn, "", "\t")
         if err != nil {
             fmt.Printf("Can not marshall txn data: %s\n", err)
         }
