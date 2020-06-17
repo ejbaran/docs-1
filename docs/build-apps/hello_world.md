@@ -440,17 +440,19 @@ while True:
 ```java tab="Java"
 // utility function to wait on a transaction to be confirmed    
 public void waitForConfirmation( String txID ) throws Exception{
-    if( algodApiInstance == null ) connectToNetwork();
+    if( client == null ) this.client = connectToNetwork();
+    Long lastRound = client.GetStatus().execute().body().lastRound;
     while(true) {
         try {
             //Check the pending tranactions
-            com.algorand.algosdk.algod.client.model.Transaction pendingInfo = algodApiInstance.pendingTransactionInformation(txID);
-            if (pendingInfo.getRound() != null && pendingInfo.getRound().longValue() > 0) {
+            Response<PendingTransactionResponse> pendingInfo = client.PendingTransactionInformation(txID).execute();
+            if (pendingInfo.body().confirmedRound != null && pendingInfo.body().confirmedRound > 0) {
                 //Got the completed Transaction
-                System.out.println("Transaction " + pendingInfo.getTx() + " confirmed in round " + pendingInfo.getRound().longValue());
+                System.out.println("Transaction " + txID + " confirmed in round " + pendingInfo.body().confirmedRound);
                 break;
             } 
-            algodApiInstance.waitForBlock(BigInteger.valueOf( algodApiInstance.getStatus().getLastRound().longValue() +1 ) );
+            lastRound++;
+            client.WaitForBlock(lastRound).execute();
         } catch (Exception e) {
             throw( e );
         }
