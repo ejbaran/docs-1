@@ -270,6 +270,9 @@ Maven:
     </tr>
 </table>
 
+!!! info
+    The Java SDK V2 clients implements a new pattern when calling methods. Each will append `.execute()` to the method call. Example: `Long lastRound = client.GetStatus().execute().body().lastRound;`
+
 ## Go
 
 
