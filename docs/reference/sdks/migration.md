@@ -95,7 +95,7 @@ npm list algosdk
 </table>
 
 !!! info
-    The JavaScript SDK V2 clients implements a new pattern when calling methods. Each will append `.do()` to the method call. Example: `let status = (await algodclient.status().do());`
+    The JavaScript SDK V2 clients implements a new pattern when calling REST methods. Each will append `.do()` to the method call. Example: `let status = (await algodclient.status().do());`
 
 ## Python
 
@@ -221,7 +221,6 @@ Maven:
         <td>
             ```java
             import com.algorand.algosdk.v2.client.common.AlgodClient;
-            import com.algorand.algosdk.algod.client.auth.ApiKeyAuth;
             ```
         </td>
     </tr>
@@ -271,7 +270,7 @@ Maven:
 </table>
 
 !!! info
-    The Java SDK V2 clients implements a new pattern when calling methods. Each will append `.execute()` to the method call. Example: `Long lastRound = client.GetStatus().execute().body().lastRound;`
+    The Java SDK V2 clients implements a new pattern when calling REST methods. Each will append `.execute()` to the method call. Example: `Long lastRound = client.GetStatus().execute().body().lastRound;`
 
 ## Go
 
@@ -363,7 +362,7 @@ make build
 </table>
 
 !!! info
-    The Go SDK V2 clients implements a new pattern when calling methods. Each will append `.Do(context.Background())` to the method call. Example: `status, err := client.Status().Do(context.Background())`
+    The Go SDK V2 clients implements a new pattern when calling REST methods. Each will append `.Do(context.Background())` to the method call. Example: `status, err := client.Status().Do(context.Background())`
 
 # kmd Client Instantiations<a name="kmd-instantiations"></a>
 <table>
