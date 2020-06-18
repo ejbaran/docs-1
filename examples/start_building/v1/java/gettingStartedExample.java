@@ -115,9 +115,7 @@ public class Tutorial {
         } catch (ApiException e) {
             System.err.println("Exception when calling algod#transactionInformation: " + e.getCode());
         }
-    }
-
-    public static void main(String args[]) throws Exception {
+    }    public static void main(String args[]) throws Exception {
         Tutorial t = new Tutorial();
         t.gettingStartedExample();
     }
