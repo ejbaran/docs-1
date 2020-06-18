@@ -33,13 +33,13 @@ There are also REST APIs available for both **algod** and **kmd** processes.
 Algorand provides a standalone daemon [algorand-indexer](../features/indexer.md) that reads committed blocks from the Algorand blockchain and maintains a local database of transactions and accounts that are searchable and indexed. A [REST API](../reference/rest-apis/indexer.md) is available which enables application developers to perform rich and efficient queries on accounts, transactions, assets, and so forth.
 
 # Choosing a network
-There are three **public** Algorand Networks paired with the functionality to create **private** networks using any protocol version. 
+There are three **public** [Algorand Networks](../reference/algorand-networks/index.md) paired with the functionality to [create **private** networks](https://developer.algorand.org/tutorials/create-private-network/) using any protocol version. 
 
 [**MainNet**](../reference/algorand-networks/mainnet.md) is the primary Algorand Network with real-value assets, including Algorand's native currency - the Algo. [**TestNet**](../reference/algorand-networks/testnet.md) mirrors MainNet in terms of its protocol (i.e. software) version, but it has test Algos, available via a faucet, and a different genesis block, which means that the state of accounts and distribution of funds is different.  [**BetaNet**](../reference/algorand-networks/betanet.md) is where new protocol-level features will be released for initial testing. Therefore, quality and features may not be final, and protocol upgrades and network restarts are common.
 
  
 ## Recommended Use
-If your application depends on features currently available on MainNet, use TestNet as your public testing network. If your application depends on features only available on BetaNet, use BetaNet as your public testing network. In all cases, use private networks, as needed, for greater control and isolation of your development environment.
+If your application depends on features currently available on MainNet, use TestNet as your public testing network. If your application depends on features only available on BetaNet, use BetaNet as your public testing network. In all cases, use private networks, as needed, for greater control and isolation of your development environment. Learn more about feature availability on each of the networks in the [Network Reference](../reference/algorand-networks/index.md) section. Sections in these docs marked with 🔷 indicate a feature available on BetaNet only.
 
 If you are not sure which network to start with, TestNet is usually a good option as it allows you to develop against live features without risking real assets. Switching networks later will be trivial.
 

@@ -4,6 +4,9 @@ The **algod IP address** and access **token** you obtained in the [Workspace Set
 
 _Read more about the [node's algod process](../reference/node/artifacts.md#algod)._
 
+!!! info
+    The examples in this section have been updated to the v2 API, which was launched to MainNet on June 16, 2020. Visit the [v2 Migration Guide](../reference/sdks/migration.md) for information on how to migrate your code from v1. Access archived v1 examples [here](https://github.com/algorand/docs/tree/master/examples/start-building). 
+
 # Create an algod client
 Instantiate an **algod** client with your preferred SDK. 
 

@@ -6,6 +6,9 @@ Follow the guide below to send your first transaction on Algorand and familiariz
 
 Code snippets are abbreviated for conciseness and clarity. See the full code example for each SDK at the bottom of this guide.
 
+!!! info
+    The examples in this section have been updated to the v2 API, which was launched to MainNet on June 16, 2020. Visit the [v2 Migration Guide](../reference/sdks/migration.md) for information on how to migrate your code from v1. Access archived v1 examples [here](https://github.com/algorand/docs/tree/master/examples/start-building). 
+
 # Create an account
 In order to send a transaction, you first need an [account](../features/accounts/index.md#accounts) on Algorand. Create an account by generating an Algorand public/private key pair and then funding the public address with Algos on your chosen network. 
 
@@ -86,7 +89,7 @@ For [TestNet](../../reference/algorand-networks/testnet/#faucet) and [BetaNet](.
 
 ## Connect your client
 
-Each SDK provides a client which must instantiate prior to making calls to the API endopoints. You must provide values for `<algod-address>`, `<port>` and `<algod-token>`. The CLI tools implement the client natively. 
+Each SDK provides a client which must instantiate prior to making calls to the API endpoints. You must provide values for `<algod-address>`, `<port>` and `<algod-token>`. The CLI tools implement the client natively. 
 
 _Learn more about [Connecting to a Node](connect.md)._
 
@@ -208,7 +211,7 @@ $ goal account balance -a <my-address>
 
 Create a transaction to send 1 Algo from your account to the TestNet faucet address (`GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A`) with the note "Hello World".
 
-Transactions require a certain minimum set of parameters to be valid. Mandatory fields include the **round validity range**, the **fee**, and the **genesis hash** for the network the transaction is valid for. Read all about Transaction types, fields, and configurations in the Transactions Feature Guide. For now, construct a payment transaction as follows. Use the _suggested parameters_ methods to initialize network-related 
+Transactions require a certain minimum set of parameters to be valid. Mandatory fields include the **round validity range**, the **fee**, and the **genesis hash** for the network the transaction is valid for. Read all about Transaction types, fields, and configurations in the [Transactions Feature Guide](../features/transactions/index.md). For now, construct a payment transaction as follows. Use the _suggested parameters_ methods to initialize network-related 
 fields. 
 
 ```javascript tab="JavaScript"
@@ -367,34 +370,6 @@ Transaction [TXID] still pending as of round [LAST_ROUND]
 Transaction [TXID] committed in round [COMMITTED_ROUND]
 ```
 
-!!! Info
-    If you are using a third-party service, it may require you to specify a `Content-Type` header when you send transactions to the network. Set the `Content-Type` to `application/x-binary` and add it as a header to the algod client or the specific request that sends the transaction.
-
-    ```JavaScript tab=
-	const algosdk = require("algosdk");
-
-	async function gettingStartedExample() {
-
-		const server = <algod-address>;
-		const port = "";
-		const token = {
-			'X-API-Key': <service-api-key>,
-            'Content-Type': 'application/x-binary'
-		};
-
-		let postAlgodClient = new algosdk.Algod(token, server, port);
-		
-	}
-	```
-
-	```Python tab= 
-	algod_client.send_transaction(signed_txn, headers={'content-type': 'application/x-binary'})  
-	```
-
-	```Go tab=
-    txHeaders := append([]*algod.Header{}, &algod.Header{"Content-Type", "application/x-binary"})
-    sendResponse, err := algodClient.SendRawTransaction(bytes, txHeaders)
-	```
 
 # Wait for confirmation
 
@@ -421,20 +396,20 @@ const waitForConfirmation = async function (algodclient, txId) {
 ```
 
 ```python tab="Python"
-"""
-Utility function to wait until the transaction is
-confirmed before proceeding.
-"""
-last_round = client.status().get('last-round')
-while True:
-    txinfo = client.pending_transaction_info(txid)
-    if txinfo.get('confirmed-round') and txinfo.get('confirmed-round') > 0:
-        print("Transaction {} confirmed in round {}.".format(txid, txinfo.get('confirmed-round')))
-        return txinfo
-    else:
-        print("Waiting for confirmation")
-        last_round += 1
-        client.status_after_block(last_round)
+def wait_for_confirmation(client, txid):
+	"""
+	Utility function to wait until the transaction is
+	confirmed before proceeding.
+	"""
+	last_round = client.status().get('last-round')
+	txinfo = client.pending_transaction_info(txid)
+	while not (txinfo.get('confirmed-round') and txinfo.get('confirmed-round') > 0):
+		print("Waiting for confirmation")
+		last_round += 1
+		client.status_after_block(last_round)
+		txinfo = client.pending_transaction_info(txid)
+	print("Transaction {} confirmed in round {}.".format(txid, txinfo.get('confirmed-round')))
+	return txinfo
 ```
 
 ```java tab="Java"
@@ -633,71 +608,71 @@ Notice above the pattern of constructing a transaction, authorizing it, submitti
     ```
 
     ```python tab="Python"
-    import json
-    import time
-    import base64
-    from algosdk.v2client import algod
-    from algosdk import mnemonic
-    from algosdk.future.transaction import PaymentTxn
+import json
+import time
+import base64
+from algosdk import mnemonic
+from algosdk.v2client import algod
+from algosdk.future.transaction import PaymentTxn
 
-    def wait_for_confirmation(client, txid):
-        """
-        Utility function to wait until the transaction is
-        confirmed before proceeding.
-        """
-        last_round = client.status().get('last-round')
-        while True:
-            txinfo = client.pending_transaction_info(txid)
-            if txinfo.get('confirmed-round') and txinfo.get('confirmed-round') > 0:
-                print("Transaction {} confirmed in round {}.".format(txid, txinfo.get('confirmed-round')))
-                return txinfo
-            else:
-                print("Waiting for confirmation")
-                last_round += 1
-                client.status_after_block(last_round)
+def wait_for_confirmation(client, txid):
+	"""
+	Utility function to wait until the transaction is
+	confirmed before proceeding.
+	"""
+	last_round = client.status().get('last-round')
+	txinfo = client.pending_transaction_info(txid)
+	while not (txinfo.get('confirmed-round') and txinfo.get('confirmed-round') > 0):
+		print("Waiting for confirmation")
+		last_round += 1
+		client.status_after_block(last_round)
+		txinfo = client.pending_transaction_info(txid)
+	print("Transaction {} confirmed in round {}.".format(txid, txinfo.get('confirmed-round')))
+	return txinfo
 
-    def gettingStartedExample():
-        algod_address = "http://localhost:4001"
-        algod_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        algod_client = algod.AlgodClient(algod_token, algod_address)
 
-        passphrase = "Your 25-word mnemonic generated and displayed above"
+def getting_started_example():
+	algod_address = "http://localhost:4001"
+	algod_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	algod_client = algod.AlgodClient(algod_token, algod_address)
 
-        # generate a public/private key pair
-        private_key = mnemonic.to_private_key(passphrase)
-        my_address = mnemonic.to_public_key(passphrase)
-        print("My address: {}".format(my_address))
+	passphrase = "your 25-word mnemonic"
 
-        account_info = algod_client.account_info(my_address)
-        print("Account balance: {} microAlgos".format(account_info.get('amount')))
+	# generate a public/private key pair
+	private_key = mnemonic.to_private_key(passphrase)
+	my_address = mnemonic.to_public_key(passphrase)
+	print("My address: {}".format(my_address))
 
-        # build transaction
-        params = algod_client.suggested_params()
-        # comment out the next two (2) lines to use suggested fees
-        params.flat_fee = True
-        params.fee = 1000
-        receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A"
-        note = "Hello World".encode()
-    
-        unsigned_txn = PaymentTxn(my_address, params, receiver, 1000000, None, note)
+	account_info = algod_client.account_info(my_address)
+	print("Account balance: {} microAlgos".format(account_info.get('amount')))
 
-        # sign transaction
-        signed_txn = unsigned_txn.sign(mnemonic.to_private_key(passphrase))
-        txid = algod_client.send_transaction(signed_txn)
-        print("Signed transaction with txID: {}".format(txid))
+	# build transaction
+	params = algod_client.suggested_params()
+	# comment out the next two (2) lines to use suggested fees
+	params.flat_fee = True
+	params.fee = 1000
+	receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A"
+	note = "Hello World".encode()
 
-        # wait for confirmation
-        wait_for_confirmation(algod_client, txid) 
+	unsigned_txn = PaymentTxn(my_address, params, receiver, 1000000, None, note)
 
-        # read transction
-        try:
-            confirmed_txn = algod_client.pending_transaction_info(txid)
-        except Exception as err:
-            print(err)
-        print("Transaction information: {}".format(json.dumps(confirmed_txn, indent=4)))
-        print("Decoded note: {}".format(base64.b64decode(confirmed_txn["txn"]["txn"]["note"]).decode()))
+	# sign transaction
+	signed_txn = unsigned_txn.sign(mnemonic.to_private_key(passphrase))
+	txid = algod_client.send_transaction(signed_txn)
+	print("Signed transaction with txID: {}".format(txid))
 
-    gettingStartedExample()
+	# wait for confirmation
+	wait_for_confirmation(algod_client, txid) 
+
+	# read transction
+	try:
+		confirmed_txn = algod_client.pending_transaction_info(txid)
+	except Exception as err:
+		print(err)
+	print("Transaction information: {}".format(json.dumps(confirmed_txn, indent=4)))
+	print("Decoded note: {}".format(base64.b64decode(confirmed_txn["txn"]["txn"]["note"]).decode()))
+
+getting_started_example()
     ```
 
     ```java tab="Java"
