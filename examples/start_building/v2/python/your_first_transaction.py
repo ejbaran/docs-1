@@ -26,7 +26,7 @@ def getting_started_example():
 	algod_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 	algod_client = algod.AlgodClient(algod_token, algod_address)
 
-	passphrase = "your 25-word mnemonic"
+	passphrase = "Your 25-word mnemonic generated and displayed above"
 
 	# generate a public/private key pair
 	private_key = mnemonic.to_private_key(passphrase)
