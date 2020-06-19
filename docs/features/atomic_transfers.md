@@ -18,7 +18,7 @@ Atomic transfers enable use cases such as:
 
 # Process Overview
 
-To implement an atomic transfer, generate all of the transactions that will be involved in the transfer and then group those transactions together. The result of grouping is that each transaction is assigned the same group ID. Once the transactions contain the group ID, the transactions can be split up and sent to their respective senders to be authorized. A single party can then collect all the authorized transactions and submit them to the network together. 
+To implement an atomic transfer, generate all of the transactions that will be involved in the transfer and then group those transactions together. The result of grouping is that each transaction is assigned the same group ID. Once all transactions contain this group ID, the transactions can be split up and sent to their respective senders to be authorized. A single party can then collect all the authorized transactions and submit them to the network together. 
 
 !!! info
     An individual account involved in an atomic transfer, can verify that all the correct transfers are involved by creating the same set of [unsigned] transactions and grouping them in the same order. The group ID is a hash of the group of transactions and should match if the configuration is the same.
@@ -30,7 +30,7 @@ Below you will find examples for creating and sending group transactions to the 
 
 # Step-by-Step Guide
 
-## Create transactions
+## Create Transactions
 Create two or more (up to 16 total) unsigned transactions of any type. Read about transaction types in the [Transactions Overview](./transactions/index.md) section. 
 
 This could be done by a service or by each party involved in the transaction. For example, an asset exchange application can create the entire atomic transfer and allow individual parties to sign from their location.
@@ -100,7 +100,9 @@ $ goal clerk send --from=my-account-b<PLACEHOLDER> --to=my-account-a<PLACEHOLDER
 
 At this point, these are just individual transactions. The next critical step is to combine them and then calculate the group ID.
 
-## Combine transactions 
+See [Authorizing Transactions Offline](./transactions/offline_transactions.md#saving-unsigned-transactions-to-file) to learn how to create and save individual **unsigned** transactions to a file. This method can be used to distribute group transactions for signing.
+
+## Combine Transactions 
 Combining transactions just means concatenating them into a single file or ordering them in an array so that a group ID can then be assigned. 
 
 If using `goal`, the transaction files can be combined using an OS-level command such as `cat`. If using one of the SDKs, the application may store all the transactions individually or in an array. From the SDK it is also possible to read a transaction from a file created at an earlier time, which is described in the [Offline Transactions](./transactions/offline_transactions.md) documentation. See the complete example at the bottom of this page that details how transactions are combined in the SDKs. To combine transactions in `goal` use a similar method to the one below.
@@ -109,8 +111,7 @@ If using `goal`, the transaction files can be combined using an OS-level command
 cat unsignedtransaction1.tx unsignedtransaction2.tx > combinedtransactions.tx
 ```
 
-
-## Group transactions
+## Group Transactions
 
 The result of this step is what ultimately guarantees that a particular transaction belongs to a group and is not valid if sent alone (even if authorized). A group ID is calculated by hashing the contents of the combined transaction and assigning the resulting hash as a [group ID](../reference/transactions.md#group) to each transaction. This mechanism allows anyone to recreate all transactions and recalculate the group ID to verify that the contents are as agreed upon by all parties. 
 
@@ -144,10 +145,12 @@ The result of this step is what ultimately guarantees that a particular transact
 goal clerk group -i yourwalletcombinedtransactions.tx -o groupedtransactions.tx -d data -w 
 ```
 
-At this point, transactions can be split and sent to individuals for authorization. See [Authorizing Transactions Offline](./transactions/offline_transactions.md#saving-unsigned-transactions-to-file) to learn how to create and save individual **unsigned** transactions to a file. This method can be used to distribute group transactions for signing.
+## Split Transactions
 
-## Sign transactions
-With a group ID assigned, each transaction sender must authorize their respective transaction. All authorized transactions are then recombined before they are sent to the network.
+At this point, transactions can be split and sent to individuals for authorization. 
+
+## Sign Transactions
+With a group ID assigned, each transaction sender must authorize their respective transaction. 
 
 ``` javascript tab="JavaScript"
 	// Sign each transaction in the group with
@@ -218,7 +221,11 @@ $ goal clerk sign -i splitfiles-1 -o splitfiles-1.sig -d data -w yourwallet
 cat splitfiles-0.sig splitfiles-1.sig > signout.tx
 ```
 
-## Send transactions
+## Assemble Transaction Group
+
+All authorized transactions are then recombined before they are sent to the network.
+
+## Send Transaction Group
 The signed group transactions are sent to the network together. 
 
 ``` javascript tab="JavaScript"
