@@ -25,7 +25,7 @@ public class GroupedTransaction {
     // utility function to connect to a node
     private AlgodApi connectToNetwork(){
 
-        final String ALGOD_API_ADDR = "http://localhost:4001"
+        final String ALGOD_API_ADDR = "http://localhost:4001";
         final String ALGOD_API_TOKEN = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
         AlgodClient client = (AlgodClient) new AlgodClient().setBasePath(ALGOD_API_ADDR);
