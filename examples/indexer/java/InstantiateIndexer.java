@@ -1,7 +1,7 @@
 /**
   * requires java-algorand-sdk 1.4.2 or higher (see pom.xml)
   */
-  package com.algorand.javatest.indexer;
+  package com.algorand.InstantiateIndexer;
   import com.algorand.algosdk.v2.client.common.IndexerClient;
   import com.algorand.algosdk.v2.client.common.Client;
   public class InstantiateIndexer {
