@@ -37,65 +37,68 @@ This could be done by a service or by each party involved in the transaction. Fo
 
 The example below illustrates Account A sending a transaction to Account C and Account B sending a transaction to Account A.
 
-``` javascript tab="JavaScript"
-	// Transaction A to C 
-	let transaction1 = algosdk.makePaymentTxn(myAccountA.addr, 
-		receiver, params.minFee, 100000, undefined, 
-		params.lastRound, params.lastRound + 1000, new Uint8Array(0), 
-		params.genesishashb64, params.genesisID);
+!!! info
+    The examples in this section have been updated to the v2 API, which was launched to MainNet on June 16, 2020. Visit the [v2 Migration Guide](../reference/sdks/migration.md) for information on how to migrate your code from v1. 
 
-	// Create transaction B to A
-	let transaction2 = algosdk.makePaymentTxn(myAccountB.addr, 
-		myAccountA.addr, params.minFee, 200000, undefined, 
-		params.lastRound, params.lastRound + 1000, new Uint8Array(0), 
-		params.genesishashb64, params.genesisID);
+    Full running code examples for each SDK and both API versions are available within the GitHub repo at [/examples/atomic_transfers](https://github.com/algorand/docs/tree/master/examples/atomic_transfers) and for [download](https://github.com/algorand/docs/blob/master/examples/atomic_transfers/atomic_transfers.zip?raw=true) (.zip).
+
+``` javascript tab="JavaScript"
+        // Transaction A to C 
+        let transaction1 = algosdk.makePaymentTxnWithSuggestedParams(myAccountA.addr, receiver, 1000000, undefined, undefined, params);  
+        // Create transaction B to A
+        let transaction2 = algosdk.makePaymentTxnWithSuggestedParams(myAccountB.addr, myAccountA.addr, 1000000, undefined, undefined, params);  
 			
 ```
 
 ``` python tab="Python"  
-    # create transaction1
-	txn1 = transaction.PaymentTxn(account_a, fee, last_round, last_round+1000, gh, account_c, amount)
+	# from account 1 to account 3
+    txn_1 = transaction.PaymentTxn(account_1, params, account_3, 1000000)
 
-	# create transaction2
-	txn2 = transaction.PaymentTxn(account_b, fee, last_round, last_round+1000, gh, account_a, amount)
+	# from account 2 to account 1
+    txn_2 = transaction.PaymentTxn(account_2, params, account_1, 2000000)
+
 ```
 
 ``` java tab="Java"
-    // Create the first transaction
-    Transaction tx1 = new Transaction(acctA.getAddress(), 
-        acctC.getAddress(), 10000, cp.firstRound.intValue(), 
-        cp.lastRound.intValue(), null, cp.genHash);
-    tx1.fee = BigInteger.valueOf(1000);
+        // Create the first transaction
+        Transaction tx1 = Transaction.PaymentTransactionBuilder()
+        .sender(acctA.getAddress())
+        .amount(1000000)
+        .receiver(acctC.getAddress())
+        .suggestedParams(params)
+        .build();
 
-    // Create the second transaction
-    Transaction tx2 = new Transaction(acctB.getAddress(), 
-        acctA.getAddress(), 20000, cp.firstRound.intValue(), 
-        cp.lastRound.intValue(), null, cp.genHash);
-    tx2.fee = BigInteger.valueOf(1000);
+        // Create the second transaction
+        Transaction tx2 = Transaction.PaymentTransactionBuilder()
+        .sender(acctB.getAddress())
+        .amount(2000000)
+        .receiver(acctA.getAddress())
+        .suggestedParams(params)
+        .build();
+
 ```
 
 ``` go tab="Go"
-	tx1, err := transaction.MakePaymentTxn(account1, account3, 1, 100000,
-		txParams.LastRound, txParams.LastRound+1000, nil, "", 
-		txParams.GenesisID, txParams.GenesisHash)
-   	if err != nil {
-	   	fmt.Printf("Error creating transaction: %s\n", err)
-	   	return
+	// from account 1 to account 3
+	tx1, err := transaction.MakePaymentTxnWithFlatFee(account1, account3, minFee, 1000000, firstValidRound, lastValidRound, nil, "", genID, genHash)
+	if err != nil {
+		fmt.Printf("Error creating transaction: %s\n", err)
+		return
 	}
-	   
-	tx2, err := transaction.MakePaymentTxn(account2, account1, 1, 100000,
-		txParams.LastRound, txParams.LastRound+1000, nil, "", 
-		txParams.GenesisID, txParams.GenesisHash)
-   	if err != nil {
-	   	fmt.Printf("Error creating transaction: %s\n", err)
-	   	return
-   	}
+
+	// from account 2 to account 1
+	tx2, err := transaction.MakePaymentTxnWithFlatFee(account2, account1, minFee, 2000000, firstValidRound, lastValidRound, nil, "", genID, genHash)
+	if err != nil {
+		fmt.Printf("Error creating transaction: %s\n", err)
+		return
+	}
+
 ```
 
 ``` goal tab="goal"
 $ goal clerk send --from=my-account-a<PLACEHOLDER> --to=my-account-c<PLACEHOLDER> --fee=1000 --amount=1000000 --out=unsginedtransaction1.txn"
 
-$ goal clerk send --from=my-account-b<PLACEHOLDER> --to=my-account-a<PLACEHOLDER> --fee=1000 --amount=1000000 --out=unsginedtransaction2.txn"
+$ goal clerk send --from=my-account-b<PLACEHOLDER> --to=my-account-a<PLACEHOLDER> --fee=1000 --amount=2000000 --out=unsginedtransaction2.txn"
 ```
 
 At this point, these are just individual transactions. The next critical step is to combine them and then calculate the group ID.
@@ -107,6 +110,26 @@ Combining transactions just means concatenating them into a single file or order
 
 If using `goal`, the transaction files can be combined using an OS-level command such as `cat`. If using one of the SDKs, the application may store all the transactions individually or in an array. From the SDK it is also possible to read a transaction from a file created at an earlier time, which is described in the [Offline Transactions](./transactions/offline_transactions.md) documentation. See the complete example at the bottom of this page that details how transactions are combined in the SDKs. To combine transactions in `goal` use a similar method to the one below.
 
+``` javascript tab="JavaScript"
+    // Combine transactions
+    let txns = [transaction1, transaction2]
+```
+
+``` python tab="Python"
+	# the Python SDK performs combining implicitly within grouping below
+
+```
+
+``` java tab="Java"
+	// the Go SDK performs combining implicitly within grouping below
+
+```
+
+``` go tab="Go"
+    // the Go SDK performs combining implicitly within grouping below
+
+```
+
 ``` goal tab="goal"
 cat unsignedtransaction1.tx unsignedtransaction2.tx > combinedtransactions.tx
 ```
@@ -116,8 +139,8 @@ cat unsignedtransaction1.tx unsignedtransaction2.tx > combinedtransactions.tx
 The result of this step is what ultimately guarantees that a particular transaction belongs to a group and is not valid if sent alone (even if authorized). A group ID is calculated by hashing the contents of the combined transaction and assigning the resulting hash as a [group ID](../reference/transactions.md#group) to each transaction. This mechanism allows anyone to recreate all transactions and recalculate the group ID to verify that the contents are as agreed upon by all parties. 
 
 ``` javascript tab="JavaScript"
-	// Group both transactions
-	let txgroup = algosdk.assignGroupID(txns);
+    // Group both transactions
+    let txgroup = algosdk.assignGroupID(txns);
 ```
 
 ``` python tab="Python"
@@ -161,15 +184,10 @@ With a group ID assigned, each transaction sender must authorize their respectiv
 ```
 
 ``` python tab="Python"
-	# sign transaction1
-	stxn1 = txn1.sign(pk_account_a)
+	# sign transactions
+    stxn_1 = txn_1.sign(sk_1)    
+    stxn_2 = txn_2.sign(sk_2)
 
-	# sign transaction2
-	stxn2 = txn2.sign(pk_account_b)
-
-	signedGroup =  []
-	signedGroup.append(stxn1)
-	signedGroup.append(stxn2)
 ```
 
 ``` java tab="Java"
@@ -217,6 +235,19 @@ Wrote transaction 1 to splitfiles-1
 $ goal clerk sign -i splitfiles-0 -o splitfiles-0.sig -d data -w yourwallet
 $ goal clerk sign -i splitfiles-1 -o splitfiles-1.sig -d data -w yourwallet
 
+# combine signed transactions files
+cat splitfiles-0.sig splitfiles-1.sig > signout.tx
+```
+## Assemble Transaction
+
+``` python tab="Python"
+	# assemble transaction group
+    signedGroup =  []
+    signedGroup.append(stxn_1)
+    signedGroup.append(stxn_2)
+```
+
+``` goal tab="goal"
 # combine signed transactions files
 cat splitfiles-0.sig splitfiles-1.sig > signout.tx
 ```
