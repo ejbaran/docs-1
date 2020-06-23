@@ -100,9 +100,11 @@ public class GroupedTransaction {
             byteOutputStream.write(encodedTxBytes2);
             byte groupTransactionBytes[] = byteOutputStream.toByteArray();
 
+            // send transaction group
             String id = client.RawTransaction().rawtxn(groupTransactionBytes).execute().body().txId;
             System.out.println("Successfully sent tx with ID: " + id);
-            // write transaction to node
+
+            // wait for confirmation
             waitForConfirmation(id);
 
         } catch (Exception e) {
