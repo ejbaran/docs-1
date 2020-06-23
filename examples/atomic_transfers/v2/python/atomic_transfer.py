@@ -74,8 +74,7 @@ def group_transactions() :
 	# generate account3, display mnemonic, wait
 	# print("Generating new account...")
     account_3 = generate_new_account()
-    print("!! NOTICE !! Please retain the above generated \"25-word mnemonic passphrase\" for future use. Press any key to continue...")
-    input()
+    print("!! NOTICE !! Please retain the above generated \"25-word mnemonic passphrase\" for future use.")
 
 	# display account balances
     print("Initial balances:")
@@ -117,8 +116,6 @@ def group_transactions() :
     print("...computed groupId: ", group_id)
     txn_1.group = group_id
     txn_2.group = group_id
-    print("Press any key to continue...")
-    input()
 
 	# split transaction group
     print("Splitting unsigned transaction group...")
@@ -140,8 +137,6 @@ def group_transactions() :
 	# send transactions
     print("Sending transaction group...")
     tx_id = algod_client.send_transactions(signedGroup)
-    print("Press any key to continue...")
-    input()
 
     # wait for confirmation
     wait_for_confirmation(algod_client, tx_id) 
@@ -151,7 +146,6 @@ def group_transactions() :
     display_account_algo_balance(algod_client, account_1)
     display_account_algo_balance(algod_client, account_2)
     display_account_algo_balance(algod_client, account_3)
-    print("Press any key to continue...")
 
 	# display confirmed transaction group
 	# tx1

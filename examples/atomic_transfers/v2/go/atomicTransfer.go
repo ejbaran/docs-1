@@ -115,8 +115,7 @@ func main() {
 	// generate account3, display mnemonic, wait
 	fmt.Println("Generating new account...")
 	account3 := generateNewAccount()
-	fmt.Println("!! NOTICE !! Please retain the above generated \"25-word mnemonic passphrase\" for future use. Press any key to continue...")
-	fmt.Scanln()
+	fmt.Println("!! NOTICE !! Please retain the above generated \"25-word mnemonic passphrase\" for future use.")
 
 	// display account balances
 	fmt.Println("Initial balances:")
@@ -161,8 +160,6 @@ func main() {
 		return
 	}
 	fmt.Printf("...tx2: from %s to %s for %v microAlgos\n", fromAddr, toAddr, amount)
-	fmt.Println("Press any key to continue...")
-	fmt.Scanln()
 
 	// combine transations
 	fmt.Println("Combining transactions...")
@@ -192,8 +189,6 @@ func main() {
 		return
 	}
 	fmt.Println("...account2 signed tx2: ", sTxID2)
-	fmt.Println("Press any key to continue...")
-	fmt.Scanln()
 
 	// assemble transaction group
 	fmt.Println("Assembling transaction group...")
@@ -215,7 +210,6 @@ func main() {
 	displayAccountAlgoBalance(account1, algodClient)
 	displayAccountAlgoBalance(account2, algodClient)
 	displayAccountAlgoBalance(account3, algodClient)
-	fmt.Println("Press any key to continue...")
 
 	//display confirmed transaction group
 	// tx1
