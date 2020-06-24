@@ -1,6 +1,5 @@
-package com.algorand.assets.v2.java;
-//package com.algorand.javatest.assets.v2;
-// AssetExample.java
+package com.algorand.javatest.assets.v2;
+
 import java.math.BigInteger;
 import com.algorand.algosdk.v2.client.common.AlgodClient;
 import com.algorand.algosdk.account.Account;
@@ -139,7 +138,7 @@ public class AssetExample {
         System.out.println("Account2: " + acct2.getAddress());
         System.out.println("Account3: " + acct3.getAddress());
 
-        // CREAT ASSET
+        // CREATE ASSET
         // get changing network parameters for each transaction
         TransactionParametersResponse params = client.TransactionParams().execute().body();
         params.fee = (long) 1000;

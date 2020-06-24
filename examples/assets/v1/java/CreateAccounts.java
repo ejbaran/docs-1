@@ -1,5 +1,4 @@
-package com.algorand.assets.v1.java;
-// CreateAccounts.java
+package com.algorand.javatest.assets.v1;
 import com.algorand.algosdk.account.Account;
 
 public class CreateAccounts

@@ -4,6 +4,8 @@ The Algorand protocol supports the creation of on-chain assets that benefit from
 
 With Algorand Standard Assets you can represent stablecoins, loyalty points, system credits, and in-game points, just to name a few examples. You can also represent single, unique assets like a deed for a house, collectable items, unique parts on a supply chain, etc. There is also optional functionality to place transfer restrictions on an asset that help support securities, compliance, and certification use cases.
 
+
+
 !!! info
     Assets that represent many of the same type, like a stablecoin, may be referred to as **fungible assets**. Single, unique assets are referred to as **non-fungible assets**. 
 
@@ -337,7 +339,7 @@ After an asset has been created only the manager, reserve, freeze and reserve ac
 ```
 
 ``` python tab="Python"  
-asset_id = <your assetid>
+# asset_id = <your assetid>
 
 # CHANGE MANAGER
 
@@ -489,7 +491,7 @@ Before an account can receive a specific asset it must opt-in to receive it. An 
 ```
 
 ``` python tab="Python"  
-asset_id = <your assetid>
+# asset_id = <your assetid>
 
 # OPT-IN
 
@@ -638,7 +640,7 @@ Assets can be transferred between accounts that have opted-in to receiving the a
 ```
 
 ``` python tab="Python"  
-asset_id = <your assetid>
+# asset_id = <your assetid>
 
 # TRANSFER ASSET
 
@@ -784,7 +786,7 @@ Freezing or unfreezing an asset for an account requires a transaction that is si
 ```
 
 ``` python tab="Python"  
-asset_id = <Your assetid>
+# asset_id = <Your assetid>
 
 # FREEZE ASSET
 
@@ -925,7 +927,7 @@ Revoking an asset for an account removes a specific number of the asset from the
 ```
 
 ``` python tab="Python"  
-asset_id = <your assetid>
+# asset_id = <your assetid>
 
 # REVOKE ASSET
 
@@ -1082,7 +1084,7 @@ Created assets can be destroyed only by the asset manager account. All of the as
 ```
 
 ``` python tab="Python"  
-asset_id = <Your assetid>
+# asset_id = <Your assetid>
 
 # DESTROY ASSET
 # With all assets back in the creator's account,

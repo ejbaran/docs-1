@@ -1,5 +1,5 @@
-package com.algorand.assets.v1.java;
-// CreateAsset,java
+package com.algorand.javatest.assets.v1;
+
 import java.math.BigInteger;
 
 import com.algorand.algosdk.account.Account;

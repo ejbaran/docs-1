@@ -1,5 +1,4 @@
-package com.algorand.assets.v2.java;
-//package com.algorand.javatest.assets.v2;
+package com.algorand.javatest.assets.v2;
 
 
 import java.math.BigInteger;
