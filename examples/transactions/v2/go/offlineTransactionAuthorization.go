@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 
@@ -15,8 +16,8 @@ import (
 	"github.com/algorand/go-algorand-sdk/types"
 )
 
-// user declared account mnemonics for account1
-const mnemonic1 = "boy kidney fall hamster ecology mercy inquiry vast deal normal vibrant labor couch economy embody glory possible color burger addict soap almost margin about negative" // TODO:"Your 25-word mnemonic goes here";"
+// user declared mnemonic for myAccount
+const myMnemonic = "boy kidney fall hamster ecology mercy inquiry vast deal normal vibrant labor couch economy embody glory possible color burger addict soap almost margin about negative" // TODO:"Your 25-word mnemonic goes here";"
 const receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A"
 
 // user declared algod connection parameters
@@ -63,15 +64,11 @@ func getAddress(mn string) string {
 	return address
 }
 
-func saveUnsignedTransaction(algodClient *algod.Client) {
-	// recover account for example
-	account1 := getAddress(mnemonic1)
-
+func createTransaction(algodClient *algod.Client, myAccount string) types.Transaction {
 	// get network suggested parameters
 	txParams, err := algodClient.SuggestedParams().Do(context.Background())
 	if err != nil {
 		fmt.Printf("error getting suggested tx params: %s\n", err)
-		return
 	}
 	txParams.FlatFee = true
 	var minFee uint64 = 1000
@@ -80,92 +77,119 @@ func saveUnsignedTransaction(algodClient *algod.Client) {
 	firstValidRound := uint64(txParams.FirstRoundValid)
 	lastValidRound := uint64(txParams.LastRoundValid)
 
-	// make transactions
-	fmt.Println("Creating transactions...")
-	// from account1 to receiver
-	fromAddr := account1
+	// make transaction
+	fmt.Println("Creating transaction...")
+	// from account to receiver
+	fromAddr := myAccount
 	toAddr := receiver
 	var amount uint64 = 1000000
 
 	tx1, err := transaction.MakePaymentTxnWithFlatFee(fromAddr, toAddr, minFee, amount, firstValidRound, lastValidRound, nil, "", genID, genHash)
 	if err != nil {
 		fmt.Printf("Error creating transaction: %s\n", err)
-		return
 	}
 	fmt.Printf("...tx1: from %s to %s for %v microAlgos\n", fromAddr, toAddr, amount)
 
+	return tx1
+}
+func saveUnsignedTransactionToFile(algodClient *algod.Client, txn types.Transaction) {
+	// assign Transaction data to SignedTxn struct
+	unsignedTx := types.SignedTxn{
+		Txn: txn,
+	}
+
 	// save unsigned Transaction to file
-	err = ioutil.WriteFile("./unsigned.txn", msgpack.Encode(tx1), 0644)
+	err := ioutil.WriteFile("./unsigned.txn", msgpack.Encode(unsignedTx), 0644)
 	if err == nil {
-		fmt.Printf("Saved unsigned transaction to file.\n")
+		fmt.Printf("Saving unsigned transaction to file...\n")
 		return
 	}
-	fmt.Printf("Failed in saving trx to file, error %s\n", err)
+	fmt.Printf("...Failed to save transaction to file, error %s\n", err)
 }
 
-func readUnsignedTransaction(algodClient *algod.Client) []byte {
+func readUnsigedTransactionFromFile() types.Transaction {
 	// read unsigned transaction from file
 	fmt.Println("Reading transaction from file...")
 	dat, err := ioutil.ReadFile("./unsigned.txn")
 	if err != nil {
 		fmt.Printf("...Error reading transaction from file: %s\n", err)
 	}
-	fmt.Println("Decoding bytes...")
+	fmt.Println("Decoding file bytes...")
 	var unsignedTxRaw types.SignedTxn
 	msgpack.Decode(dat, &unsignedTxRaw)
-	var unsignedTxn types.Transaction = unsignedTxRaw.Txn
+	unsignedTxn := unsignedTxRaw.Txn
 
-	// get account from mnemonic
-	fmt.Println("Loading account...")
-	getAddress(mnemonic1)
-	sk1, err := mnemonic.ToPrivateKey(mnemonic1)
+	// TODO: display unsigned transaction
+
+	return unsignedTxn
+}
+
+func signTransaction(unsignedTxn types.Transaction, myMnemonic string) []byte {
+	// Load private key from mnemonic
+	sk1, err := mnemonic.ToPrivateKey(myMnemonic)
+	if err != nil {
+		fmt.Printf("...Failed to convert mnemonic to private key: %v\n", err)
+	}
 
 	// sign the transaction
 	fmt.Println("Signing transactions...")
-	sTxID1, stx1, err := crypto.SignTransaction(sk1, unsignedTxn)
+	signedTxnId, signedBytes, err := crypto.SignTransaction(sk1, unsignedTxn)
 	if err != nil {
-		fmt.Printf("Failed to sign transaction: %s\n", err)
+		fmt.Printf("...Failed to sign transaction: %s\n", err)
 	}
-	fmt.Println("...account1 signed tx1: ", sTxID1)
+	fmt.Println("...Signed transaction: ", signedTxnId)
 
-	return stx1
+	return signedBytes
 }
 
-func saveSignedTransaction(algodClient *algod.Client, signedTx []byte) {
-
-	//Save the signed transaction to file
-	err := ioutil.WriteFile("./signed.stxn", signedTx, 0644)
+func saveSignedTransactionToFile(signedBytes []byte) {
+	// save the signed transaction to file
+	fmt.Println("Saving signed transction to file...")
+	err := ioutil.WriteFile("./signed.stxn", signedBytes, 0644)
 	if err == nil {
-		fmt.Printf("Saved signed transaction to file\n")
+		fmt.Printf("...Saved signed transaction to file\n")
 		return
 	}
-	fmt.Printf("Failed in saving trx to file, error %s\n", err)
+	fmt.Printf("...Failed to save transaction to file, error %s\n", err)
 }
 
-/*
-func readSignedTransaction(){
+func readSignedTransactionFromFile() []byte {
+	// read unsigned transaction from file
+	fmt.Println("Reading transaction from file...")
+	signedBytes, err := ioutil.ReadFile("./signed.stxn")
+	if err != nil {
+		fmt.Printf("...Error reading signed transaction from file: %s\n", err)
+	}
+	fmt.Println("Decoding bytes...")
 
-    // setup connection
-    algodClient := setupConnection()
+	// display signed transaction
+	var signedTxRaw types.SignedTxn
+	var signedTxn types.Transaction
+	msgpack.Decode(signedBytes, &signedTxRaw)
+	signedTxn = signedTxRaw.Txn
 
-    // read unsigned transaction from file
-    dat, err := ioutil.ReadFile("./signed.stxn")
-    if err != nil {
-        fmt.Printf("Error reading signed transaction from file: %s\n", err)
-        return
-    }
+	txnJSON, err := json.MarshalIndent(signedTxn, "", "\t")
+	if err != nil {
+		fmt.Printf("Can not marshall txn data: %s\n", err)
+	}
+	fmt.Printf("Transaction information: %s\n", txnJSON)
 
-    // send the transaction to the network
-    sendResponse, err := algodClient.SendRawTransaction(dat)
-    if err != nil {
-        fmt.Printf("failed to send transaction: %s\n", err)
-        return
-    }
-
-    fmt.Printf("Transaction ID: %s\n", sendResponse.TxID)
-    waitForConfirmation(algodClient, sendResponse.TxID)
+	return signedBytes
 }
-*/
+
+func sendSignedTransaction(algodClient *algod.Client, signedBytes []byte) {
+	// send the transaction to the network
+	fmt.Println("Sending signed transction to network...")
+	txId, err := algodClient.SendRawTransaction(signedBytes).Do(context.Background())
+	if err != nil {
+		fmt.Printf("...Failed to send transaction: %s\n", err)
+		return
+	}
+
+	// wait for response
+	waitForConfirmation(txId, algodClient)
+}
+
 func main() {
 	// Initialize an algodClient
 	algodClient, err := algod.MakeClient(algodAddress, algodToken)
@@ -174,8 +198,28 @@ func main() {
 		return
 	}
 
-	saveUnsignedTransaction(algodClient)
-	var signedTx = readUnsignedTransaction(algodClient)
-	saveSignedTransaction(algodClient, signedTx)
-	//readSignedTransaction()
+	// Load account from Mymnemonic
+	fmt.Println("Loading signing account...")
+	myAccount := getAddress(myMnemonic)
+
+	// Create transaction from myAccount
+	unsignedTxn := createTransaction(algodClient, myAccount)
+
+	// Save unsigned transaction to file
+	saveUnsignedTransactionToFile(algodClient, unsignedTxn)
+
+	// Read the unsigned transaction from the file
+	unsignedTxn = readUnsigedTransactionFromFile()
+
+	// Sign the transaction using the mnemonic
+	signedBytes := signTransaction(unsignedTxn, myMnemonic)
+
+	// Save the signed transaction to file
+	saveSignedTransactionToFile(signedBytes)
+
+	// Read the signed transaction from file
+	signedBytes = readSignedTransactionFromFile()
+
+	// Send the transaction to the network
+	sendSignedTransaction(algodClient, signedBytes)
 }
