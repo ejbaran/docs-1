@@ -48,27 +48,26 @@ func waitForConfirmation(txID string, client *algod.Client) {
 	}
 }
 
-// utility function to get address string
-func getAddress(mn string) string {
+// utility function to get Account object
+func getAccount(mn string) (string, ed25519.PrivateKey) {
 	sk, err := mnemonic.ToPrivateKey(mn)
 	if err != nil {
-		fmt.Printf("error recovering account: %s\n", err)
-		return ""
+		fmt.Printf("...error recovering account: %s\n", err)
 	}
 	pk := sk.Public()
 	var a types.Address
 	cpk := pk.(ed25519.PublicKey)
 	copy(a[:], cpk[:])
-	fmt.Printf("...address: %s\n", a.String())
+	fmt.Printf("...found address: %s\n", a.String())
 	address := a.String()
-	return address
+	return address, sk
 }
 
 func createTransaction(algodClient *algod.Client, myAccount string) types.Transaction {
 	// get network suggested parameters
 	txParams, err := algodClient.SuggestedParams().Do(context.Background())
 	if err != nil {
-		fmt.Printf("error getting suggested tx params: %s\n", err)
+		fmt.Printf("...error getting suggested tx params: %s\n", err)
 	}
 	txParams.FlatFee = true
 	var minFee uint64 = 1000
@@ -86,37 +85,37 @@ func createTransaction(algodClient *algod.Client, myAccount string) types.Transa
 
 	tx1, err := transaction.MakePaymentTxnWithFlatFee(fromAddr, toAddr, minFee, amount, firstValidRound, lastValidRound, nil, "", genID, genHash)
 	if err != nil {
-		fmt.Printf("Error creating transaction: %s\n", err)
+		fmt.Printf("...error creating transaction: %s\n", err)
 	}
 	fmt.Printf("...tx1: from %s to %s for %v microAlgos\n", fromAddr, toAddr, amount)
 
 	return tx1
 }
-func saveUnsignedTransactionToFile(algodClient *algod.Client, txn types.Transaction) {
-	// assign Transaction data to SignedTxn struct
-	unsignedTx := types.SignedTxn{
-		Txn: txn,
+func saveUnsignedTransactionToFile(txnObj types.Transaction) {
+	// assign Transaction object to SignedTxn struct
+	unsignedTxn := types.SignedTxn{
+		Txn: txnObj,
 	}
 
 	// save unsigned Transaction to file
-	err := ioutil.WriteFile("./unsigned.txn", msgpack.Encode(unsignedTx), 0644)
+	err := ioutil.WriteFile("./unsigned.txn", msgpack.Encode(unsignedTxn), 0644)
 	if err == nil {
 		fmt.Printf("Saving unsigned transaction to file...\n")
 		return
 	}
-	fmt.Printf("...Failed to save transaction to file, error %s\n", err)
+	fmt.Printf("...failed to save transaction to file, error %s\n", err)
 }
 
 func readUnsigedTransactionFromFile() types.Transaction {
 	// read unsigned transaction from file
 	fmt.Println("Reading transaction from file...")
-	dat, err := ioutil.ReadFile("./unsigned.txn")
+	bytesRead, err := ioutil.ReadFile("./unsigned.txn")
 	if err != nil {
-		fmt.Printf("...Error reading transaction from file: %s\n", err)
+		fmt.Printf("...error reading transaction from file: %s\n", err)
 	}
 	fmt.Println("Decoding file bytes...")
 	var unsignedTxRaw types.SignedTxn
-	msgpack.Decode(dat, &unsignedTxRaw)
+	msgpack.Decode(bytesRead, &unsignedTxRaw)
 	unsignedTxn := unsignedTxRaw.Txn
 
 	// TODO: display unsigned transaction
@@ -124,16 +123,10 @@ func readUnsigedTransactionFromFile() types.Transaction {
 	return unsignedTxn
 }
 
-func signTransaction(unsignedTxn types.Transaction, myMnemonic string) []byte {
-	// Load private key from mnemonic
-	sk1, err := mnemonic.ToPrivateKey(myMnemonic)
-	if err != nil {
-		fmt.Printf("...Failed to convert mnemonic to private key: %v\n", err)
-	}
-
+func signTransaction(unsignedTxn types.Transaction, sk ed25519.PrivateKey) []byte {
 	// sign the transaction
 	fmt.Println("Signing transactions...")
-	signedTxnId, signedBytes, err := crypto.SignTransaction(sk1, unsignedTxn)
+	signedTxnId, signedBytes, err := crypto.SignTransaction(sk, unsignedTxn)
 	if err != nil {
 		fmt.Printf("...Failed to sign transaction: %s\n", err)
 	}
@@ -200,19 +193,19 @@ func main() {
 
 	// Load account from Mymnemonic
 	fmt.Println("Loading signing account...")
-	myAccount := getAddress(myMnemonic)
+	address, sk := getAccount(myMnemonic)
 
-	// Create transaction from myAccount
-	unsignedTxn := createTransaction(algodClient, myAccount)
+	// Create transaction object from account
+	txnObj := createTransaction(algodClient, address)
 
 	// Save unsigned transaction to file
-	saveUnsignedTransactionToFile(algodClient, unsignedTxn)
+	saveUnsignedTransactionToFile(txnObj)
 
 	// Read the unsigned transaction from the file
-	unsignedTxn = readUnsigedTransactionFromFile()
+	unsignedTxn := readUnsigedTransactionFromFile()
 
 	// Sign the transaction using the mnemonic
-	signedBytes := signTransaction(unsignedTxn, myMnemonic)
+	signedBytes := signTransaction(unsignedTxn, sk)
 
 	// Save the signed transaction to file
 	saveSignedTransactionToFile(signedBytes)

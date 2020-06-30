@@ -1,24 +1,22 @@
-const algosdk = require('/Users/ryanrfox/algorand/docs/testing/js/node_modules/algosdk') //TODO:'algosdk');
+const algosdk = require('algosdk');
 const fs = require('fs');
-var client = null;
-// make connection to node
-async function setupClient() {
-    if( client == null){
-        const token = "a31f09a18dbf7ad68c9e0ff22355774fb89c67ed2c4642d6c6822f9360cd7697"//TODO:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-        const server = "http://localhost";
-        const port = 49392 //TODO:4001;
-        let algodClient = new algosdk.Algodv2(token, server, port);
-        client = algodClient;
-    } else {
-        return client;
-    }
-    return client;
-}
+
+// user declared mnemonic for myAccount
+const myMnemonic = "boy kidney fall hamster ecology mercy inquiry vast deal normal vibrant labor couch economy embody glory possible color burger addict soap almost margin about negative" // TODO:"Your 25-word mnemonic goes here";"
+const receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A"
+
+// user declared algod connection parameters
+const algodAddress = "http://localhost"
+const algodPort = 49392 //TODO:4001;
+const algodToken = "a31f09a18dbf7ad68c9e0ff22355774fb89c67ed2c4642d6c6822f9360cd7697" //TODO:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+
+// Function that waits for a given txId to be confirmed by the network
+//
 // recover account from mnemonic passphrase
-function recoverAccount(){
-    const passphrase = "boy kidney fall hamster ecology mercy inquiry vast deal normal vibrant labor couch economy embody glory possible color burger addict soap almost margin about negative"; // TODO:"Your 25-word mnemonic goes here";"
+function getAddress(passphrase){
     let myAccount = algosdk.mnemonicToSecretKey(passphrase);
-    return myAccount;
+    console.log("...using account: ", myAccount.addr)
+    return myAccount.addr;
 }
 // Function used to wait for a tx confirmation
 const waitForConfirmation = async function (algodclient, txId) {
@@ -35,8 +33,37 @@ const waitForConfirmation = async function (algodclient, txId) {
         await algodclient.statusAfterBlock(lastRound).do();
       }
 }; 
-async function writeUnsignedTransactionToFile() {
 
+async function createTransaction(algodClient, myAccount) {
+    try{
+        // get network suggested parameters
+        let params = await algodClient.getTransactionParams().do();
+        
+        // make transaction
+        let unsignedTxn = algosdk.makePaymentTxnWithSuggestedParams(myAccount, receiver, 1000000, undefined, undefined, params);  
+        
+        return unsignedTxn;
+    }
+    catch( e ){
+        console.log( e );
+    }
+}; 
+
+
+function saveUnsignedTransactionToFile(algodClient, unsignedTxn) {
+    try{
+        // Save unsigned transaction object to file
+        console.log("Writing unsigned transaction to './unsigned.txn'...")
+        let bytesToWrite = algosdk.encodeObj(txn.get_obj_for_encoding());
+        fs.writeFileSync('./unsigned.txn', bytesToWrite);
+    }
+    catch( e ){
+        console.log( e );
+    }
+}; 
+
+async function writeUnsignedTransactionToFile() {
+//TODO: DELETE
     try{
         // setup accounts
         const receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A";
@@ -61,6 +88,7 @@ async function writeUnsignedTransactionToFile() {
         console.log( e );
     }
 }; 
+
 async function readUnsignedTransactionFromFile() {
 
     try{
@@ -152,5 +180,37 @@ async function testSigned(){
     await writeSignedTransactionToFile();
     await readSignedTransactionFromFile();
 }*/
-testUnsigned();
+//testUnsigned();
 //testSigned();
+
+//
+
+// Initialize an algodClient
+let algodClient = new algosdk.Algodv2(algodToken, algodAddress, algodPort);
+
+// Load account from Mymnemonic
+console.log("Loading signing account...")
+myAccount = getAddress(myMnemonic)
+
+// Create transaction from myAccount
+unsignedTxn = createTransaction(algodClient, myAccount)
+
+/*
+// Save unsigned transaction to file
+saveUnsignedTransactionToFile(algodClient, unsignedTxn)
+
+// Read the unsigned transaction from the file
+unsignedTxn = readUnsigedTransactionFromFile()
+
+// Sign the transaction using the mnemonic
+signedBytes := signTransaction(unsignedTxn, myMnemonic)
+
+// Save the signed transaction to file
+saveSignedTransactionToFile(signedBytes)
+
+// Read the signed transaction from file
+signedBytes = readSignedTransactionFromFile()
+
+// Send the transaction to the network
+sendSignedTransaction(algodClient, signedBytes)
+*/
