@@ -83,13 +83,13 @@ func createTransaction(algodClient *algod.Client, myAccount string) types.Transa
 	toAddr := receiver
 	var amount uint64 = 1000000
 
-	tx1, err := transaction.MakePaymentTxnWithFlatFee(fromAddr, toAddr, minFee, amount, firstValidRound, lastValidRound, nil, "", genID, genHash)
+	txnObj, err := transaction.MakePaymentTxnWithFlatFee(fromAddr, toAddr, minFee, amount, firstValidRound, lastValidRound, nil, "", genID, genHash)
 	if err != nil {
 		fmt.Printf("...error creating transaction: %s\n", err)
 	}
 	fmt.Printf("...tx1: from %s to %s for %v microAlgos\n", fromAddr, toAddr, amount)
 
-	return tx1
+	return txnObj
 }
 func saveUnsignedTransactionToFile(txnObj types.Transaction) {
 	// assign Transaction object to SignedTxn struct
@@ -114,23 +114,23 @@ func readUnsigedTransactionFromFile() types.Transaction {
 		fmt.Printf("...error reading transaction from file: %s\n", err)
 	}
 	fmt.Println("Decoding file bytes...")
-	var unsignedTxRaw types.SignedTxn
-	msgpack.Decode(bytesRead, &unsignedTxRaw)
-	unsignedTxn := unsignedTxRaw.Txn
+	var unsignedTxn types.SignedTxn
+	msgpack.Decode(bytesRead, &unsignedTxn)
+	txnObj := unsignedTxn.Txn
 
 	// TODO: display unsigned transaction
 
-	return unsignedTxn
+	return txnObj
 }
 
-func signTransaction(unsignedTxn types.Transaction, sk ed25519.PrivateKey) []byte {
+func signTransaction(txnObj types.Transaction, sk ed25519.PrivateKey) []byte {
 	// sign the transaction
 	fmt.Println("Signing transactions...")
-	signedTxnId, signedBytes, err := crypto.SignTransaction(sk, unsignedTxn)
+	signedTxnID, signedBytes, err := crypto.SignTransaction(sk, txnObj)
 	if err != nil {
 		fmt.Printf("...Failed to sign transaction: %s\n", err)
 	}
-	fmt.Println("...Signed transaction: ", signedTxnId)
+	fmt.Println("...Signed transaction: ", signedTxnID)
 
 	return signedBytes
 }
@@ -156,12 +156,12 @@ func readSignedTransactionFromFile() []byte {
 	fmt.Println("Decoding bytes...")
 
 	// display signed transaction
-	var signedTxRaw types.SignedTxn
-	var signedTxn types.Transaction
-	msgpack.Decode(signedBytes, &signedTxRaw)
-	signedTxn = signedTxRaw.Txn
+	var signedTxn types.SignedTxn
+	var signedTxnObj types.Transaction
+	msgpack.Decode(signedBytes, &signedTxn)
+	signedTxnObj = signedTxn.Txn
 
-	txnJSON, err := json.MarshalIndent(signedTxn, "", "\t")
+	txnJSON, err := json.MarshalIndent(signedTxnObj, "", "\t")
 	if err != nil {
 		fmt.Printf("Can not marshall txn data: %s\n", err)
 	}
@@ -173,14 +173,14 @@ func readSignedTransactionFromFile() []byte {
 func sendSignedTransaction(algodClient *algod.Client, signedBytes []byte) {
 	// send the transaction to the network
 	fmt.Println("Sending signed transction to network...")
-	txId, err := algodClient.SendRawTransaction(signedBytes).Do(context.Background())
+	txID, err := algodClient.SendRawTransaction(signedBytes).Do(context.Background())
 	if err != nil {
 		fmt.Printf("...Failed to send transaction: %s\n", err)
 		return
 	}
 
 	// wait for response
-	waitForConfirmation(txId, algodClient)
+	waitForConfirmation(txID, algodClient)
 }
 
 func main() {

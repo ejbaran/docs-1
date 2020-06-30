@@ -45,7 +45,7 @@ async function createTransaction(algodClient, myAccount) {
 function saveUnsignedTransactionToFile(txnObj) {
     try{
         // assign Transaction object to SignedTxn struct
-        unsignedTxn = {
+        let unsignedTxn = {
             txn: txnObj.get_obj_for_encoding(),
         }
 
@@ -65,27 +65,28 @@ function readUnsigedTransactionFromFile() {
         console.log("Reading transaction from file...");
         let bytesRead = fs.readFileSync('./unsigned.txn');  
 
-        return bytesRead;
+        console.log("Decoding file bytes...")
+
+        let unsignedTxn = algosdk.decodeObj(bytesRead);
+        let txnObj = unsignedTxn.txn;
+        unsignedTxn = new algosdk.makePaymentTxn(txnObj.get_obj_for_encoding());
+
+        console.log(unsignedTxn);    
+
+        return unsignedTxn;
     }
     catch( e ){
         console.log( e );
     }
 }
 
-function signTransaction(bytesRead, sk) {
+function signTransaction(unsignedTxn, sk) {
     try {
         console.log("Signing transactions...");
-        console.log("...decoding bytes");
-        let unsignedTxn = algosdk.decodeObj(bytesRead);
-        let txnObj = unsignedTxn.txn;
-
-        foo = txnObj.get_obj_for_encoding();
-
         // display transaction object
-        console.log(foo);
 
         // sign transaction and write to file
-        let signedTxn = algosdk.signTransaction(txnObj, sk);
+        let signedTxn = algosdk.signTransaction(unsignedTxn, sk);
         let txId = signedTxn.txID().toString();
         console.log("...signed transaction with txID: %s", txId);
 
