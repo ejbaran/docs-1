@@ -52,11 +52,28 @@ def create_transaction(algod_client, address) :
     print("...txn: from {} to {} for {} microAlgos".format(sender, receiver, amount))
     print("...with txid:", txn_obj.get_txid())
 
-def saveUnsignedTransactionToFile(txnObj) :
-    print("Saving signed transction to file...")
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    transaction.write_to_file([txnObj], dir_path + "/unsigned.txn")
+    return txn_obj
 
+def save_unsigned_transaction_to_file(txn_obj) :
+    print("Saving unsigned transction to file...")
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    transaction.write_to_file([txn_obj], dir_path + "/unsigned.txn")
+
+def read_unsiged_transaction_from_file() :
+    print("Reading unsigned transction from file...")
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    txns = transaction.retrieve_from_file(dir_path + "/unsigned.txn")
+    unsigned_txn = txns[0]
+
+    return unsigned_txn
+
+def sign_transaction(unsigned_txn, sk) :
+    print("Signing transaction...")
+    signed_txn = unsigned_txn.sign(sk)
+    signed_bytes = signed_txn.transaction.get_txid()
+    print("Signed transaction with txID: {}".format(signed_bytes))
+
+    return signed_bytes
 
 def main() :
 	# Initialize an algod_client
@@ -66,24 +83,24 @@ def main() :
     address, sk = get_account(my_mnemonic)
 
 	# Create transaction object from account
-    txnObj = create_transaction(algod_client, address)
+    txn_obj = create_transaction(algod_client, address)
 
 	# Save unsigned transaction to file
-    saveUnsignedTransactionToFile(txnObj)
+    save_unsigned_transaction_to_file(txn_obj)
 
-	# # Read the unsigned transaction from the file
-	# unsignedTxn := readUnsigedTransactionFromFile()
+	# Read the unsigned transaction from the file
+    unsigned_txn = read_unsiged_transaction_from_file()
 
-	# # Sign the transaction using the mnemonic
-	# signedBytes := signTransaction(unsignedTxn, sk)
+	# Sign the transaction using the mnemonic
+    signed_bytes = sign_transaction(unsigned_txn, sk)
 
 	# # Save the signed transaction to file
-	# saveSignedTransactionToFile(signedBytes)
+	# save_signed_transaction_to_file(signed_bytes)
 
 	# # Read the signed transaction from file
-	# signedBytes = readSignedTransactionFromFile()
+	# signed_bytes = read_signed_transaction_from_file()
 
 	# # Send the transaction to the network
-	# sendSignedTransaction(algod_client, signedBytes)
+	# send_signed_transaction(algod_client, signed_bytes)
 
 main()

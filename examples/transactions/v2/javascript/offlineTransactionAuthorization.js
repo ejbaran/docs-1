@@ -65,15 +65,20 @@ function readUnsigedTransactionFromFile() {
         console.log("Reading transaction from file...");
         let bytesRead = fs.readFileSync('./unsigned.txn');  
 
-        console.log("Decoding file bytes...")
-
+        console.log("Decoding file bytes...");
         let unsignedTxn = algosdk.decodeObj(bytesRead);
+
+        // create new 
+        //txnObj = from_obj_for_encoding(unsignedTxn);
+        //txnObj = new algosdk.makePaymentTxn(unsignedTxn);
+
+        // get the txnObj from unsignedTxn
         let txnObj = unsignedTxn.txn;
-        unsignedTxn = new algosdk.makePaymentTxn(txnObj.get_obj_for_encoding());
 
-        console.log(unsignedTxn);    
 
-        return unsignedTxn;
+        console.log(txnObj);    
+
+        return txnObj;
     }
     catch( e ){
         console.log( e );

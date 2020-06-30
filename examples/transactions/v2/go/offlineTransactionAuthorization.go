@@ -202,10 +202,10 @@ func main() {
 	saveUnsignedTransactionToFile(txnObj)
 
 	// Read the unsigned transaction from the file
-	unsignedTxn := readUnsigedTransactionFromFile()
+	txnObj := readUnsigedTransactionFromFile()
 
 	// Sign the transaction using the mnemonic
-	signedBytes := signTransaction(unsignedTxn, sk)
+	signedBytes := signTransaction(txnObj, sk)
 
 	// Save the signed transaction to file
 	saveSignedTransactionToFile(signedBytes)
