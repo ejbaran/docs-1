@@ -9,25 +9,106 @@ The same methodology described here can also be used to work with [LogicSignatur
 
 Algorand SDK's and `goal` support writing and reading both signed and unsigned transactions to a file. Examples of these scenarios are shown in the following code snippets.
 
-Unsigned transactions require the transaction object to be created before writing to a file.
+There are three basic steps when working with transactions: create, sign and send. The offline authorization scenario assumes the signing step is performed by a disconnected _offline device_ and the create and send steps are performed by an _online device_ connected to the network. 
 
 # Online Device (Create)
 
+The first step is to create an unsigned transaction. This requires online connectivity to gather relevant network parameters. Other information required includes the sender, reciever and amount. The result will be an unsigned transaction file able to be exported to an offline device for signing.
+
 ## Initializations
 
+First, gather the required transaction details:
+
 ``` javascript tab="JavaScript"
+const algosdk = require('algosdk');
+const fs = require('fs');
+
+// User declared accounts. The receiver is the TestNet faucet.
+const sender = "YOUR_ACCOUNT_TO_SEND_FROM";
+const receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A";
+
+// User declared algod settings. These are the defaults for Sandbox.
+const algodAddress = "http://localhost";
+const algodPort = 4001;
+const algodToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+
+// Initialize and algod client.
+let algodClient = new algosdk.Algodv2(algodToken, algodAddress, algodPort);
+
 ```
 
 ``` python tab="Python"
+import json
+import time
+import base64
+import os
+from algosdk.v2client import algod
+from algosdk import mnemonic
+from algosdk.future import transaction
+from algosdk import encoding
+from algosdk import account
+
+# User declared accounts. The receiver is the TestNet faucet.
+sender = "YOUR_ACCOUNT_TO_SEND_FROM"
+receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A"
+
+# User declared algod settings. These are the defaults for Sandbox.
+algod_address = "http://localhost:4001"
+algod_token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+# Initialize an algod client.
+algod_client = algod.AlgodClient(algod_token, algod_address)
 ```
 
 ``` java tab="Java"
+final String SENDER = "YOUR_ACCOUNT_TO_SEND_FROM"
+final String RECEIVER = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A"
+
+// User declared algod settings. These are the defaults for Sandbox.
+final String ALGOD_API_ADDR = "http://localhost";
+final Integer ALGOD_PORT = 4001;
+final String ALGOD_API_TOKEN = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+
+// Initialize an algod client.
+AlgodClient algodClient = (AlgodClient) new AlgodClient(ALGOD_API_ADDR, ALGOD_PORT, ALGOD_API_TOKEN);
 ```
 
 ``` go tab="Go"
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+
+	"crypto/ed25519"
+
+	"github.com/algorand/go-algorand-sdk/client/v2/algod"
+	"github.com/algorand/go-algorand-sdk/crypto"
+	"github.com/algorand/go-algorand-sdk/encoding/msgpack"
+	"github.com/algorand/go-algorand-sdk/mnemonic"
+	"github.com/algorand/go-algorand-sdk/transaction"
+	"github.com/algorand/go-algorand-sdk/types"
+)
+
+// User declared accounts. The receiver is the TestNet faucet.
+const sender = "YOUR_ACCOUNT_TO_SEND_FROM"
+const receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A"
+
+// User declared algod settings. These are the defaults for Sandbox.
+const algodAddress = "http://localhost"
+const algodPort = 4001
+const algodToken = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+// Initialize and algod client.
+algodClient, err := algod.MakeClient(algodAddress, algodToken)
 ```
 
 ``` bash tab="goal"
+# User declared accounts. The receiver is the TestNet faucet.
+SENDER="YOUR_ACCOUNT_TO_SEND_FROM"
+RECEIVER="GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A"
 ```
 
 ## Create Unsigned Transaction
