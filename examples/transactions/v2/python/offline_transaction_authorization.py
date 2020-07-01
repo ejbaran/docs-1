@@ -16,8 +16,8 @@ receiver = "GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A"
 algod_address = "http://localhost:49392"                                          #TODO:"http:#localhost:4001"
 algod_token = "a31f09a18dbf7ad68c9e0ff22355774fb89c67ed2c4642d6c6822f9360cd7697" #TODO:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
-# def that waits for a given txId to be confirmed by the network
-def wait_for_confirmation(client, txid) :
+# Function that waits for a given txid to be confirmed by the network
+def wait_for_confirmation(client, txid):
     last_round = client.status().get('last-round')
     txinfo = client.pending_transaction_info(txid)
     while not (txinfo.get('confirmed-round') and txinfo.get('confirmed-round') > 0):
@@ -43,10 +43,7 @@ def create_transaction(algod_client, address) :
     # comment out the next two (2) lines to use suggested fees
     params.flat_fee = True
     params.fee = 1000
-
-	# from account 1 to account 3
     sender = address
-    #receiver = receiver
     amount = 1000000
     txn_obj = transaction.PaymentTxn(sender, params, receiver, amount)
     print("...txn: from {} to {} for {} microAlgos".format(sender, receiver, amount))
@@ -70,10 +67,36 @@ def read_unsiged_transaction_from_file() :
 def sign_transaction(unsigned_txn, sk) :
     print("Signing transaction...")
     signed_txn = unsigned_txn.sign(sk)
-    signed_bytes = signed_txn.transaction.get_txid()
-    print("Signed transaction with txID: {}".format(signed_bytes))
+    txid = signed_txn.transaction.get_txid()
+    print("Signed transaction with txID: {}".format(txid))
 
-    return signed_bytes
+    return signed_txn
+
+def save_signed_transaction_to_file(signed_txn) :
+    print("Saving signed transction to file...")
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    transaction.write_to_file([signed_txn], dir_path + "/signed.txn")
+
+def read_signed_transaction_from_file() :
+    print("Reading signed transction from file...")
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    txns = transaction.retrieve_from_file(dir_path + "/signed.txn")
+    signed_txn = txns[0]
+
+    return signed_txn
+
+def send_signed_transaction(algod_client, signed_txn) :
+    # send transactions
+    print("Sending transactions...")
+    tx_id = algod_client.send_transactions([signed_txn])
+
+    # wait for confirmation
+    wait_for_confirmation(algod_client, tx_id) 
+
+    confirmed_txn = algod_client.pending_transaction_info(tx_id.get_txid())
+    print("Transaction information: {}".format(json.dumps(confirmed_txn, indent=4)))
+
+   
 
 def main() :
 	# Initialize an algod_client
@@ -92,15 +115,15 @@ def main() :
     unsigned_txn = read_unsiged_transaction_from_file()
 
 	# Sign the transaction using the mnemonic
-    signed_bytes = sign_transaction(unsigned_txn, sk)
+    signed_txn = sign_transaction(unsigned_txn, sk)
 
-	# # Save the signed transaction to file
-	# save_signed_transaction_to_file(signed_bytes)
+	# Save the signed transaction to file
+    save_signed_transaction_to_file(signed_txn)
 
-	# # Read the signed transaction from file
-	# signed_bytes = read_signed_transaction_from_file()
+	# Read the signed transaction from file
+    signed_txn = read_signed_transaction_from_file()
 
-	# # Send the transaction to the network
-	# send_signed_transaction(algod_client, signed_bytes)
+	# Send the transaction to the network
+    send_signed_transaction(algod_client, signed_txn)
 
 main()
