@@ -10,8 +10,26 @@ const algodAddress = "http://localhost"
 const algodPort = 49392 //TODO:4001;
 const algodToken = "a31f09a18dbf7ad68c9e0ff22355774fb89c67ed2c4642d6c6822f9360cd7697" //TODO:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
+// function used to wait for a tx confirmation
+const waitForConfirmation = async function (algodclient, txId) {
+    let status = (await algodclient.status().do());
+    let lastRound = status["last-round"];
+    while (true) {
+        const pendingInfo = await algodclient.pendingTransactionInformation(txId).do();
+        if (pendingInfo["confirmed-round"] !== null && pendingInfo["confirmed-round"] > 0) {
+            //Got the completed Transaction
+            console.log("Transaction " + txId + " confirmed in round " + pendingInfo["confirmed-round"]);
+            break;
+        }
+        console.log("...waiting for confirmation");
+        lastRound++;
+        await algodclient.statusAfterBlock(lastRound).do();
+    }
+}; 
+
 // recover account from mnemonic passphrase
 function getAccount(passphrase) {
+    console.log("Loading signing account...")
     try {
         let myAccount = algosdk.mnemonicToSecretKey(passphrase);
         console.log("...found address: ", myAccount.addr)
@@ -40,7 +58,7 @@ async function createTransaction(algodClient, myAccount) {
     catch( e ){
         console.log( e );
     }
-}; 
+}
 
 function saveUnsignedTransactionToFile(txnObj) {
     try{
@@ -57,7 +75,7 @@ function saveUnsignedTransactionToFile(txnObj) {
     catch( e ){
         console.log( e );
     }
-}; 
+}
 
 function readUnsigedTransactionFromFile() {
     try {
@@ -68,15 +86,10 @@ function readUnsigedTransactionFromFile() {
         console.log("Decoding file bytes...");
         let unsignedTxn = algosdk.decodeObj(bytesRead);
 
-        // create new 
-        //txnObj = from_obj_for_encoding(unsignedTxn);
-        //txnObj = new algosdk.makePaymentTxn(unsignedTxn);
-
         // get the txnObj from unsignedTxn
         let txnObj = unsignedTxn.txn;
-
-
-        console.log(txnObj);    
+   
+        //BLOCKER: txnObj is not properly decoded. gh, rcv, snd, etc. are still byte[]. See SDK Issuee https://github.com/algorand/js-algorand-sdk/issues/114
 
         return txnObj;
     }
@@ -85,21 +98,59 @@ function readUnsigedTransactionFromFile() {
     }
 }
 
-function signTransaction(unsignedTxn, sk) {
+function signTransaction(txnObj, sk) {
     try {
         console.log("Signing transactions...");
-        // display transaction object
+        //TODO: display transaction object prior to signing
 
-        // sign transaction and write to file
-        let signedTxn = algosdk.signTransaction(unsignedTxn, sk);
+        // sign transaction
+        //BLOCKER: algosdk.signTransaction(txnObj, sk) ERROR: genesis hash must be specified and in a base64 string. See SDK Issuee https://github.com/algorand/js-algorand-sdk/issues/114
+        let signedTxn = algosdk.signTransaction(txnObj, sk);
         let txId = signedTxn.txID().toString();
         console.log("...signed transaction with txID: %s", txId);
+
+        return signedTxn;
+    }
+    catch( e ){
+        console.log( e );
+    }    
+}
+
+function saveSignedTransactionToFile(signedTxn) {
+    try{
+        // Save signed transaction object to file
+        console.log("Writing signed transaction to './signed.txn'...")
+        fs.writeFileSync('./signed.txn', signedTxn);
+    }
+    catch( e ){
+        console.log( e );
+    }
+} 
+
+function readSignedTransactionFromFile() {
+    try {
+        // read unsigned transaction from file
+        console.log("Reading transaction from file...");
+        let signedBytes = fs.readFileSync('./signed.txn');  
 
         return signedBytes;
     }
     catch( e ){
         console.log( e );
-    }    
+    }
+}
+
+function sendSignedTransaction(algodClient, signedBytes) {
+    try {
+        let txn = (await algodClient.sendRawTransaction(signedBytes).do());
+        console.log("Sent transaction : " + tx.txId);
+
+        // Wait for transaction to be confirmed
+        await waitForConfirmation(algodClient, txn.txId)
+    } 
+    catch (err) {
+        console.log("err", err);  
+    }
 }
 
 async function offlineTransctionAuthorization() {
@@ -107,31 +158,27 @@ async function offlineTransctionAuthorization() {
     let algodClient = new algosdk.Algodv2(algodToken, algodAddress, algodPort);
 
     // Load account from Mymnemonic
-    console.log("Loading signing account...")
-    myAccount = getAccount(myMnemonic)
+    myAccount = getAccount(myMnemonic);
 
 	// Create transaction object from account
-    txnObj = await createTransaction(algodClient, myAccount.addr)
+    txnObj = await createTransaction(algodClient, myAccount.addr);
 
     // Save unsigned transaction to file
-    saveUnsignedTransactionToFile(txnObj)
+    saveUnsignedTransactionToFile(txnObj);
 
     // Read the unsigned transaction from the file
-    bytesRead = readUnsigedTransactionFromFile()
+    txnObj = readUnsigedTransactionFromFile();
 
     // Sign the transaction using the secret key
-    signedBytes = signTransaction(bytesRead, myAccount.sk)
+    signedTxn = signTransaction(txnObj, myAccount.sk);
 
-    console.log("Done")
-    /*
     // Save the signed transaction to file
-    saveSignedTransactionToFile(signedBytes)
+    saveSignedTransactionToFile(signedTxn);
 
     // Read the signed transaction from file
-    signedBytes = readSignedTransactionFromFile()
+    signedBytes = readSignedTransactionFromFile();
 
     // Send the transaction to the network
-    sendSignedTransaction(algodClient, signedBytes)
-    */
-}
-offlineTransctionAuthorization()
+    sendSignedTransaction(algodClient, signedBytes);
+};
+offlineTransctionAuthorization();
