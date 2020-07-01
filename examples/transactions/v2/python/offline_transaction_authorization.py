@@ -83,6 +83,8 @@ def read_signed_transaction_from_file() :
     txns = transaction.retrieve_from_file(dir_path + "/signed.txn")
     signed_txn = txns[0]
 
+    #TODO: Ensure signed_txn contains a signature. See issue: https://github.com/algorand/py-algorand-sdk/issues/124
+
     return signed_txn
 
 def send_signed_transaction(algod_client, signed_txn) :
@@ -95,8 +97,6 @@ def send_signed_transaction(algod_client, signed_txn) :
 
     confirmed_txn = algod_client.pending_transaction_info(tx_id.get_txid())
     print("Transaction information: {}".format(json.dumps(confirmed_txn, indent=4)))
-
-   
 
 def main() :
 	# Initialize an algod_client
